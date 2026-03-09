@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-  const API_BASE_URL = 'http://localhost:8080';
+  const API_BASE_URL = window.location.port === '8080'
+    ? 'http://localhost:8080'
+    : '';
+  const LOGIN_API_PATH = '/api/login';
   const DASHBOARD_URL = '/';
 
   const inputEmail = document.getElementById('email');
@@ -126,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     nutDangNhap.disabled = true;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
+      const response = await fetch(`${API_BASE_URL}${LOGIN_API_PATH}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -151,7 +154,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       window.location.href = data?.redirectUrl || DASHBOARD_URL;
     } catch (error) {
-      hienThongBaoLoi(error.message || 'Không thể đăng nhập. Vui lòng thử lại!');
+      const laLoiMangHoacCors = error instanceof TypeError;
+      hienThongBaoLoi(
+        laLoiMangHoacCors
+          ? 'Không thể kết nối API. Nếu chạy UI khác cổng, hãy cấu hình proxy cùng origin hoặc bật CORS ở backend.'
+          : (error.message || 'Không thể đăng nhập. Vui lòng thử lại!')
+      );
       hienLoiInput(khungEmail, loiEmail, '');
       hienLoiInput(khungMatKhau, loiMatKhau, 'Email hoặc mật khẩu không chính xác!');
     } finally {

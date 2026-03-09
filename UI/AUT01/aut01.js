@@ -1,6 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-  const API_BASE_URL = 'http://localhost:8080';
+  const API_BASE_URL = window.location.port === '8080'
+    ? 'http://localhost:8080'
+    : '';
+
+  function buildApiUrl(path) {
+    return `${API_BASE_URL}${path}`;
+  }
 
   const inputHoTen = document.getElementById('ho-ten');
   const inputEmail = document.getElementById('email');
@@ -187,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     nutLuu.disabled = true;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/staff/create`, {
+      const response = await fetch(buildApiUrl('/api/staff/create'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -225,7 +231,10 @@ document.addEventListener('DOMContentLoaded', function () {
       iconTickEmail.classList.remove('hien');
       nutLuu.classList.remove('bi-vo-hieu');
     } catch (error) {
-      thongBao.textContent = error.message || 'Có lỗi xảy ra khi tạo tài khoản!';
+      const laLoiMangHoacCors = error instanceof TypeError;
+      thongBao.textContent = laLoiMangHoacCors
+        ? 'Không thể kết nối API. Nếu chạy UI khác cổng, hãy cấu hình proxy cùng origin hoặc bật CORS ở backend.'
+        : (error.message || 'Có lỗi xảy ra khi tạo tài khoản!');
       thongBao.classList.add('loi');
       thongBao.style.display = 'flex';
     } finally {
