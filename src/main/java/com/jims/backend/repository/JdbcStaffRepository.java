@@ -30,6 +30,29 @@ public class JdbcStaffRepository implements StaffRepository {
         }
     }
 
+
+    @Override
+    public Staff findByEmail(String email) throws SQLException {
+        String sql = "SELECT s.staff_id, s.full_name, s.email, s.password_hash, r.role_name "
+            + "FROM staff s JOIN roles r ON s.role_id = r.role_id WHERE LOWER(s.email) = LOWER(?) LIMIT 1";
+        try (Connection conn = databaseConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Staff staff = new Staff();
+                staff.setStaffId(rs.getInt("staff_id"));
+                staff.setFullName(rs.getString("full_name"));
+                staff.setEmail(rs.getString("email"));
+                staff.setPasswordHash(rs.getString("password_hash"));
+                staff.setRole(Role.fromUiName(rs.getString("role_name")));
+                return staff;
+            }
+        }
+    }
+
     @Override
     public int getRoleIdByName(Role role) throws SQLException {
         String sql = "SELECT role_id FROM roles WHERE role_name = ? LIMIT 1";
