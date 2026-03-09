@@ -1,18 +1,25 @@
 package com.jims.backend.model;
 
 public enum Role {
-    TEACHER("Giáo viên"),
-    ASSISTANT("Trợ giảng"),
-    ADMIN("Admin");
+    TEACHER("Giáo viên", "/teacher/dashboard"),
+    ASSISTANT("Trợ giảng", "/ta/dashboard"),
+    ADMIN("Admin", "/admin/dashboard"),
+    DIRECTOR("Giám đốc", "/director/dashboard");
 
     private final String uiName;
+    private final String dashboardPath;
 
-    Role(String uiName) {
+    Role(String uiName, String dashboardPath) {
         this.uiName = uiName;
+        this.dashboardPath = dashboardPath;
     }
 
     public String getUiName() {
         return uiName;
+    }
+
+    public String getDashboardPath() {
+        return dashboardPath;
     }
 
     public static Role fromUiName(String raw) {

@@ -8,6 +8,8 @@ import java.util.List;
 public interface StaffRepository {
     boolean existsByEmail(String email) throws SQLException;
 
+    Staff findByEmail(String email) throws SQLException;
+
     int getRoleIdByName(Role role) throws SQLException;
 
     Staff save(Staff staff) throws SQLException;

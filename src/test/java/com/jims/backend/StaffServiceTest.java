@@ -81,11 +81,17 @@ public class StaffServiceTest {
         }
 
         @Override
+        public Staff findByEmail(String email) {
+            return storage.stream().filter(s -> s.getEmail().equalsIgnoreCase(email)).findFirst().orElse(null);
+        }
+
+        @Override
         public int getRoleIdByName(Role role) {
             return switch (role) {
                 case TEACHER -> 1;
                 case ASSISTANT -> 2;
                 case ADMIN -> 3;
+                case DIRECTOR -> 4;
             };
         }
 

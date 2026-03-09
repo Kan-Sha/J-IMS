@@ -39,4 +39,4 @@ CREATE TABLE students (
     FOREIGN KEY (status_id) REFERENCES learning_status(status_id)
 );
 
-INSERT INTO roles (role_name) VALUES ('Giáo viên'), ('Trợ giảng'), ('Admin');
+INSERT INTO roles (role_name) VALUES ('Giáo viên'), ('Trợ giảng'), ('Admin'), ('Giám đốc');

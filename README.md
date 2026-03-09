@@ -222,6 +222,38 @@ Response:
 
 ---
 
+## Login (AUT-02)
+
+```
+POST /api/v1/auth/login
+```
+
+Request:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "JoyEnglish@123"
+}
+```
+
+Success Response (`200`):
+
+```json
+{
+  "staff_id": 1,
+  "full_name": "Nguyen Van A",
+  "email": "admin@example.com",
+  "role": "Admin",
+  "redirect_to": "/admin/dashboard"
+}
+```
+
+Error cases:
+- `422 VALIDATION_ERROR`: `Mục này không được để trống!`
+- `422 VALIDATION_ERROR`: `Định dạng email không hợp lệ!`
+- `401 AUTH_FAILED`: `Email hoặc mật khẩu không chính xác!`
+
 ## Get Staff List
 
 ```
