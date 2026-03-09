@@ -1,27 +1,30 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-  const inputMatKhau  = document.getElementById('mat-khau');
-  const iconMat       = document.getElementById('icon-mat');
-  const nutDangNhap   = document.getElementById('nut-dang-nhap');
-  const nutToggleMK   = document.getElementById('nut-toggle-mk');
-  const thongBao      = document.getElementById('thong-bao');
+  const API_BASE_URL = 'http://localhost:8080';
+  const DASHBOARD_URL = '/';
 
-  const khungEmail    = document.getElementById('khung-email');
-  const khungMatKhau  = document.getElementById('khung-matkhau');
-  const loiEmail      = document.getElementById('loi-email');
-  const loiMatKhau    = document.getElementById('loi-matkhau');
+  const inputEmail = document.getElementById('email');
+  const inputMatKhau = document.getElementById('mat-khau');
+  const iconMat = document.getElementById('icon-mat');
+  const nutDangNhap = document.getElementById('nut-dang-nhap');
+  const nutToggleMK = document.getElementById('nut-toggle-mk');
+  const thongBao = document.getElementById('thong-bao');
+
+  const khungEmail = document.getElementById('khung-email');
+  const khungMatKhau = document.getElementById('khung-matkhau');
+  const loiEmail = document.getElementById('loi-email');
+  const loiMatKhau = document.getElementById('loi-matkhau');
 
   let dangHienMatKhau = false;
 
-
   function hienLoiInput(khung, loiEl, noiDung) {
-    khung.classList.add('loi-input');     
-    loiEl.textContent = noiDung;          
-    loiEl.classList.add('hien');          
+    khung.classList.add('loi-input');
+    loiEl.textContent = noiDung;
+    loiEl.classList.add('hien');
     const input = khung.querySelector('.o-nhap');
-  if (input && input.type === 'password') {
-    input.setAttribute('placeholder', '');  
-  }
+    if (input && input.type === 'password') {
+      input.setAttribute('placeholder', '');
+    }
   }
 
   function xoaLoiInput(khung, loiEl) {
@@ -29,20 +32,34 @@ document.addEventListener('DOMContentLoaded', function() {
     loiEl.textContent = '';
     loiEl.classList.remove('hien');
     const input = khung.querySelector('.o-nhap');
-  if (input && input.type === 'password') {
-    input.setAttribute('placeholder', '***************');
-  }
+    if (input && input.type === 'password') {
+      input.setAttribute('placeholder', '***************');
+    }
   }
 
-  document.getElementById('email').addEventListener('input', function() {
+  function xoaThongBao() {
+    thongBao.style.display = 'none';
+    thongBao.textContent = '';
+    thongBao.className = 'thong-bao';
+  }
+
+  function hienThongBaoLoi(noiDung) {
+    thongBao.textContent = noiDung;
+    thongBao.className = 'thong-bao loi';
+    thongBao.style.display = 'block';
+  }
+
+  inputEmail.addEventListener('input', function () {
     xoaLoiInput(khungEmail, loiEmail);
+    xoaThongBao();
   });
 
-  document.getElementById('mat-khau').addEventListener('input', function() {
+  inputMatKhau.addEventListener('input', function () {
     xoaLoiInput(khungMatKhau, loiMatKhau);
+    xoaThongBao();
   });
 
-  nutToggleMK.addEventListener('click', function() {
+  nutToggleMK.addEventListener('click', function () {
     dangHienMatKhau = !dangHienMatKhau;
     if (dangHienMatKhau) {
       inputMatKhau.type = 'text';
@@ -60,38 +77,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  nutDangNhap.addEventListener('click', function(e) {
+  nutDangNhap.addEventListener('click', function (e) {
     const ripple = document.createElement('span');
     ripple.classList.add('ripple');
     const rect = nutDangNhap.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
-    ripple.style.width  = size + 'px';
-    ripple.style.height = size + 'px';
-    ripple.style.left   = (e.clientX - rect.left - size / 2) + 'px';
-    ripple.style.top    = (e.clientY - rect.top  - size / 2) + 'px';
+    ripple.style.width = `${size}px`;
+    ripple.style.height = `${size}px`;
+    ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+    ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
     nutDangNhap.appendChild(ripple);
     setTimeout(() => ripple.remove(), 600);
     xuLyDangNhap();
   });
 
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') xuLyDangNhap();
   });
 
-  function xuLyDangNhap() {
-    const email   = document.getElementById('email').value.trim();
-    const matKhau = document.getElementById('mat-khau').value;
+  async function xuLyDangNhap() {
+    if (nutDangNhap.disabled) return;
+
+    const email = inputEmail.value.trim();
+    const matKhau = inputMatKhau.value;
+
     xoaLoiInput(khungEmail, loiEmail);
     xoaLoiInput(khungMatKhau, loiMatKhau);
+    xoaThongBao();
 
     let coLoi = false;
 
     if (!email) {
       hienLoiInput(khungEmail, loiEmail, 'Mục này không được để trống!');
       coLoi = true;
-    }
-    
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       hienLoiInput(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       coLoi = true;
     }
@@ -104,21 +123,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (coLoi) return;
 
     nutDangNhap.textContent = 'Đang xử lý...';
-    nutDangNhap.disabled    = true;
+    nutDangNhap.disabled = true;
 
-    setTimeout(() => {
-      nutDangNhap.textContent = 'Đăng nhập';
-      nutDangNhap.disabled    = false;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password: matKhau
+        })
+      });
 
-      if (email === 'admin@gmail.com' && matKhau === '123456') {
-        xoaLoiInput(khungEmail, loiEmail);
-        xoaLoiInput(khungMatKhau, loiMatKhau);
-        alert('✅ Đăng nhập thành công!');
-      } else {
-        hienLoiInput(khungEmail, loiEmail, '');
-        hienLoiInput(khungMatKhau, loiMatKhau, 'Email hoặc mật khẩu không chính xác!');
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {
+        data = null;
       }
-    }, 1000);
+
+      if (!response.ok) {
+        const errorMessage = data?.message || data?.error || 'Email hoặc mật khẩu không chính xác!';
+        throw new Error(errorMessage);
+      }
+
+      window.location.href = data?.redirectUrl || DASHBOARD_URL;
+    } catch (error) {
+      hienThongBaoLoi(error.message || 'Không thể đăng nhập. Vui lòng thử lại!');
+      hienLoiInput(khungEmail, loiEmail, '');
+      hienLoiInput(khungMatKhau, loiMatKhau, 'Email hoặc mật khẩu không chính xác!');
+    } finally {
+      nutDangNhap.textContent = 'Đăng nhập';
+      nutDangNhap.disabled = false;
+    }
   }
 
 });

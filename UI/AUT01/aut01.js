@@ -1,33 +1,30 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-  const inputHoTen    = document.getElementById('ho-ten');
-  const inputEmail    = document.getElementById('email');
-  const inputMatKhau  = document.getElementById('mat-khau');
-  const inputChucVu   = document.getElementById('chuc-vu');
+  const API_BASE_URL = 'http://localhost:8080';
 
-  const khungHoTen    = document.getElementById('khung-ho-ten');
-  const khungEmail    = document.getElementById('khung-email');
-  const khungMatKhau  = document.getElementById('khung-mat-khau');
-  const khungChucVu   = document.getElementById('khung-chuc-vu');
+  const inputHoTen = document.getElementById('ho-ten');
+  const inputEmail = document.getElementById('email');
+  const inputMatKhau = document.getElementById('mat-khau');
+  const inputChucVu = document.getElementById('chuc-vu');
 
-  const loiHoTen      = document.getElementById('loi-ho-ten');
-  const loiEmail      = document.getElementById('loi-email');
-  const loiMatKhau    = document.getElementById('loi-mat-khau');
-  const loiChucVu     = document.getElementById('loi-chuc-vu');
+  const khungHoTen = document.getElementById('khung-ho-ten');
+  const khungEmail = document.getElementById('khung-email');
+  const khungMatKhau = document.getElementById('khung-mat-khau');
+  const khungChucVu = document.getElementById('khung-chuc-vu');
+
+  const loiHoTen = document.getElementById('loi-ho-ten');
+  const loiEmail = document.getElementById('loi-email');
+  const loiMatKhau = document.getElementById('loi-mat-khau');
+  const loiChucVu = document.getElementById('loi-chuc-vu');
 
   const iconTickEmail = document.getElementById('icon-tick-email');
-  const iconMat       = document.getElementById('icon-mat');
-  const nutToggleMK   = document.getElementById('nut-toggle-mk');
-  const nutLuu        = document.getElementById('nut-luu');
-  const nutHuy        = document.getElementById('nut-huy');
-  const thongBao      = document.getElementById('thong-bao');
+  const iconMat = document.getElementById('icon-mat');
+  const nutToggleMK = document.getElementById('nut-toggle-mk');
+  const nutLuu = document.getElementById('nut-luu');
+  const nutHuy = document.getElementById('nut-huy');
+  const thongBao = document.getElementById('thong-bao');
 
   let dangHienMatKhau = false;
-
-  const danhSachEmailTonTai = [
-    'admin@gmail.com',
-    'existaccount@gmail.com'
-  ];
 
   const selectHienThi = document.createElement('span');
   selectHienThi.className = 'select-hien-thi';
@@ -76,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
       nutLuu.classList.remove('bi-vo-hieu');
     }
   }
+
   inputHoTen.addEventListener('input', function () {
     xoaLoi(khungHoTen, loiHoTen);
     capNhatNutLuu();
@@ -117,18 +115,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   nutHuy.addEventListener('click', function () {
-    inputHoTen.value   = '';
-    inputEmail.value   = '';
+    inputHoTen.value = '';
+    inputEmail.value = '';
     inputMatKhau.value = '';
-    inputChucVu.value  = '';
+    inputChucVu.value = '';
 
     selectHienThi.textContent = '-- Chọn chức vụ --';
     selectHienThi.classList.remove('co-gia-tri');
 
-    xoaLoi(khungHoTen,   loiHoTen);
-    xoaLoi(khungEmail,   loiEmail);
+    xoaLoi(khungHoTen, loiHoTen);
+    xoaLoi(khungEmail, loiEmail);
     xoaLoi(khungMatKhau, loiMatKhau);
-    xoaLoi(khungChucVu,  loiChucVu);
+    xoaLoi(khungChucVu, loiChucVu);
 
     iconTickEmail.classList.remove('hien');
     nutLuu.classList.remove('bi-vo-hieu');
@@ -137,18 +135,18 @@ document.addEventListener('DOMContentLoaded', function () {
     thongBao.className = 'thong-bao';
   });
 
-  nutLuu.addEventListener('click', function () {
-    if (nutLuu.classList.contains('bi-vo-hieu')) return;
+  nutLuu.addEventListener('click', async function () {
+    if (nutLuu.classList.contains('bi-vo-hieu') || nutLuu.disabled) return;
 
-    const hoTen   = inputHoTen.value.trim();
-    const email   = inputEmail.value.trim();
+    const hoTen = inputHoTen.value.trim();
+    const email = inputEmail.value.trim();
     const matKhau = inputMatKhau.value;
-    const chucVu  = inputChucVu.value;
+    const chucVu = inputChucVu.value;
 
-    xoaLoi(khungHoTen,   loiHoTen);
-    xoaLoi(khungEmail,   loiEmail);
+    xoaLoi(khungHoTen, loiHoTen);
+    xoaLoi(khungEmail, loiEmail);
     xoaLoi(khungMatKhau, loiMatKhau);
-    xoaLoi(khungChucVu,  loiChucVu);
+    xoaLoi(khungChucVu, loiChucVu);
     thongBao.style.display = 'none';
     thongBao.className = 'thong-bao';
 
@@ -165,9 +163,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       coLoi = true;
-    } else if (danhSachEmailTonTai.includes(email.toLowerCase())) {
-      hienLoi(khungEmail, loiEmail, 'Email này đã tồn tại!');
-      coLoi = true;
     }
 
     if (!matKhau) {
@@ -177,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
       hienLoi(khungMatKhau, loiMatKhau, 'Mật khẩu phải có ít nhất 6 ký tự!');
       coLoi = true;
     }
+
     if (!chucVu) {
       hienLoi(khungChucVu, loiChucVu, 'Mục này không được để trống!');
       coLoi = true;
@@ -186,26 +182,56 @@ document.addEventListener('DOMContentLoaded', function () {
       nutLuu.classList.add('bi-vo-hieu');
       return;
     }
-    nutLuu.textContent = 'Đang lưu...';
-    nutLuu.disabled    = true;
 
-    setTimeout(() => {
-      nutLuu.textContent = 'Lưu';
-      nutLuu.disabled    = false;
-      danhSachEmailTonTai.push(email.toLowerCase());
+    nutLuu.textContent = 'Đang lưu...';
+    nutLuu.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/staff/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fullName: hoTen,
+          email,
+          password: matKhau,
+          role: chucVu
+        })
+      });
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {
+        data = null;
+      }
+
+      if (!response.ok) {
+        const errorMessage = data?.message || data?.error || 'Không thể tạo tài khoản. Vui lòng thử lại!';
+        throw new Error(errorMessage);
+      }
+
       thongBao.innerHTML = '✅ Tạo tài khoản thành công!';
       thongBao.classList.add('thanh-cong');
       thongBao.style.display = 'flex';
-      inputHoTen.value   = '';
-      inputEmail.value   = '';
+
+      inputHoTen.value = '';
+      inputEmail.value = '';
       inputMatKhau.value = '';
-      inputChucVu.value  = '';
+      inputChucVu.value = '';
       selectHienThi.textContent = '-- Chọn chức vụ --';
       selectHienThi.classList.remove('co-gia-tri');
       iconTickEmail.classList.remove('hien');
       nutLuu.classList.remove('bi-vo-hieu');
-
-    }, 800);
+    } catch (error) {
+      thongBao.textContent = error.message || 'Có lỗi xảy ra khi tạo tài khoản!';
+      thongBao.classList.add('loi');
+      thongBao.style.display = 'flex';
+    } finally {
+      nutLuu.textContent = 'Lưu';
+      nutLuu.disabled = false;
+    }
   });
 
   document.addEventListener('keydown', function (e) {
