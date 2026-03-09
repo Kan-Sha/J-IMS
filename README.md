@@ -1,14 +1,18 @@
-Dưới đây là **README chuẩn kiểu GitHub project** (gọn, chuyên nghiệp, dễ đọc cho developer khác), giả định **MySQL JDBC Driver đã nằm trong `lib/`**.
 
----
 
-# J-IMS Backend (Java)
+# J-IMS 
+hệ thống **J-IMS (Joy English Institute Management System)**.
 
-Backend Java thuần cho chức năng **Staff Management – Create Account (AUT-01)** của hệ thống **J-IMS (Joy English Institute Management System)**.
+Hiện tại backend hỗ trợ các chức năng:
+
+* **AUT-01:** Create Staff Account
+* **AUT-02:** Staff Login
+* **Staff Management API**
 
 Hệ thống cung cấp REST API để:
 
 * Tạo tài khoản nhân viên
+* Đăng nhập hệ thống
 * Lấy danh sách nhân viên
 * Lưu dữ liệu vào MySQL theo schema đã cung cấp
 
@@ -32,24 +36,51 @@ Project **không sử dụng framework** (Spring, Maven, Gradle) để giữ cod
 ```
 J-IMS
 │
-├── docs/                # tài liệu UI / requirement
-├── scripts/             # database schema
+├── docs/                      # tài liệu integration / requirement
+│   └── aut02-integration.md
+│
+├── scripts/                   # database schema
 │   └── schema.sql
 │
-├── lib/                 # external libraries
+├── UI/
+│   └── AUT02/                 # login UI prototype
+│       ├── aut02.html
+│       ├── aut02.css
+│       ├── aut02.js
+│       └── images
+│
+├── lib/                       # external libraries
 │   └── mysql-connector-j-8.x.x.jar
 │
 ├── src/
 │   ├── main/java/com/jims/backend
 │   │
-│   │   ├── controller   # xử lý HTTP request
-│   │   ├── service      # business logic
-│   │   ├── repository   # database access
-│   │   ├── model        # entity / DTO
-│   │   └── Application  # entry point
+│   │   ├── http               # HTTP handlers
+│   │   │   ├── AuthHandler
+│   │   │   └── StaffHandler
+│   │   │
+│   │   ├── service            # business logic
+│   │   │   └── AuthService
+│   │   │
+│   │   ├── repository         # database access
+│   │   │   └── JdbcStaffRepository
+│   │   │
+│   │   ├── dto                # request / response objects
+│   │   │   ├── LoginRequest
+│   │   │   └── LoginResponse
+│   │   │
+│   │   ├── model              # entities
+│   │   │   └── Role
+│   │   │
+│   │   ├── util               # utility classes
+│   │   │   ├── JsonUtil
+│   │   │   └── HttpUtil
+│   │   │
+│   │   └── Application        # entry point
 │   │
 │   └── test/java
-│       └── StaffServiceTest
+│       ├── StaffServiceTest
+│       └── AuthServiceTest
 │
 └── README.md
 ```
@@ -58,16 +89,16 @@ J-IMS
 
 # Setup
 
-## 1. Yêu cầu hệ thống
+## 1. System Requirements
 
-Cài đặt:
+Install:
 
 ```
 Java JDK 8+
 MySQL Server
 ```
 
-Kiểm tra:
+Check:
 
 ```bash
 java -version
@@ -78,7 +109,7 @@ mysql --version
 
 # Database Setup
 
-Tạo database:
+Create database:
 
 ```sql
 CREATE DATABASE jims;
@@ -90,14 +121,14 @@ Import schema:
 mysql -u root -p jims < scripts/schema.sql
 ```
 
-Kiểm tra bảng:
+Check tables:
 
 ```sql
 USE jims;
 SHOW TABLES;
 ```
 
-Các bảng cần có:
+Expected tables:
 
 ```
 roles
@@ -107,36 +138,27 @@ classes
 learning_status
 ```
 
-Kiểm tra roles seed:
+Check roles seed:
 
 ```sql
 SELECT * FROM roles;
 ```
 
-Ví dụ:
+Example:
 
 ```
-+---------+---------------+
-| role_id | role_name     |
-+---------+---------------+
-| 1       | Giáo viên     |
-| 2       | Trợ giảng     |
-| 3       | Admin         |
-| 4       | Giám đốc      |
-```
-
-Demo account AUT-02:
-
-```
-email: admin@gmail.com
-password: 123456
+role_id | role_name
+1       | Giáo viên
+2       | Trợ giảng
+3       | Admin
+4       | Giám đốc
 ```
 
 ---
 
 # Configuration
 
-Thiết lập biến môi trường:
+Set environment variables:
 
 ```bash
 export DB_URL='jdbc:mysql://127.0.0.1:3306/jims'
@@ -144,7 +166,7 @@ export DB_USER='root'
 export DB_PASSWORD='your_password'
 ```
 
-Ví dụ:
+Example:
 
 ```bash
 export DB_PASSWORD='123456'
@@ -154,19 +176,17 @@ export DB_PASSWORD='123456'
 
 # Build Project
 
-Compile toàn bộ source:
+Compile all source files:
 
 ```bash
 javac -cp "lib/mysql-connector-j-8.3.0.jar" -d out $(find src/main/java -name "*.java")
 ```
 
-Sau khi compile:
+After compiling, the compiled classes will appear in:
 
 ```
 out/
 ```
-
-sẽ chứa các `.class`.
 
 ---
 
@@ -176,7 +196,7 @@ sẽ chứa các `.class`.
 java -cp "out:lib/mysql-connector-j-8.3.0.jar" com.jims.backend.Application
 ```
 
-Server sẽ chạy tại:
+Server will run at:
 
 ```
 http://localhost:8080
@@ -186,9 +206,7 @@ http://localhost:8080
 
 # API
 
-Chi tiết cách nối UI `aut02.js` với backend: `docs/aut02-integration.md`.
-
-## Create Staff
+## Create Staff (AUT-01)
 
 ```
 POST /api/v1/staff
@@ -205,7 +223,7 @@ Request:
 }
 ```
 
-Test bằng curl:
+Example test:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/staff \
@@ -232,7 +250,7 @@ Response:
 
 ---
 
-## Login (AUT-02)
+# Login (AUT-02)
 
 ```
 POST /api/v1/auth/login
@@ -247,7 +265,7 @@ Request:
 }
 ```
 
-Success Response (`200`):
+Success response:
 
 ```json
 {
@@ -259,12 +277,22 @@ Success Response (`200`):
 }
 ```
 
-Error cases:
-- `422 VALIDATION_ERROR`: `Mục này không được để trống!`
-- `422 VALIDATION_ERROR`: `Định dạng email không hợp lệ!`
-- `401 AUTH_FAILED`: `Email hoặc mật khẩu không chính xác!`
+Possible errors:
 
-## Get Staff List
+```
+422 VALIDATION_ERROR
+"Mục này không được để trống!"
+
+422 VALIDATION_ERROR
+"Định dạng email không hợp lệ!"
+
+401 AUTH_FAILED
+"Email hoặc mật khẩu không chính xác!"
+```
+
+---
+
+# Get Staff List
 
 ```
 GET /api/v1/staff
@@ -291,74 +319,42 @@ Response:
 
 ---
 
+# UI Prototype (AUT-02)
+
+Login UI prototype nằm tại:
+
+
+UI/AUT02/aut02.html
+
+
+Chạy bằng cách mở file:
+
+
+UI/AUT02/aut02.html
+
+
+Chi tiết cách kết nối UI với backend:
+
+
+docs/aut02-integration.md
+
+
+---
+
 # Running Tests
 
-Test service layer (không cần database):
+Run service layer tests:
 
 ```bash
 javac -d out $(find src/main/java src/test/java -name "*.java")
 java -cp out com.jims.backend.StaffServiceTest
 ```
 
----
-
-# Common Issues
-
-### DB_ERROR khi gọi API
-
-Nguyên nhân phổ biến:
-
-```
-MySQL chưa chạy
-Sai DB_PASSWORD
-Database chưa import schema
-```
-
-Kiểm tra MySQL:
+Run login service test:
 
 ```bash
-sudo systemctl status mysql
+java -cp out com.jims.backend.AuthServiceTest
 ```
 
 ---
-
-### Server chạy nhưng API trả []
-
-Điều này **không phải lỗi**.
-Chỉ có nghĩa là bảng `staff` chưa có dữ liệu.
-
----
-
-# Development Workflow
-
-```
-1. Setup database
-2. Compile project
-3. Run backend
-4. Test API bằng curl
-```
-
----
-
-# Git Notes
-
-Không commit file build:
-
-```
-out/
-*.class
-```
-
-Thêm `.gitignore`:
-
-```
-out/
-*.class
-```
-
----
-
-# License
-
-Internal academic project for **Joy English Institute Management System**.
 
