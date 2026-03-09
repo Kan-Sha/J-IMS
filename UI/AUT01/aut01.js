@@ -23,11 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const thongBao      = document.getElementById('thong-bao');
 
   let dangHienMatKhau = false;
-
-  const danhSachEmailTonTai = [
-    'admin@gmail.com',
-    'existaccount@gmail.com'
-  ];
+  const API_BASE_URL = 'http://localhost:8080';
 
   const selectHienThi = document.createElement('span');
   selectHienThi.className = 'select-hien-thi';
@@ -137,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     thongBao.className = 'thong-bao';
   });
 
-  nutLuu.addEventListener('click', function () {
+  nutLuu.addEventListener('click', async function () {
     if (nutLuu.classList.contains('bi-vo-hieu')) return;
 
     const hoTen   = inputHoTen.value.trim();
@@ -165,9 +161,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       coLoi = true;
-    } else if (danhSachEmailTonTai.includes(email.toLowerCase())) {
-      hienLoi(khungEmail, loiEmail, 'Email này đã tồn tại!');
-      coLoi = true;
     }
 
     if (!matKhau) {
@@ -189,10 +182,44 @@ document.addEventListener('DOMContentLoaded', function () {
     nutLuu.textContent = 'Đang lưu...';
     nutLuu.disabled    = true;
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/staff`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          full_name: hoTen,
+          email: email,
+          password: matKhau,
+          role: chucVu
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 422 || response.status === 409) {
+          if (data.field === 'full_name') {
+            hienLoi(khungHoTen, loiHoTen, data.message || 'Mục này không được để trống!');
+          } else if (data.field === 'email') {
+            hienLoi(khungEmail, loiEmail, data.message || 'Email không hợp lệ!');
+          } else if (data.field === 'password') {
+            hienLoi(khungMatKhau, loiMatKhau, data.message || 'Mật khẩu không hợp lệ!');
+          } else if (data.field === 'role') {
+            hienLoi(khungChucVu, loiChucVu, data.message || 'Mục này không được để trống!');
+          }
+        } else {
+          thongBao.innerHTML = data.message || '❌ Tạo tài khoản thất bại!';
+          thongBao.classList.remove('thanh-cong');
+          thongBao.style.display = 'flex';
+        }
+        capNhatNutLuu();
+        return;
+      }
+
       nutLuu.textContent = 'Lưu';
       nutLuu.disabled    = false;
-      danhSachEmailTonTai.push(email.toLowerCase());
       thongBao.innerHTML = '✅ Tạo tài khoản thành công!';
       thongBao.classList.add('thanh-cong');
       thongBao.style.display = 'flex';
@@ -204,8 +231,14 @@ document.addEventListener('DOMContentLoaded', function () {
       selectHienThi.classList.remove('co-gia-tri');
       iconTickEmail.classList.remove('hien');
       nutLuu.classList.remove('bi-vo-hieu');
-
-    }, 800);
+    } catch (error) {
+      thongBao.innerHTML = '❌ Không thể kết nối máy chủ!';
+      thongBao.classList.remove('thanh-cong');
+      thongBao.style.display = 'flex';
+    } finally {
+      nutLuu.textContent = 'Lưu';
+      nutLuu.disabled = false;
+    }
   });
 
   document.addEventListener('keydown', function (e) {
