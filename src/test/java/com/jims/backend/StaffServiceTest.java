@@ -24,7 +24,7 @@ public class StaffServiceTest {
         req.setFullName("  Example Name ");
         req.setEmail("example@gmail.com");
         req.setRole("Giáo viên");
-        var response = service.create(req);
+        com.jims.backend.dto.StaffResponse response = service.create(req);
         assertEquals("Example Name", response.getFullName(), "full_name trim failed");
     }
 
@@ -81,12 +81,24 @@ public class StaffServiceTest {
         }
 
         @Override
+        public Staff findByEmail(String email) {
+            return storage.stream().filter(s -> s.getEmail().equalsIgnoreCase(email)).findFirst().orElse(null);
+        }
+
+        @Override
         public int getRoleIdByName(Role role) {
-            return switch (role) {
-                case TEACHER -> 1;
-                case ASSISTANT -> 2;
-                case ADMIN -> 3;
-            };
+            switch (role) {
+                case TEACHER:
+                    return 1;
+                case ASSISTANT:
+                    return 2;
+                case ADMIN:
+                    return 3;
+                case DIRECTOR:
+                    return 4;
+                default:
+                    throw new IllegalArgumentException("Unknown role");
+            }
         }
 
         @Override

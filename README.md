@@ -122,6 +122,14 @@ Ví dụ:
 | 1       | Giáo viên     |
 | 2       | Trợ giảng     |
 | 3       | Admin         |
+| 4       | Giám đốc      |
+```
+
+Demo account AUT-02:
+
+```
+email: admin@gmail.com
+password: 123456
 ```
 
 ---
@@ -178,6 +186,8 @@ http://localhost:8080
 
 # API
 
+Chi tiết cách nối UI `aut02.js` với backend: `docs/aut02-integration.md`.
+
 ## Create Staff
 
 ```
@@ -221,6 +231,38 @@ Response:
 ```
 
 ---
+
+## Login (AUT-02)
+
+```
+POST /api/v1/auth/login
+```
+
+Request:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "JoyEnglish@123"
+}
+```
+
+Success Response (`200`):
+
+```json
+{
+  "staff_id": 1,
+  "full_name": "Nguyen Van A",
+  "email": "admin@example.com",
+  "role": "Admin",
+  "redirect_to": "/admin/dashboard"
+}
+```
+
+Error cases:
+- `422 VALIDATION_ERROR`: `Mục này không được để trống!`
+- `422 VALIDATION_ERROR`: `Định dạng email không hợp lệ!`
+- `401 AUTH_FAILED`: `Email hoặc mật khẩu không chính xác!`
 
 ## Get Staff List
 
