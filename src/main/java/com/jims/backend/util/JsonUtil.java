@@ -2,6 +2,8 @@ package com.jims.backend.util;
 
 import com.jims.backend.dto.CreateStaffRequest;
 import com.jims.backend.dto.ErrorResponse;
+import com.jims.backend.dto.LoginRequest;
+import com.jims.backend.dto.LoginResponse;
 import com.jims.backend.dto.StaffResponse;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -23,8 +25,25 @@ public final class JsonUtil {
                 request.setFullName(value);
             } else if ("email".equals(key)) {
                 request.setEmail(value);
+            } else if ("password".equals(key)) {
+                request.setPassword(value);
             } else if ("role".equals(key)) {
                 request.setRole(value);
+            }
+        }
+        return request;
+    }
+
+    public static LoginRequest parseLogin(String body) {
+        LoginRequest request = new LoginRequest();
+        Matcher matcher = FIELD_PATTERN.matcher(body);
+        while (matcher.find()) {
+            String key = matcher.group(1);
+            String value = matcher.group(2);
+            if ("email".equals(key)) {
+                request.setEmail(value);
+            } else if ("password".equals(key)) {
+                request.setPassword(value);
             }
         }
         return request;
@@ -37,6 +56,17 @@ public final class JsonUtil {
             + "\"email\":\"" + escape(response.getEmail()) + "\"," 
             + "\"role\":\"" + escape(response.getRole()) + "\"," 
             + "\"default_password\":\"" + escape(response.getDefaultPassword()) + "\""
+            + "}";
+    }
+
+
+    public static String toJson(LoginResponse response) {
+        return "{"
+            + "\"staff_id\":" + response.getStaffId() + ","
+            + "\"full_name\":\"" + escape(response.getFullName()) + "\","
+            + "\"email\":\"" + escape(response.getEmail()) + "\","
+            + "\"role\":\"" + escape(response.getRole()) + "\","
+            + "\"redirect_to\":\"" + escape(response.getRedirectTo()) + "\""
             + "}";
     }
 

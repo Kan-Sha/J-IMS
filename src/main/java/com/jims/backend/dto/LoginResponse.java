@@ -1,10 +1,19 @@
 package com.jims.backend.dto;
 
-public class CreateStaffRequest {
+public class LoginResponse {
+    private int staffId;
     private String fullName;
     private String email;
-    private String password;
     private String role;
+    private String redirectTo;
+
+    public int getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(int staffId) {
+        this.staffId = staffId;
+    }
 
     public String getFullName() {
         return fullName;
@@ -22,19 +31,19 @@ public class CreateStaffRequest {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getRedirectTo() {
+        return redirectTo;
+    }
+
+    public void setRedirectTo(String redirectTo) {
+        this.redirectTo = redirectTo;
     }
 }

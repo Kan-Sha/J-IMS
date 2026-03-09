@@ -1,8 +1,8 @@
 package com.jims.backend.http;
 
-import com.jims.backend.dto.CreateStaffRequest;
+import com.jims.backend.dto.LoginRequest;
 import com.jims.backend.service.ApiException;
-import com.jims.backend.service.StaffService;
+import com.jims.backend.service.AuthService;
 import com.jims.backend.util.HttpUtil;
 import com.jims.backend.util.JsonUtil;
 import com.sun.net.httpserver.HttpExchange;
@@ -10,11 +10,11 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class StaffHandler implements HttpHandler {
-    private final StaffService staffService;
+public class AuthHandler implements HttpHandler {
+    private final AuthService authService;
 
-    public StaffHandler(StaffService staffService) {
-        this.staffService = staffService;
+    public AuthHandler(AuthService authService) {
+        this.authService = authService;
     }
 
     @Override
@@ -25,18 +25,13 @@ public class StaffHandler implements HttpHandler {
                 write(exchange, 204, "");
                 return;
             }
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                String body = HttpUtil.readBody(exchange.getRequestBody());
-                CreateStaffRequest request = JsonUtil.parseCreateStaff(body);
-                String payload = JsonUtil.toJson(staffService.create(request));
-                write(exchange, 201, payload);
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                write(exchange, 405, "{\"message\":\"Method Not Allowed\"}");
                 return;
             }
-            if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-                write(exchange, 200, JsonUtil.toJsonArray(staffService.list()));
-                return;
-            }
-            write(exchange, 405, "{\"message\":\"Method Not Allowed\"}");
+            String body = HttpUtil.readBody(exchange.getRequestBody());
+            LoginRequest request = JsonUtil.parseLogin(body);
+            write(exchange, 200, JsonUtil.toJson(authService.login(request)));
         } catch (ApiException e) {
             write(exchange, e.getStatus(), JsonUtil.toJson(e.getError()));
         } catch (Exception e) {

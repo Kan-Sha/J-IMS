@@ -13,7 +13,9 @@ import java.util.List;
 public class StaffServiceTest {
     public static void main(String[] args) throws Exception {
         shouldCreateStaffSuccess();
+        shouldCreateStaffWithSlugRole();
         shouldRejectInvalidEmail();
+        shouldRejectShortPassword();
         shouldRejectDuplicateEmail();
         System.out.println("All StaffService tests passed.");
     }
@@ -23,9 +25,23 @@ public class StaffServiceTest {
         CreateStaffRequest req = new CreateStaffRequest();
         req.setFullName("  Example Name ");
         req.setEmail("example@gmail.com");
+        req.setPassword("123456");
         req.setRole("Giáo viên");
-        var response = service.create(req);
+        com.jims.backend.dto.StaffResponse response = service.create(req);
         assertEquals("Example Name", response.getFullName(), "full_name trim failed");
+        assertEquals("123456", response.getDefaultPassword(), "password should echo input to support AUT-02 login");
+    }
+
+    private static void shouldCreateStaffWithSlugRole() {
+        StaffService service = new StaffService(new FakeRepo());
+        CreateStaffRequest req = new CreateStaffRequest();
+        req.setFullName("Role Slug");
+        req.setEmail("roleslug@gmail.com");
+        req.setPassword("abcdef");
+        req.setRole("tro-giang");
+
+        com.jims.backend.dto.StaffResponse response = service.create(req);
+        assertEquals("Trợ giảng", response.getRole(), "slug role mapping failed");
     }
 
     private static void shouldRejectInvalidEmail() {
@@ -33,12 +49,29 @@ public class StaffServiceTest {
         CreateStaffRequest req = new CreateStaffRequest();
         req.setFullName("Example");
         req.setEmail("123456");
+        req.setPassword("123456");
         req.setRole("Giáo viên");
         try {
             service.create(req);
             throw new AssertionError("Expected ApiException for invalid email");
         } catch (ApiException e) {
             assertEquals(422, e.getStatus(), "status should be 422");
+        }
+    }
+
+    private static void shouldRejectShortPassword() {
+        StaffService service = new StaffService(new FakeRepo());
+        CreateStaffRequest req = new CreateStaffRequest();
+        req.setFullName("Example");
+        req.setEmail("example2@gmail.com");
+        req.setPassword("123");
+        req.setRole("Admin");
+        try {
+            service.create(req);
+            throw new AssertionError("Expected ApiException for short password");
+        } catch (ApiException e) {
+            assertEquals(422, e.getStatus(), "status should be 422");
+            assertEquals("Mật khẩu phải có ít nhất 6 ký tự!", e.getError().getMessage(), "password message mismatch");
         }
     }
 
@@ -55,6 +88,7 @@ public class StaffServiceTest {
         CreateStaffRequest req = new CreateStaffRequest();
         req.setFullName("Example");
         req.setEmail("exist@gmail.com");
+        req.setPassword("123456");
         req.setRole("Admin");
 
         try {
@@ -72,7 +106,7 @@ public class StaffServiceTest {
     }
 
     static class FakeRepo implements StaffRepository {
-        private final List<Staff> storage = new ArrayList<>();
+        private final List<Staff> storage = new ArrayList<Staff>();
         private int id = 1;
 
         @Override
@@ -81,12 +115,24 @@ public class StaffServiceTest {
         }
 
         @Override
+        public Staff findByEmail(String email) {
+            return storage.stream().filter(s -> s.getEmail().equalsIgnoreCase(email)).findFirst().orElse(null);
+        }
+
+        @Override
         public int getRoleIdByName(Role role) {
-            return switch (role) {
-                case TEACHER -> 1;
-                case ASSISTANT -> 2;
-                case ADMIN -> 3;
-            };
+            switch (role) {
+                case TEACHER:
+                    return 1;
+                case ASSISTANT:
+                    return 2;
+                case ADMIN:
+                    return 3;
+                case DIRECTOR:
+                    return 4;
+                default:
+                    throw new IllegalArgumentException("Unknown role");
+            }
         }
 
         @Override

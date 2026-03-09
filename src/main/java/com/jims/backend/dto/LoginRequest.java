@@ -1,18 +1,8 @@
 package com.jims.backend.dto;
 
-public class CreateStaffRequest {
-    private String fullName;
+public class LoginRequest {
     private String email;
     private String password;
-    private String role;
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
 
     public String getEmail() {
         return email;
@@ -28,13 +18,5 @@ public class CreateStaffRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 }

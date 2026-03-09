@@ -24,18 +24,21 @@ public class StaffService {
 
     public StaffResponse create(CreateStaffRequest request) {
         validate(request);
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        String rawPassword = request.getPassword().trim();
+
         try {
-            if (staffRepository.existsByEmail(request.getEmail())) {
+            if (staffRepository.existsByEmail(normalizedEmail)) {
                 throw new ApiException(409, new ErrorResponse("EMAIL_EXISTS", "Email này đã tồn tại!", "email"));
             }
             Staff staff = new Staff();
             staff.setFullName(request.getFullName().trim());
-            staff.setEmail(request.getEmail().trim().toLowerCase());
+            staff.setEmail(normalizedEmail);
             staff.setRole(Role.fromUiName(request.getRole()));
-            staff.setPasswordHash(PasswordUtil.sha256(DEFAULT_PASSWORD));
+            staff.setPasswordHash(PasswordUtil.sha256(rawPassword));
 
             Staff saved = staffRepository.save(staff);
-            return toResponse(saved);
+            return toResponse(saved, rawPassword);
         } catch (SQLException e) {
             throw new ApiException(500, new ErrorResponse("DB_ERROR", "Không thể kết nối cơ sở dữ liệu", null));
         }
@@ -59,8 +62,19 @@ public class StaffService {
         }
 
         String email = request.getEmail() == null ? "" : request.getEmail().trim();
+        if (email.isEmpty()) {
+            throw new ApiException(422, new ErrorResponse("VALIDATION_ERROR", "Mục này không được để trống!", "email"));
+        }
         if (!EMAIL_PATTERN.matcher(email).matches()) {
             throw new ApiException(422, new ErrorResponse("VALIDATION_ERROR", "Định dạng email không hợp lệ!", "email"));
+        }
+
+        String password = request.getPassword() == null ? "" : request.getPassword().trim();
+        if (password.isEmpty()) {
+            throw new ApiException(422, new ErrorResponse("VALIDATION_ERROR", "Mục này không được để trống!", "password"));
+        }
+        if (password.length() < 6) {
+            throw new ApiException(422, new ErrorResponse("VALIDATION_ERROR", "Mật khẩu phải có ít nhất 6 ký tự!", "password"));
         }
 
         Role role = Role.fromUiName(request.getRole());
@@ -70,12 +84,16 @@ public class StaffService {
     }
 
     private StaffResponse toResponse(Staff staff) {
+        return toResponse(staff, DEFAULT_PASSWORD);
+    }
+
+    private StaffResponse toResponse(Staff staff, String rawPassword) {
         StaffResponse response = new StaffResponse();
         response.setStaffId(staff.getStaffId());
         response.setFullName(staff.getFullName());
         response.setEmail(staff.getEmail());
         response.setRole(staff.getRole().getUiName());
-        response.setDefaultPassword(DEFAULT_PASSWORD);
+        response.setDefaultPassword(rawPassword == null || rawPassword.isEmpty() ? DEFAULT_PASSWORD : rawPassword);
         return response;
     }
 }
