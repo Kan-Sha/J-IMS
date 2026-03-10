@@ -65,14 +65,6 @@ CREATE TABLE students (
     UNIQUE(first_name, last_name, date_of_birth)
 );
 
-CREATE TABLE tuition_invoices (
-    invoice_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id VARCHAR(20) NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    due_date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES students(student_id)
-);
 
 INSERT INTO staff (full_name, email, password_hash, role_id)
 SELECT 'Admin Demo',
