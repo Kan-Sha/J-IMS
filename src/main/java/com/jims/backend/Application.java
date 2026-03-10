@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 
 public class Application {
     public static void main(String[] args) throws IOException {
-        int port = Integer.parseInt(System.getenv().getOrDefault("JIMS_PORT", "8080"));
+         int port = 8080;
 
         StaffRepository staffRepository = new StaffRepository();
         StudentRepository studentRepository = new StudentRepository();
