@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+  const API_BASE_URL = 'http://localhost:8080';
+
   const inputMatKhau  = document.getElementById('mat-khau');
   const iconMat       = document.getElementById('icon-mat');
   const nutDangNhap   = document.getElementById('nut-dang-nhap');
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Enter') xuLyDangNhap();
   });
 
-  function xuLyDangNhap() {
+  async function xuLyDangNhap() {
     const email   = document.getElementById('email').value.trim();
     const matKhau = document.getElementById('mat-khau').value;
     xoaLoiInput(khungEmail, loiEmail);
@@ -106,19 +108,43 @@ document.addEventListener('DOMContentLoaded', function() {
     nutDangNhap.textContent = 'Đang xử lý...';
     nutDangNhap.disabled    = true;
 
-    setTimeout(() => {
-      nutDangNhap.textContent = 'Đăng nhập';
-      nutDangNhap.disabled    = false;
+    try {
+      const response = await fetch(API_BASE_URL + '/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          password: matKhau
+        })
+      });
 
-      if (email === 'admin@gmail.com' && matKhau === '123456') {
+      const data = await response.json();
+
+      if (response.ok) {
         xoaLoiInput(khungEmail, loiEmail);
         xoaLoiInput(khungMatKhau, loiMatKhau);
         alert('✅ Đăng nhập thành công!');
-      } else {
-        hienLoiInput(khungEmail, loiEmail, '');
-        hienLoiInput(khungMatKhau, loiMatKhau, 'Email hoặc mật khẩu không chính xác!');
+        if (data.redirect_to) {
+          window.location.href = data.redirect_to;
+        }
+        return;
       }
-    }, 1000);
+
+      if (response.status === 422 && data.field === 'email') {
+        hienLoiInput(khungEmail, loiEmail, data.message || 'Định dạng email không hợp lệ!');
+      } else if (response.status === 422 && data.field === 'password') {
+        hienLoiInput(khungMatKhau, loiMatKhau, data.message || 'Mật khẩu không hợp lệ!');
+      } else {
+        hienLoiInput(khungMatKhau, loiMatKhau, data.message || 'Email hoặc mật khẩu không chính xác!');
+      }
+    } catch (error) {
+      hienLoiInput(khungMatKhau, loiMatKhau, 'Không thể kết nối máy chủ!');
+    } finally {
+      nutDangNhap.textContent = 'Đăng nhập';
+      nutDangNhap.disabled    = false;
+    }
   }
 
 });
