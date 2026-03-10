@@ -1,0 +1,109 @@
+package com.jims.backend.service;
+
+import com.jims.backend.model.Student;
+import com.jims.backend.repository.ClassRepository;
+import com.jims.backend.repository.StudentRepository;
+import com.jims.backend.util.StudentIdGenerator;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+public class StudentService {
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^(\\+84|0)[0-9]{9,11}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+
+    private final StudentRepository studentRepository;
+    private final ClassRepository classRepository;
+
+    public StudentService(StudentRepository studentRepository, ClassRepository classRepository) {
+        this.studentRepository = studentRepository;
+        this.classRepository = classRepository;
+    }
+
+    public ApiResult createStudent(String firstName,
+                                   String lastName,
+                                   String dob,
+                                   String gender,
+                                   String parentName,
+                                   String phone,
+                                   String email,
+                                   String address,
+                                   Integer classId) {
+        try {
+            if (isBlank(firstName) || isBlank(lastName) || isBlank(dob) || isBlank(gender)
+                    || isBlank(parentName) || isBlank(phone) || classId == null) {
+                return new ApiResult(false, Collections.emptyMap(), "Mục này không được để trống!", 400);
+            }
+
+            String fullName = (firstName + " " + lastName).trim();
+            if (fullName.length() < 8 || fullName.length() > 100) {
+                return new ApiResult(false, Collections.emptyMap(), "Họ tên phải từ 8 đến 100 ký tự!", 400);
+            }
+
+            if (!PHONE_PATTERN.matcher(phone.trim()).matches()) {
+                return new ApiResult(false, Collections.emptyMap(), "Số điện thoại không hợp lệ!", 400);
+            }
+
+            if (!isBlank(email) && !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+                return new ApiResult(false, Collections.emptyMap(), "Sai định dạng email!", 400);
+            }
+
+            Date dateOfBirth = Date.valueOf(LocalDate.parse(dob));
+            if (studentRepository.existsDuplicate(firstName.trim(), lastName.trim(), dateOfBirth)) {
+                return new ApiResult(false, Collections.emptyMap(), "Học sinh đã tồn tại!", 409);
+            }
+
+            if (!classRepository.isClassAvailable(classId.intValue())) {
+                return new ApiResult(false, Collections.emptyMap(), "Lớp đã đầy", 409);
+            }
+
+            String yearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+            String latest = studentRepository.findLatestStudentIdByMonth(yearMonth);
+            String studentCode = StudentIdGenerator.generate(latest);
+
+            Student student = new Student();
+            student.setStudentId(studentCode);
+            student.setFirstName(firstName.trim());
+            student.setLastName(lastName.trim());
+            student.setDateOfBirth(dateOfBirth);
+            student.setGender(gender.trim());
+            student.setParentName(parentName.trim());
+            student.setPhone(phone.trim());
+            student.setEmail(isBlank(email) ? null : email.trim());
+            student.setAddress(isBlank(address) ? null : address.trim());
+            student.setClassId(classId.intValue());
+
+            Connection conn = studentRepository.getConnection();
+            try {
+                conn.setAutoCommit(false);
+                boolean inserted = studentRepository.insertStudent(conn, student);
+                boolean classUpdated = classRepository.incrementClassSize(conn, classId.intValue());
+                if (inserted && classUpdated) {
+                    conn.commit();
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    data.put("studentId", studentCode);
+                    return new ApiResult(true, data, "Student created successfully", 201);
+                }
+                conn.rollback();
+                return new ApiResult(false, Collections.emptyMap(), "Tạo học sinh thất bại!", 500);
+            } finally {
+                conn.close();
+            }
+        } catch (IllegalArgumentException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Ngày sinh không hợp lệ!", 400);
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+}

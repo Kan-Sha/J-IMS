@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const loiMatKhau    = document.getElementById('loi-matkhau');
 
   let dangHienMatKhau = false;
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = (() => {
+    const host = window.location && window.location.hostname ? window.location.hostname : '127.0.0.1';
+    return `${window.location.protocol}//${host}:8080`;
+  })();
 
 
   function hienLoiInput(khung, loiEl, noiDung) {
