@@ -5,10 +5,12 @@ import com.jims.backend.service.ApiResult;
 import com.jims.backend.service.StudentService;
 import com.jims.backend.util.JsonUtil;
 import com.jims.backend.util.ResponseUtil;
+import com.jims.backend.util.SessionManager;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.util.Collections;
 
 public class StudentController {
 
@@ -28,6 +30,12 @@ public class StudentController {
                 }
                 if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                     ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+
+                String token = resolveToken(exchange);
+                if (SessionManager.getSession(token) == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
                     return;
                 }
 
@@ -51,6 +59,26 @@ public class StudentController {
                 ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
             }
         };
+    }
+
+    private String resolveToken(HttpExchange exchange) {
+        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+        if (authHeader != null && !authHeader.trim().isEmpty()) {
+            return authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
+        }
+
+        String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookieHeader == null || cookieHeader.trim().isEmpty()) {
+            return null;
+        }
+        String[] cookies = cookieHeader.split(";");
+        for (String cookie : cookies) {
+            String trimmed = cookie.trim();
+            if (trimmed.startsWith("JIMS_TOKEN=")) {
+                return trimmed.substring("JIMS_TOKEN=".length());
+            }
+        }
+        return null;
     }
 
     private String getString(JsonObject object, String key) {

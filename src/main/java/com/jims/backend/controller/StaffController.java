@@ -51,14 +51,29 @@ public class StaffController {
             return fromHeader;
         }
 
-        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
-        if (authHeader == null || authHeader.trim().isEmpty()) {
-            return null;
-        }
-
-        String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
+        String token = resolveToken(exchange);
         SessionManager.SessionData session = SessionManager.getSession(token);
         return session == null ? null : session.getRole();
+    }
+
+    private String resolveToken(HttpExchange exchange) {
+        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+        if (authHeader != null && !authHeader.trim().isEmpty()) {
+            return authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
+        }
+
+        String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookieHeader == null || cookieHeader.trim().isEmpty()) {
+            return null;
+        }
+        String[] cookies = cookieHeader.split(";");
+        for (String cookie : cookies) {
+            String trimmed = cookie.trim();
+            if (trimmed.startsWith("JIMS_TOKEN=")) {
+                return trimmed.substring("JIMS_TOKEN=".length());
+            }
+        }
+        return null;
     }
 
     private String getString(JsonObject object, String key) {

@@ -33,6 +33,12 @@ public class AuthController {
 
                 JsonObject body = JsonUtil.parseBody(exchange);
                 ApiResult result = authService.login(getString(body, "email"), getString(body, "password"));
+                if (result.isSuccess()) {
+                    Object token = ((java.util.Map<?, ?>) result.getData()).get("token");
+                    if (token != null) {
+                        exchange.getResponseHeaders().add("Set-Cookie", "JIMS_TOKEN=" + token + "; Path=/; HttpOnly; SameSite=Lax");
+                    }
+                }
                 ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
             }
         };
@@ -51,9 +57,9 @@ public class AuthController {
                     return;
                 }
 
-                String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
-                String token = extractToken(authHeader);
+                String token = resolveToken(exchange);
                 ApiResult result = authService.logout(token);
+                exchange.getResponseHeaders().add("Set-Cookie", "JIMS_TOKEN=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax");
                 ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
             }
         };
@@ -66,13 +72,29 @@ public class AuthController {
         return object.get(key).getAsString();
     }
 
-    private String extractToken(String authorization) {
-        if (authorization == null) {
+    private String resolveToken(HttpExchange exchange) {
+        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+        if (authHeader != null && !authHeader.trim().isEmpty()) {
+            if (authHeader.startsWith("Bearer ")) {
+                return authHeader.substring(7);
+            }
+            return authHeader;
+        }
+        String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+        return extractTokenFromCookie(cookieHeader);
+    }
+
+    private String extractTokenFromCookie(String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.trim().isEmpty()) {
             return null;
         }
-        if (authorization.startsWith("Bearer ")) {
-            return authorization.substring(7);
+        String[] cookies = cookieHeader.split(";");
+        for (String cookie : cookies) {
+            String trimmed = cookie.trim();
+            if (trimmed.startsWith("JIMS_TOKEN=")) {
+                return trimmed.substring("JIMS_TOKEN=".length());
+            }
         }
-        return authorization;
+        return null;
     }
 }

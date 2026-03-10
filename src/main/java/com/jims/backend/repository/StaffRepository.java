@@ -47,6 +47,20 @@ public class StaffRepository {
         return null;
     }
 
+    public Integer findRoleIdByAnyRoleNames(String[] roleNames) throws SQLException {
+        if (roleNames == null || roleNames.length == 0) {
+            return null;
+        }
+
+        for (String roleName : roleNames) {
+            Integer roleId = findRoleIdByRoleName(roleName);
+            if (roleId != null) {
+                return roleId;
+            }
+        }
+        return null;
+    }
+
     public int insertStaff(String fullName, String email, String passwordHash, int roleId) throws SQLException {
         String sql = "INSERT INTO staff(full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();

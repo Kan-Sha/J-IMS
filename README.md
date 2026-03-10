@@ -27,6 +27,9 @@ src/main/java/com/jims/backend/
 - `POST /api/auth/logout` (AUT-04)
 - `POST /api/students` (STU-01: Create student profile)
 
+> Login success now returns `redirect: "/AUT01/aut01.html"` and sets cookie `JIMS_TOKEN`.
+> This cookie can then be used by AUT-01 (create staff), STU-01 (create student), and AUT-04 (logout).
+
 ## 1) Prerequisites
 
 - JDK 8 installed (`java -version`)

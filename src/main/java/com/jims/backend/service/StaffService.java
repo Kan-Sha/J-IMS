@@ -22,7 +22,7 @@ public class StaffService {
 
     public ApiResult createStaff(String requesterRole, String fullName, String email, String role) {
         try {
-            if (!"Admin".equalsIgnoreCase(trim(requesterRole))) {
+            if (!isAdminRole(requesterRole)) {
                 return new ApiResult(false, Collections.emptyMap(), "Bạn không có quyền tạo tài khoản!", 403);
             }
 
@@ -40,12 +40,12 @@ public class StaffService {
                 return new ApiResult(false, Collections.emptyMap(), "Email này đã tồn tại!", 409);
             }
 
-            Integer roleId = staffRepository.findRoleIdByRoleName(mapRoleName(role));
+            Integer roleId = resolveRoleId(role);
             if (roleId == null) {
                 return new ApiResult(false, Collections.emptyMap(), "Chức vụ không hợp lệ!", 400);
             }
 
-            int inserted = staffRepository.insertStaff(fullName.trim(), email, PasswordUtil.sha256(DEFAULT_PASSWORD), roleId);
+            int inserted = staffRepository.insertStaff(fullName.trim(), email, PasswordUtil.sha256(DEFAULT_PASSWORD), roleId.intValue());
             if (inserted > 0) {
                 Map<String, Object> data = new HashMap<String, Object>();
                 data.put("defaultPassword", DEFAULT_PASSWORD);
@@ -58,18 +58,24 @@ public class StaffService {
         }
     }
 
-    private String mapRoleName(String role) {
+    private Integer resolveRoleId(String role) throws SQLException {
         String normalized = trim(role);
+
         if ("Teacher".equalsIgnoreCase(normalized) || "Giáo viên".equalsIgnoreCase(normalized)) {
-            return "Giáo viên";
+            return staffRepository.findRoleIdByAnyRoleNames(new String[]{"Teacher", "Giáo viên"});
         }
         if ("TA".equalsIgnoreCase(normalized) || "Trợ giảng".equalsIgnoreCase(normalized)) {
-            return "Trợ giảng";
+            return staffRepository.findRoleIdByAnyRoleNames(new String[]{"TA", "Trợ giảng"});
         }
         if ("Admin".equalsIgnoreCase(normalized)) {
-            return "Admin";
+            return staffRepository.findRoleIdByRoleName("Admin");
         }
-        return normalized;
+
+        return staffRepository.findRoleIdByRoleName(normalized);
+    }
+
+    private boolean isAdminRole(String role) {
+        return "Admin".equalsIgnoreCase(trim(role));
     }
 
     private boolean isBlank(String value) {

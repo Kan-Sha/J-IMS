@@ -43,7 +43,7 @@ public class AuthService {
             data.put("staffId", staff.getStaffId());
             data.put("name", staff.getFullName());
             data.put("role", role);
-            data.put("redirect", redirectByRole(role));
+            data.put("redirect", "/AUT01/aut01.html");
             data.put("token", token);
 
             return new ApiResult(true, data, "Login successful", 200);
@@ -57,21 +57,11 @@ public class AuthService {
         return new ApiResult(true, Collections.emptyMap(), "Logout successful", 200);
     }
 
-    private String redirectByRole(String role) {
-        if ("Admin".equals(role)) {
-            return "/admin/dashboard";
-        }
-        if ("Teacher".equals(role)) {
-            return "/teacher/dashboard";
-        }
-        return "/ta/dashboard";
-    }
-
     private String normalizeRole(String roleName) {
-        if ("Giáo viên".equalsIgnoreCase(roleName)) {
+        if ("Teacher".equalsIgnoreCase(roleName) || "Giáo viên".equalsIgnoreCase(roleName)) {
             return "Teacher";
         }
-        if ("Trợ giảng".equalsIgnoreCase(roleName)) {
+        if ("TA".equalsIgnoreCase(roleName) || "Trợ giảng".equalsIgnoreCase(roleName)) {
             return "TA";
         }
         return "Admin";
