@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const message = payload && payload.message ? payload.message : 'Đăng nhập thất bại!';
 
       if (!success) {
+        hienLoiInput(khungEmail, loiEmail, '');
         hienLoiInput(khungMatKhau, loiMatKhau, message);
         showThongBao('error', message);
         return;
