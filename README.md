@@ -83,6 +83,14 @@ When you set Mysql user is "root" and password is "123456", the backend will be:
 - **DB password**: `123456`
 - **Port**: `8080`
 
+which means:
+```powershell
+$env:JIMS_DB_URL = "jdbc:mysql://localhost:3306/jims?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+$env:JIMS_DB_USER = "root"
+$env:JIMS_DB_PASSWORD = "123456"
+$env:JIMS_PORT = "8080"
+```
+
 
 macOS / Linux (bash):
 
@@ -92,24 +100,11 @@ export JIMS_DB_USER='root'
 export JIMS_DB_PASSWORD='your_password'
 export JIMS_PORT='8080'
 ```
-
-#### Option B — Set persistently (run once per machine/user)
-
-Windows PowerShell:
-
-```powershell
-# run once (persists for future terminals)
-setx JIMS_DB_URL "jdbc:mysql://localhost:3306/jims?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-setx JIMS_DB_USER "root"
-setx JIMS_DB_PASSWORD "your_password"
-setx JIMS_PORT "8080"
-```
-
-Note: after `setx`, you must open a **new** terminal for the variables to appear.
+ the variables to appear.
 
 ## Run the application (every time)
 
-### Option A: Maven (recommended)
+### Use Maven 
 
 ```bash
 # run any time you want to start the backend
@@ -119,66 +114,3 @@ mvn exec:java
 
 Server starts at `http://localhost:8080` by default.
 
-### Option B: Plain `javac/java` (advanced)
-
-Use Maven unless you have a specific reason not to.
-
-## API endpoints (implemented)
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `POST /api/staff` (create staff)
-- `POST /api/students` (create student)
-- `GET /api/classes` (list classes)
-
-## CORS
-- **Allowed origin**: `http://127.0.0.1:5501`
-
-## API response format
-
-```json
-{
-  "success": true,
-  "data": {},
-  "message": ""
-}
-```
-
-
-
-
-## Quick test (curl)
-
-### Login
-
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@gmail.com","password":"123456"}'
-```
-
-### Create staff (Admin)
-
-```bash
-curl -X POST http://localhost:8080/api/staff \
-  -H "Content-Type: application/json" \
-  -H "X-Staff-Role: Admin" \
-  -d '{"fullName":"Nguyen Van A","email":"example@gmail.com","role":"Teacher"}'
-```
-
-### Create student
-
-```bash
-curl -X POST http://localhost:8080/api/students \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName":"Van",
-    "lastName":"Nguyen",
-    "dob":"2008-10-12",
-    "gender":"Male",
-    "parentName":"Nguyen Thi B",
-    "phone":"0912345678",
-    "email":"abc@gmail.com",
-    "address":"Ha Noi",
-    "classId":2
-  }'
-```

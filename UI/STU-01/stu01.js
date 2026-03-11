@@ -75,19 +75,17 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error('Không thể tải danh sách lớp');
       }
 
-      const lopConCho = classes.filter(l => (l.currentSize || 0) < (l.capacity || 0));
-      if (lopConCho.length === 0) {
+      if (classes.length === 0) {
         const opt = document.createElement('option');
         opt.value = '';
         opt.textContent = 'Không có lớp nào còn chỗ';
         opt.disabled = true;
         inputLop.appendChild(opt);
       } else {
-        lopConCho.forEach(l => {
-          const conLai = (l.capacity || 0) - (l.currentSize || 0);
+        classes.forEach(l => {
           const opt = document.createElement('option');
           opt.value = String(l.classId);
-          opt.textContent = `${l.className} (còn ${conLai})`;
+          opt.textContent = String(l.className || '');
           inputLop.appendChild(opt);
         });
       }

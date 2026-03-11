@@ -37,7 +37,7 @@ public class ClassRepository {
     }
 
     public List<Map<String, Object>> listClasses() throws SQLException {
-        String sql = "SELECT class_id, class_name, capacity, current_size FROM classes ORDER BY class_name ASC";
+        String sql = "SELECT class_id, class_name FROM classes WHERE capacity > current_size ORDER BY class_name ASC";
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -46,8 +46,6 @@ public class ClassRepository {
                 Map<String, Object> row = new LinkedHashMap<String, Object>();
                 row.put("classId", rs.getInt("class_id"));
                 row.put("className", rs.getString("class_name"));
-                row.put("capacity", rs.getInt("capacity"));
-                row.put("currentSize", rs.getInt("current_size"));
                 result.add(row);
             }
         }
