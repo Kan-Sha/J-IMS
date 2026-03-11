@@ -37,6 +37,15 @@ CREATE TABLE classes (
     current_size INT DEFAULT 0
 );
 
+
+INSERT INTO classes (class_name, capacity, current_size)
+VALUES
+('6A', 30, 30),
+('6B', 25, 10),
+('7A', 40, 5),
+('7B', 30, 15),
+('8C', 20, 2);
+
 CREATE TABLE learning_status (
     status_id INT AUTO_INCREMENT PRIMARY KEY,
     status_name VARCHAR(30) NOT NULL UNIQUE
