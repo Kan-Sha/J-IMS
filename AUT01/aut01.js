@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const inputHoTen    = document.getElementById('ho-ten');
   const inputEmail    = document.getElementById('email');
   const inputMatKhau  = document.getElementById('mat-khau');
+  inputMatKhau.value = 'JoyEnglish@123';
   const inputChucVu   = document.getElementById('chuc-vu');
 
   const khungHoTen    = document.getElementById('khung-ho-ten');
@@ -106,29 +107,10 @@ document.addEventListener('DOMContentLoaded', function () {
     capNhatNutLuu();
   });
 
-  nutToggleMK.addEventListener('click', function () {
-    dangHienMatKhau = !dangHienMatKhau;
-    if (dangHienMatKhau) {
-      inputMatKhau.type = 'text';
-      iconMat.innerHTML = `
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      `;
-    } else {
-      inputMatKhau.type = 'password';
-      iconMat.innerHTML = `
-        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-        <line x1="1" y1="1" x2="23" y2="23"/>
-      `;
-    }
-  });
-
-
   nutHuy.addEventListener('click', function () {
     inputHoTen.value   = '';
     inputEmail.value   = '';
-    inputMatKhau.value = '';
+    inputMatKhau.value = 'JoyEnglish@123';
     inputChucVu.value  = '';
 
     selectHienThi.textContent = '-- Chọn chức vụ --';
@@ -138,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungEmail,   loiEmail);
     xoaLoi(khungMatKhau, loiMatKhau);
     xoaLoi(khungChucVu,  loiChucVu);
+    xoaLoi(khungHoTenPH, loiHoTenPH);
 
     iconTickEmail.classList.remove('hien');
     nutLuu.classList.remove('bi-vo-hieu');
@@ -292,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       inputHoTen.value = '';
       inputEmail.value = '';
-      inputMatKhau.value = '';
+      inputMatKhau.value = 'JoyEnglish@123';
       inputChucVu.value = '';
       selectHienThi.textContent = '-- Chọn chức vụ --';
       selectHienThi.classList.remove('co-gia-tri');

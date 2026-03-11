@@ -229,12 +229,11 @@ body {
   color: #b0b8c4;
 }
 
-/* Mã học viên readonly */
 .ma-hv-khung {
-  background: #f9fafb;
+  background: #ffffff;
 }
 .ma-hv-khung .o-nhap {
-  color: var(--mau-chu-phu);
+  color: var(--mau-chu);
 }
 .khung-select {
   display: flex;
