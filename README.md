@@ -72,7 +72,7 @@ which means:
 ```powershell
 $env:JIMS_DB_URL = "jdbc:mysql://localhost:3306/jims?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
 $env:JIMS_DB_USER = "root"
-$env:JIMS_DB_PASSWORD = "123456 "
+$env:JIMS_DB_PASSWORD = "123456"
 $env:JIMS_PORT = "8080"
 ```
 
