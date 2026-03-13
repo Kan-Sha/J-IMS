@@ -15,6 +15,10 @@ public final class ResponseUtil {
     public static void sendJson(HttpExchange exchange, int statusCode, boolean success, Object data, String message) throws IOException {
         CorsUtil.addCorsHeaders(exchange);
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+        // Ngăn bộ nhớ đệm trên các phản hồi API (đặc biệt là các trang bảo vệ phiên)
+        exchange.getResponseHeaders().set("Cache-Control", "no-store, no-cache, must-revalidate");
+        exchange.getResponseHeaders().set("Pragma", "no-cache");
+        exchange.getResponseHeaders().set("Expires", "0");
 
         Map<String, Object> payload = new LinkedHashMap<String, Object>();
         payload.put("success", success);

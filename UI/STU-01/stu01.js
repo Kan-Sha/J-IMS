@@ -7,6 +7,37 @@ document.addEventListener('DOMContentLoaded', function () {
     if (token) base.Authorization = `Bearer ${token}`;
     return base;
   }
+  async function kiemTraSessionVaQuyenStu01() {
+    try {
+      const token = localStorage.getItem('JIMS_TOKEN');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE}/api/auth/session`, {
+        method: 'GET',
+        credentials: 'include',
+        headers
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || !payload || !payload.success) {
+        localStorage.removeItem('JIMS_TOKEN');
+        window.location.href = '../AUT-02/aut02.html';
+        return null;
+      }
+      const data = payload.data || {};
+      const role = data.role ? String(data.role) : null;
+      if (role && role.toLowerCase() !== 'admin') {
+        window.location.href = '../STU-03/stu03.html';
+        return null;
+      }
+      return role;
+    } catch (e) {
+      localStorage.removeItem('JIMS_TOKEN');
+      window.location.href = '../AUT-02/aut02.html';
+      return null;
+    }
+  }
+
+  kiemTraSessionVaQuyenStu01();
+
   const inputHo       = document.getElementById('ho');
   const inputTen      = document.getElementById('ten');
   const inputNgaySinh = document.getElementById('ngay-sinh');

@@ -130,8 +130,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const message = payload && payload.message ? payload.message : 'Đăng nhập thất bại!';
 
       if (!success) {
-        hienLoiInput(khungEmail, loiEmail, '');
-        hienLoiInput(khungMatKhau, loiMatKhau, message);
+        // Chỉ hiển thị thông báo lỗi chung phía trên, đánh dấu khung nhập màu đỏ
+        khungEmail.classList.add('loi-input');
+        khungMatKhau.classList.add('loi-input');
         showThongBao('error', message);
         return;
       }
@@ -145,11 +146,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const redirect = payload && payload.data && payload.data.redirect ? payload.data.redirect : null;
       if (redirect) {
-        const normalized = redirect
+        let target = redirect;
+        // Giữ tương thích với các giá trị cũ nếu còn
+        target = target
           .replace(/^\/AUT01\//, '/UI/AUT-01/')
           .replace(/^\/AUT02\//, '/UI/AUT-02/')
           .replace(/^\/STU01-03\//, '/UI/STU-01/');
-        window.location.href = normalized;
+        window.location.href = target;
       }
     } catch (err) {
       showThongBao('error', 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.');

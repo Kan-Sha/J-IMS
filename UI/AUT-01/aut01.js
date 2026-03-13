@@ -29,10 +29,42 @@ document.addEventListener('DOMContentLoaded', function () {
   const popupDXNutXacNhan = document.getElementById('popup-dx-xac-nhan');
 
   let dangHienMatKhau = false;
+  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
   const API_BASE = (() => {
     const host = window.location && window.location.hostname ? window.location.hostname : '127.0.0.1';
     return `${window.location.protocol}//${host}:8080`;
   })();
+
+  async function kiemTraSessionVaQuyenAut01() {
+    try {
+      const token = localStorage.getItem('JIMS_TOKEN');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE}/api/auth/session`, {
+        method: 'GET',
+        credentials: 'include',
+        headers
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || !payload || !payload.success) {
+        localStorage.removeItem('JIMS_TOKEN');
+        window.location.href = '../AUT-02/aut02.html';
+        return null;
+      }
+      const data = payload.data || {};
+      const role = data.role ? String(data.role) : null;
+      if (role && role.toLowerCase() !== 'admin') {
+        window.location.href = '../STU-03/stu03.html';
+        return null;
+      }
+      return role;
+    } catch (e) {
+      localStorage.removeItem('JIMS_TOKEN');
+      window.location.href = '../AUT-02/aut02.html';
+      return null;
+    }
+  }
+
+  kiemTraSessionVaQuyenAut01();
 
   const danhSachEmailTonTai = [
     'admin@gmail.com',
@@ -100,8 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungEmail, loiEmail);
     iconTickEmail.classList.remove('hien');
 
-    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (regexEmail.test(this.value.trim())) {
+    if (EMAIL_REGEX_COM.test(this.value.trim())) {
       iconTickEmail.classList.add('hien');
     }
     capNhatNutLuu();
@@ -150,10 +181,12 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
+    const emailHopLe = EMAIL_REGEX_COM.test(email);
+
     if (!email) {
       hienLoi(khungEmail, loiEmail, 'Mục này không được để trống!');
       coLoi = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!emailHopLe) {
       hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       coLoi = true;
     } else if (danhSachEmailTonTai.includes(email.toLowerCase())) {
@@ -175,6 +208,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (coLoi) {
       nutLuu.classList.add('bi-vo-hieu');
+      return;
+    }
+
+    // Lớp bảo vệ cuối cùng: không gọi API nếu email không đúng dạng username@provider.com
+    if (!EMAIL_REGEX_COM.test(email)) {
+      hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
+      capNhatNutLuu();
       return;
     }
 

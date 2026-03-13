@@ -8,6 +8,48 @@ document.addEventListener('DOMContentLoaded', function () {
     return base;
   }
 
+  async function kiemTraSessionVaTuyChinhUI() {
+    try {
+      const token = localStorage.getItem('JIMS_TOKEN');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE}/api/auth/session`, {
+        method: 'GET',
+        credentials: 'include',
+        headers
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || !payload || !payload.success) {
+        localStorage.removeItem('JIMS_TOKEN');
+        window.location.href = '../AUT-02/aut02.html';
+        return null;
+      }
+      const data = payload.data || {};
+      const role = data.role ? String(data.role) : null;
+
+      // Ẩn các tính năng chỉ dành cho Admin khi là Giáo viên hoặc Trợ giảng
+      if (role && role.toLowerCase() !== 'admin') {
+        const linkThemHocSinh = document.querySelector('.sub-menu a[href="../STU-01/stu01.html"]');
+        if (linkThemHocSinh) linkThemHocSinh.style.display = 'none';
+        const subMenuItems = document.querySelectorAll('.sub-menu .sub-menu-item');
+        subMenuItems.forEach(function (item) {
+          if (item.textContent && item.textContent.indexOf('Cập nhật thông tin học sinh') !== -1) {
+            item.style.display = 'none';
+          }
+        });
+        const sidebarNhanVien = document.querySelector('.sidebar-menu a[title="Nhân viên"]');
+        if (sidebarNhanVien) sidebarNhanVien.style.display = 'none';
+      }
+
+      return role;
+    } catch (e) {
+      localStorage.removeItem('JIMS_TOKEN');
+      window.location.href = '../AUT-02/aut02.html';
+      return null;
+    }
+  }
+
+  kiemTraSessionVaTuyChinhUI();
+
   let danhSachHocSinh = [];
   let danhSachLop = [];
   let danhSachTrangThai = [];

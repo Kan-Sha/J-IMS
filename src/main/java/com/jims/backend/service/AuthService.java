@@ -43,7 +43,12 @@ public class AuthService {
             data.put("staffId", staff.getStaffId());
             data.put("name", staff.getFullName());
             data.put("role", role);
-            data.put("redirect", "/UI/AUT-01/aut01.html");
+            // Điều hướng dựa trên vai trò sau khi đăng nhập
+            if ("Admin".equalsIgnoreCase(role)) {
+                data.put("redirect", "/UI/AUT-01/aut01.html");
+            } else {
+                data.put("redirect", "/UI/STU-03/stu03.html");
+            }
             data.put("token", token);
 
             return new ApiResult(true, data, "Login successful", 200);
@@ -55,6 +60,18 @@ public class AuthService {
     public ApiResult logout(String token) {
         SessionManager.removeSession(token);
         return new ApiResult(true, Collections.emptyMap(), "Logout successful", 200);
+    }
+
+    public ApiResult sessionInfo(String token) {
+        SessionManager.SessionData session = SessionManager.getSession(token);
+        if (session == null) {
+            return new ApiResult(false, Collections.emptyMap(), "Bạn chưa đăng nhập!", 401);
+        }
+
+        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("staffId", Integer.valueOf(session.getStaffId()));
+        data.put("role", session.getRole());
+        return new ApiResult(true, data, "Session active", 200);
     }
 
     private String normalizeRole(String roleName) {

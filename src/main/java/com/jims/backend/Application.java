@@ -48,6 +48,7 @@ public class Application {
         server.createContext("/api/staff", staffController.createStaffHandler());
         server.createContext("/api/auth/login", authController.loginHandler());
         server.createContext("/api/auth/logout", authController.logoutHandler());
+        server.createContext("/api/auth/session", authController.sessionHandler());
         server.createContext("/api/students", studentController.createStudentHandler());
         server.createContext("/api/students/next-id", studentController.nextStudentIdHandler());
         server.createContext("/api/classes", classController.listClassesHandler());

@@ -325,3 +325,10 @@ body {
 .khung-input.loi-input .o-nhap {
   color: #e03131;
 }
+
+/* Ẩn nút hiện mật khẩu mặc định của Microsoft Edge,
+   chỉ giữ lại icon tuỳ chỉnh trong giao diện */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
