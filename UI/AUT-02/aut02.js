@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let dangHienMatKhau = false;
   const API_BASE = 'http://127.0.0.1:8080';
+  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
 
 
   function hienLoiInput(khung, loiEl, noiDung) {
@@ -100,9 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!email) {
       hienLoiInput(khungEmail, loiEmail, 'Mục này không được để trống!');
       coLoi = true;
-    }
-    
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!EMAIL_REGEX_COM.test(email)) {
       hienLoiInput(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       coLoi = true;
     }
@@ -112,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
       coLoi = true;
     }
 
-    if (coLoi) return;
+    if (coLoi) return; // chặn hoàn toàn việc gọi API khi email không hợp lệ
 
     nutDangNhap.textContent = 'Đang xử lý...';
     nutDangNhap.disabled    = true;
