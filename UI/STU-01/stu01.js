@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function () {
       anIcon(iconEmail);
       coLoi = true;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      hienLoi(khungEmail, loiEmail, 'Sai định dạng email!');
+      hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       hienX(iconEmail);
       coLoi = true;
     }
