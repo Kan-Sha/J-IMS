@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungEmail, loiEmail);
     anIcon(iconEmail);
     const val = this.value.trim();
-    if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) hienTick(iconEmail);
+    if (val && /^[^\s@]+@[^\s@]+\.com$/.test(val)) hienTick(iconEmail);
     capNhatNutLuu();
   });
 
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
       hienLoi(khungEmail, loiEmail, 'Mục này không được để trống!');
       anIcon(iconEmail);
       coLoi = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.com$/.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       hienX(iconEmail);
       coLoi = true;
