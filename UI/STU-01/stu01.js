@@ -423,9 +423,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (coLoi) {
       // Hiển thị popup chi tiết cho các lỗi quan trọng nhưng không vô hiệu hoá vĩnh viễn nút Lưu
-      if (!hoTenPH) {
-        hienPopup('Họ tên phụ huynh không được để trống!');
-      } else if (!lopIdRaw) {
+      if (!lopIdRaw) {
         hienPopup('Vui lòng chọn lớp hợp lệ!');
       }
       return;
