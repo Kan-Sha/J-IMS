@@ -65,7 +65,7 @@ CREATE TABLE students (
     phone VARCHAR(15) NOT NULL,
     email VARCHAR(100),
     address VARCHAR(255),
-    class_id INT NOT NULL,
+    class_id INT NULL,
     status_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (class_id) REFERENCES classes(class_id),

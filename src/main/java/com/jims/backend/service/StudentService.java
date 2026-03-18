@@ -39,7 +39,7 @@ public class StudentService {
                                    Integer classId) {
         try {
             if (isBlank(firstName) || isBlank(lastName) || isBlank(dob) || isBlank(gender)
-                    || isBlank(parentName) || isBlank(phone) || classId == null) {
+                    || isBlank(parentName) || isBlank(phone)) {
                 return new ApiResult(false, Collections.emptyMap(), "Mục này không được để trống!", 400);
             }
 
@@ -61,10 +61,6 @@ public class StudentService {
                 return new ApiResult(false, Collections.emptyMap(), "Học sinh đã tồn tại!", 409);
             }
 
-            if (!classRepository.isClassAvailable(classId.intValue())) {
-                return new ApiResult(false, Collections.emptyMap(), "Lớp đã đầy", 409);
-            }
-
             String yearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
             String latest = studentRepository.findLatestStudentIdByMonth(yearMonth);
             String studentCode = StudentIdGenerator.generate(latest);
@@ -79,14 +75,13 @@ public class StudentService {
             student.setPhone(phone.trim());
             student.setEmail(isBlank(email) ? null : email.trim());
             student.setAddress(isBlank(address) ? null : address.trim());
-            student.setClassId(classId.intValue());
+            student.setClassId(classId);
 
             Connection conn = studentRepository.getConnection();
             try {
                 conn.setAutoCommit(false);
                 boolean inserted = studentRepository.insertStudent(conn, student);
-                boolean classUpdated = classRepository.incrementClassSize(conn, classId.intValue());
-                if (inserted && classUpdated) {
+                if (inserted) {
                     conn.commit();
                     Map<String, Object> data = new HashMap<String, Object>();
                     data.put("studentId", studentCode);

@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const inputGioiTinh = document.getElementById('gioi-tinh');
   const inputHoTenPH  = document.getElementById('ho-ten-ph');
   const inputMaHV     = document.getElementById('ma-hv');
-  const inputLop      = document.getElementById('lop');
   const inputEmail    = document.getElementById('email');
   const inputSdt      = document.getElementById('sdt');
   const inputDiaChi   = document.getElementById('dia-chi');
@@ -85,58 +84,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   taoSelectHienThi(document.getElementById('khung-gioi-tinh'), inputGioiTinh);
-
-  let lopSelectSpan = null;
-
-  async function taiDanhSachLop() {
-    inputLop.innerHTML = '';
-    try {
-      const res = await fetch(`${API_BASE}/api/classes`, {
-        credentials: 'include',
-        headers: authHeaders()
-      });
-      if (res.status === 401) {
-        window.location.href = '../AUT-02/aut02.html';
-        return;
-      }
-      const payload = await res.json().catch(() => null);
-      const classes = payload && payload.success && Array.isArray(payload.data) ? payload.data : null;
-
-      if (!classes) {
-        throw new Error('Không thể tải danh sách lớp');
-      }
-
-      if (classes.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Không có lớp nào còn chỗ';
-        opt.disabled = true;
-        inputLop.appendChild(opt);
-      } else {
-        classes.forEach(l => {
-          const opt = document.createElement('option');
-          opt.value = String(l.classId);
-          opt.textContent = String(l.className || '');
-          inputLop.appendChild(opt);
-        });
-      }
-    } catch (e) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = 'Không thể tải danh sách lớp';
-      opt.disabled = true;
-      inputLop.appendChild(opt);
-    } finally {
-      if (lopSelectSpan) {
-        // keep current span, just trigger text refresh
-        inputLop.dispatchEvent(new Event('change'));
-      } else {
-        lopSelectSpan = taoSelectHienThi(document.getElementById('khung-lop'), inputLop);
-      }
-    }
-  }
-
-  taiDanhSachLop();
   function computeNextStudentIdFromLatest(latestId) {
     const now = new Date();
     const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -285,11 +232,13 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungNgaySinh, loiNgaySinh);
     capNhatNutLuu();
   });
+  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
+
   inputEmail.addEventListener('input', function () {
     xoaLoi(khungEmail, loiEmail);
     anIcon(iconEmail);
     const val = this.value.trim();
-    if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) hienTick(iconEmail);
+    if (val && EMAIL_REGEX_COM.test(val)) hienTick(iconEmail);
     capNhatNutLuu();
   });
 
@@ -353,7 +302,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const ngaySinh = inputNgaySinh.value.trim();
     const gioiTinh = inputGioiTinh.value;
     const hoTenPH  = inputHoTenPH.value.trim();
-    const lopIdRaw = inputLop.value;
     const email    = inputEmail.value.trim();
     const sdt      = inputSdt.value.trim();
     const diaChi   = inputDiaChi.value.trim();
@@ -388,15 +336,11 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
-    if (!lopIdRaw) {
-      coLoi = true;
-    }
-
     if (!email) {
       hienLoi(khungEmail, loiEmail, 'Mục này không được để trống!');
       anIcon(iconEmail);
       coLoi = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!EMAIL_REGEX_COM.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Sai định dạng email!');
       hienX(iconEmail);
       coLoi = true;
@@ -418,8 +362,6 @@ document.addEventListener('DOMContentLoaded', function () {
       nutLuu.classList.add('bi-vo-hieu');
       if (!hoTenPH) {
         hienPopup('Họ tên phụ huynh không được để trống!');
-      } else if (!lopIdRaw) {
-        hienPopup('Vui lòng chọn lớp hợp lệ!');
       }
       return;
     }
@@ -446,8 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
         parentName: hoTenPH,
         phone: sdt,
         email: email || null,
-        address: diaChi || null,
-        classId: parseInt(lopIdRaw, 10)
+        address: diaChi || null
       })
     })
       .then(res => res.json().catch(() => null).then(payload => ({ res, payload })))
@@ -481,8 +422,6 @@ document.addEventListener('DOMContentLoaded', function () {
         anIcon(iconEmail);
         anIcon(iconSdt);
         nutLuu.classList.remove('bi-vo-hieu');
-
-        taiDanhSachLop();
         hienPopup(studentId ? `Thêm học sinh thành công! Mã: ${studentId}` : 'Thêm học sinh thành công!');
       })
       .catch(() => {

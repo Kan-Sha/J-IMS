@@ -12,7 +12,7 @@ public class Student {
     private String phone;
     private String email;
     private String address;
-    private int classId;
+    private Integer classId;
 
     public String getStudentId() {
         return studentId;
@@ -86,11 +86,11 @@ public class Student {
         this.address = address;
     }
 
-    public int getClassId() {
+    public Integer getClassId() {
         return classId;
     }
 
-    public void setClassId(int classId) {
+    public void setClassId(Integer classId) {
         this.classId = classId;
     }
 }

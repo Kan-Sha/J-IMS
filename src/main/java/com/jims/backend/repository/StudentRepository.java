@@ -57,7 +57,11 @@ public class StudentRepository {
             stmt.setString(7, student.getPhone());
             stmt.setString(8, student.getEmail());
             stmt.setString(9, student.getAddress());
-            stmt.setInt(10, student.getClassId());
+            if (student.getClassId() == null) {
+                stmt.setNull(10, java.sql.Types.INTEGER);
+            } else {
+                stmt.setInt(10, student.getClassId().intValue());
+            }
             return stmt.executeUpdate() > 0;
         }
     }
@@ -70,7 +74,7 @@ public class StudentRepository {
         String sql = "SELECT s.student_id, s.first_name, s.last_name, s.date_of_birth, s.gender, s.class_id, " +
                 "c.class_name, s.status_id, COALESCE(ls.status_name, '') AS status_name " +
                 "FROM students s " +
-                "JOIN classes c ON s.class_id = c.class_id " +
+                "LEFT JOIN classes c ON s.class_id = c.class_id " +
                 "LEFT JOIN learning_status ls ON s.status_id = ls.status_id " +
                 "ORDER BY s.created_at DESC, s.student_id DESC";
 
@@ -86,7 +90,8 @@ public class StudentRepository {
                 row.put("fullName", (rs.getString("first_name") + " " + rs.getString("last_name")).trim());
                 row.put("dob", rs.getDate("date_of_birth").toString());
                 row.put("gender", rs.getString("gender"));
-                row.put("classId", rs.getInt("class_id"));
+                Object classId = rs.getObject("class_id");
+                row.put("classId", classId == null ? null : ((Number) classId).intValue());
                 row.put("className", rs.getString("class_name"));
                 Object statusId = rs.getObject("status_id");
                 row.put("statusId", statusId == null ? null : ((Number) statusId).intValue());
