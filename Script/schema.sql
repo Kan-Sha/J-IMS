@@ -70,7 +70,7 @@ CREATE TABLE students (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (class_id) REFERENCES classes(class_id),
     FOREIGN KEY (status_id) REFERENCES learning_status(status_id),
-    UNIQUE(first_name, last_name, date_of_birth)
+    UNIQUE(first_name, last_name, date_of_birth, phone)
 );
 
 

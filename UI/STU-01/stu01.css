@@ -308,12 +308,14 @@ body {
   font-size: 12px;
   color: var(--mau-loi);
   margin-top: 6px;
-  display: none;
+  display: block;
+  min-height: 16px;
+  visibility: hidden;
   font-style: italic;
 }
 
 .loi-text.hien {
-  display: block;
+  visibility: visible;
 }
 
 .khung-input.loi-input,

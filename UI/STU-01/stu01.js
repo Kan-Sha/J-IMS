@@ -51,12 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
   const khungHo       = document.getElementById('khung-ho');
   const khungTen      = document.getElementById('khung-ten');
   const khungNgaySinh = document.getElementById('khung-ngay-sinh');
+  const khungHoTenPH  = document.getElementById('khung-ho-ten-ph');
   const khungEmail    = document.getElementById('khung-email');
   const khungSdt      = document.getElementById('khung-sdt');
   const khungDiaChi   = document.getElementById('khung-dia-chi');
 
   const loiHoTen    = document.getElementById('loi-ho-ten');
   const loiNgaySinh = document.getElementById('loi-ngay-sinh');
+  const loiHoTenPH  = document.getElementById('loi-ho-ten-ph');
   const loiEmail    = document.getElementById('loi-email');
   const loiSdt      = document.getElementById('loi-sdt');
   const loiDiaChi   = document.getElementById('loi-dia-chi');
@@ -148,11 +150,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function capNhatNutLuu() {
-    const conLoi = document.querySelector('.loi-text.hien');
-    nutLuu.classList.toggle('bi-vo-hieu', !!conLoi);
-  }
-
   function kiemTraHoTen(ho, ten) {
     if (!ho || !ten) return { loiHo: !ho, loiTen: !ten, msg: 'Mục này không được để trống!' };
     const full = (ho + ' ' + ten).trim();
@@ -211,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function () {
       loiHoTen.textContent = '';
       loiHoTen.classList.remove('hien');
     }
-    capNhatNutLuu();
   });
 
   inputTen.addEventListener('input', function () {
@@ -220,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function () {
       loiHoTen.textContent = '';
       loiHoTen.classList.remove('hien');
     }
-    capNhatNutLuu();
   });
 
   inputNgaySinh.addEventListener('input', function () {
@@ -230,16 +225,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (val.length > 10) val = val.slice(0, 10);
     this.value = val;
     xoaLoi(khungNgaySinh, loiNgaySinh);
-    capNhatNutLuu();
   });
   const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
+
+  inputHoTenPH.addEventListener('input', function () {
+    xoaLoi(khungHoTenPH, loiHoTenPH);
+  });
 
   inputEmail.addEventListener('input', function () {
     xoaLoi(khungEmail, loiEmail);
     anIcon(iconEmail);
     const val = this.value.trim();
     if (val && EMAIL_REGEX_COM.test(val)) hienTick(iconEmail);
-    capNhatNutLuu();
   });
 
   inputSdt.addEventListener('input', function () {
@@ -247,12 +244,10 @@ document.addEventListener('DOMContentLoaded', function () {
     anIcon(iconSdt);
     const val = this.value.trim();
     if (val && !kiemTraSdt(val)) hienTick(iconSdt);
-    capNhatNutLuu();
   });
 
   inputDiaChi.addEventListener('input', function () {
     xoaLoi(khungDiaChi, loiDiaChi);
-    capNhatNutLuu();
   });
 
   function hienPopup(noiDung) {
@@ -282,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungHo,       null);
     xoaLoi(khungTen,      null);
     xoaLoi(khungNgaySinh, loiNgaySinh);
+    xoaLoi(khungHoTenPH,  loiHoTenPH);
     xoaLoi(khungEmail,    loiEmail);
     xoaLoi(khungSdt,      loiSdt);
     xoaLoi(khungDiaChi,   loiDiaChi);
@@ -291,12 +287,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     anIcon(iconEmail);
     anIcon(iconSdt);
-    nutLuu.classList.remove('bi-vo-hieu');
   });
 
   nutLuu.addEventListener('click', function () {
-    if (nutLuu.classList.contains('bi-vo-hieu')) return;
-
     const ho       = inputHo.value.trim();
     const ten      = inputTen.value.trim();
     const ngaySinh = inputNgaySinh.value.trim();
@@ -308,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungHo,       null);
     xoaLoi(khungTen,      null);
     xoaLoi(khungNgaySinh, loiNgaySinh);
+    xoaLoi(khungHoTenPH,  loiHoTenPH);
     xoaLoi(khungEmail,    loiEmail);
     xoaLoi(khungSdt,      loiSdt);
     xoaLoi(khungDiaChi,   loiDiaChi);
@@ -332,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (!hoTenPH) {
-      hienLoi(document.getElementById('khung-ho-ten-ph'), null, '');
+      hienLoi(khungHoTenPH, loiHoTenPH, 'Mục này không được để trống!');
       coLoi = true;
     }
 
@@ -359,17 +353,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (coLoi) {
-      nutLuu.classList.add('bi-vo-hieu');
-      if (!hoTenPH) {
-        hienPopup('Họ tên phụ huynh không được để trống!');
-      }
       return;
     }
 
     const dobIso = doiNgaySinhSangISO(ngaySinh);
     if (!dobIso) {
       hienLoi(khungNgaySinh, loiNgaySinh, 'Định dạng ngày sinh phải là DD/MM/YYYY!');
-      nutLuu.classList.add('bi-vo-hieu');
       return;
     }
 
@@ -421,7 +410,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         anIcon(iconEmail);
         anIcon(iconSdt);
-        nutLuu.classList.remove('bi-vo-hieu');
         hienPopup(studentId ? `Thêm học sinh thành công! Mã: ${studentId}` : 'Thêm học sinh thành công!');
       })
       .catch(() => {

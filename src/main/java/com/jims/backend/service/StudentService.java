@@ -57,8 +57,8 @@ public class StudentService {
             }
 
             Date dateOfBirth = Date.valueOf(LocalDate.parse(dob));
-            if (studentRepository.existsDuplicate(firstName.trim(), lastName.trim(), dateOfBirth)) {
-                return new ApiResult(false, Collections.emptyMap(), "Học sinh đã tồn tại!", 409);
+            if (studentRepository.existsDuplicate(firstName.trim(), lastName.trim(), dateOfBirth, phone.trim())) {
+                return new ApiResult(false, Collections.emptyMap(), "Học sinh này đã tồn tại trong hệ thống.", 409);
             }
 
             String yearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
