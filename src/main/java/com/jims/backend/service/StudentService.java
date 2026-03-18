@@ -48,7 +48,8 @@ public class StudentService {
                 return new ApiResult(false, Collections.emptyMap(), "Họ tên phải từ 8 đến 100 ký tự!", 400);
             }
 
-            if (!PHONE_PATTERN.matcher(phone.trim()).matches()) {
+            String normalizedPhone = phone.trim();
+            if (!PHONE_PATTERN.matcher(normalizedPhone).matches()) {
                 return new ApiResult(false, Collections.emptyMap(), "Số điện thoại không hợp lệ!", 400);
             }
 
@@ -57,8 +58,9 @@ public class StudentService {
             }
 
             Date dateOfBirth = Date.valueOf(LocalDate.parse(dob));
-            if (studentRepository.existsDuplicate(firstName.trim(), lastName.trim(), dateOfBirth)) {
-                return new ApiResult(false, Collections.emptyMap(), "Học sinh đã tồn tại!", 409);
+            // Kiểm tra trùng dựa trên Họ tên đầy đủ + Ngày sinh + Số điện thoại phụ huynh
+            if (studentRepository.existsDuplicate(firstName.trim(), lastName.trim(), dateOfBirth, normalizedPhone)) {
+                return new ApiResult(false, Collections.emptyMap(), "Học sinh này đã tồn tại trong hệ thống.", 409);
             }
 
             if (!classRepository.isClassAvailable(classId.intValue())) {
@@ -76,7 +78,7 @@ public class StudentService {
             student.setDateOfBirth(dateOfBirth);
             student.setGender(gender.trim());
             student.setParentName(parentName.trim());
-            student.setPhone(phone.trim());
+            student.setPhone(normalizedPhone);
             student.setEmail(isBlank(email) ? null : email.trim());
             student.setAddress(isBlank(address) ? null : address.trim());
             student.setClassId(classId.intValue());

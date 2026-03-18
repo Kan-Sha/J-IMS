@@ -15,13 +15,14 @@ import java.util.Map;
 
 public class StudentRepository {
 
-    public boolean existsDuplicate(String firstName, String lastName, Date dob) throws SQLException {
-        String sql = "SELECT 1 FROM students WHERE first_name = ? AND last_name = ? AND date_of_birth = ?";
+    public boolean existsDuplicate(String firstName, String lastName, Date dob, String phone) throws SQLException {
+        String sql = "SELECT 1 FROM students WHERE first_name = ? AND last_name = ? AND date_of_birth = ? AND phone = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, firstName);
             stmt.setString(2, lastName);
             stmt.setDate(3, dob);
+            stmt.setString(4, phone);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next();
             }
