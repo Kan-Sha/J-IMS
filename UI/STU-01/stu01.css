@@ -156,6 +156,7 @@ body {
   font-weight: 600;
 }
 .vung-form {
+  position: relative;
   flex: 1;
   padding: 40px 48px;
   overflow-y: auto;
@@ -400,7 +401,10 @@ body {
 .overlay {
   display: none;
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: calc(var(--rong-sidebar) + var(--rong-sub-sidebar));
   background: rgba(0, 0, 0, 0.35);
   z-index: 100;
 }
@@ -413,7 +417,7 @@ body {
   display: none;
   position: fixed;
   top: 50%;
-  left: 50%;
+  left: calc(var(--rong-sidebar) + var(--rong-sub-sidebar) + (100vw - var(--rong-sidebar) - var(--rong-sub-sidebar)) / 2);
   transform: translate(-50%, -50%);
   background: var(--mau-trang);
   border: 1px solid #8e8edf;
