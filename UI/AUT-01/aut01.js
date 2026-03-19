@@ -30,10 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let dangHienMatKhau = false;
   const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
-  const API_BASE = (() => {
-    const host = window.location && window.location.hostname ? window.location.hostname : '127.0.0.1';
-    return `${window.location.protocol}//${host}:8080`;
-  })();
+  const API_BASE = 'http://127.0.0.1:8080';
 
   async function kiemTraSessionVaQuyenAut01() {
     try {
