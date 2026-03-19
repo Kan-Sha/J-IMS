@@ -242,9 +242,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function xuLyDangXuat() {
     try {
+      const token = localStorage.getItem('JIMS_TOKEN');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       await fetch(`${API_BASE}/api/auth/logout`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers
       }).catch(() => null);
     } finally {
       window.location.href = '../AUT-02/aut02.html';
@@ -284,9 +287,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
       const role = mapChucVuToBackendRole(chucVu);
+      const token = localStorage.getItem('JIMS_TOKEN');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
       const res = await fetch(`${API_BASE}/api/staff`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify({
           fullName: hoTen,
