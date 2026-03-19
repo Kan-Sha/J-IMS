@@ -72,4 +72,23 @@ public class StaffRepository {
             return stmt.executeUpdate();
         }
     }
+
+    public void ensureDefaultRoles() throws SQLException {
+        // Keep this idempotent so the system behaves consistently across environments.
+        // Insert IGNORE relies on UNIQUE(role_name).
+        String sql = "INSERT IGNORE INTO roles(role_name) VALUES " +
+                "('Admin'), " +
+                "('Teacher'), " +
+                "('Assistant'), " +
+                "('TA'), " +
+                "('Giáo viên'), " +
+                "('Trợ giảng'), " +
+                "('Giao vien'), " +
+                "('Tro giang')";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        }
+    }
 }

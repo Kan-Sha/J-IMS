@@ -43,6 +43,12 @@ public class Application {
             System.err.println("Failed to ensure default learning statuses: " + e.getMessage());
         }
 
+        try {
+            staffRepository.ensureDefaultRoles();
+        } catch (Exception e) {
+            System.err.println("Failed to ensure default roles: " + e.getMessage());
+        }
+
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
         server.createContext("/api/staff", staffController.createStaffHandler());

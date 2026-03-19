@@ -1,13 +1,12 @@
 package com.jims.backend.service;
 
 import com.jims.backend.model.Staff;
+import com.jims.backend.model.Role;
 import com.jims.backend.repository.StaffRepository;
 import com.jims.backend.util.PasswordUtil;
 
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public class StaffService {
@@ -60,23 +59,33 @@ public class StaffService {
     }
 
     private Integer resolveRoleId(String role) throws SQLException {
-        String normalized = trim(role);
-
-        if ("Teacher".equalsIgnoreCase(normalized) || "Giáo viên".equalsIgnoreCase(normalized)) {
-            return staffRepository.findRoleIdByAnyRoleNames(new String[]{"Teacher", "Giáo viên"});
-        }
-        if ("TA".equalsIgnoreCase(normalized) || "Trợ giảng".equalsIgnoreCase(normalized)) {
-            return staffRepository.findRoleIdByAnyRoleNames(new String[]{"TA", "Trợ giảng"});
-        }
-        if ("Admin".equalsIgnoreCase(normalized)) {
-            return staffRepository.findRoleIdByRoleName("Admin");
+        Role parsed = Role.fromRequestValue(role);
+        if (parsed == null) {
+            return null;
         }
 
-        return staffRepository.findRoleIdByRoleName(normalized);
+        // Candidates cover common DB seeds that may differ across machines/environments.
+        switch (parsed) {
+            case ADMIN:
+                return staffRepository.findRoleIdByAnyRoleNames(new String[]{"Admin", "ADMIN"});
+            case TEACHER:
+                return staffRepository.findRoleIdByAnyRoleNames(new String[]{
+                        "Teacher", "TEACHER",
+                        "Giáo viên", "Giao vien"
+                });
+            case ASSISTANT:
+                return staffRepository.findRoleIdByAnyRoleNames(new String[]{
+                        "Assistant", "ASSISTANT",
+                        "TA", "Trợ giảng", "Tro giang"
+                });
+            default:
+                return null;
+        }
     }
 
     private boolean isAdminRole(String role) {
-        return "Admin".equalsIgnoreCase(trim(role));
+        Role parsed = Role.fromRequestValue(role);
+        return parsed == Role.ADMIN;
     }
 
     private boolean isBlank(String value) {

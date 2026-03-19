@@ -223,9 +223,10 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function mapChucVuToBackendRole(value) {
-    if (value === 'giao-vien') return 'Giáo viên';
-    if (value === 'tro-giang') return 'Trợ giảng';
-    if (value === 'admin') return 'Admin';
+    // Send standardized payload to reduce environment inconsistencies.
+    if (value === 'giao-vien') return 'TEACHER';
+    if (value === 'tro-giang') return 'ASSISTANT';
+    if (value === 'admin') return 'ADMIN';
     return value;
   }
 

@@ -75,10 +75,19 @@ public class AuthService {
     }
 
     private String normalizeRole(String roleName) {
-        if ("Teacher".equalsIgnoreCase(roleName) || "Giáo viên".equalsIgnoreCase(roleName)) {
+        if ("Teacher".equalsIgnoreCase(roleName)
+                || "TEACHER".equalsIgnoreCase(roleName)
+                || "Giáo viên".equalsIgnoreCase(roleName)
+                || "Giao vien".equalsIgnoreCase(roleName)) {
             return "Teacher";
         }
-        if ("TA".equalsIgnoreCase(roleName) || "Trợ giảng".equalsIgnoreCase(roleName)) {
+
+        if ("TA".equalsIgnoreCase(roleName)
+                || "TRỢ GIẢNG".equalsIgnoreCase(roleName)
+                || "Trợ giảng".equalsIgnoreCase(roleName)
+                || "Tro giang".equalsIgnoreCase(roleName)
+                || "Assistant".equalsIgnoreCase(roleName)
+                || "ASSISTANT".equalsIgnoreCase(roleName)) {
             return "TA";
         }
         return "Admin";
