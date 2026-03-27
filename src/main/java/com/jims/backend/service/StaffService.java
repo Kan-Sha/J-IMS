@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 public class StaffService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final String DEFAULT_STAFF_PASSWORD = "JoyEnglish@123";
 
     private final StaffRepository staffRepository;
 
@@ -18,23 +19,19 @@ public class StaffService {
         this.staffRepository = staffRepository;
     }
 
-    public ApiResult createStaff(String requesterRole, String fullName, String email, String password, String role) {
+    public ApiResult createStaff(String requesterRole, String fullName, String email, String role) {
         try {
             if (!isAdminRole(requesterRole)) {
                 return new ApiResult(false, Collections.emptyMap(), "Bạn không có quyền tạo tài khoản!", 403);
             }
 
-            if (isBlank(fullName) || isBlank(email) || isBlank(password) || isBlank(role)) {
+            if (isBlank(fullName) || isBlank(email) || isBlank(role)) {
                 return new ApiResult(false, Collections.emptyMap(), "Mục này không được để trống!", 400);
             }
 
             email = email.trim();
             if (!EMAIL_PATTERN.matcher(email).matches()) {
                 return new ApiResult(false, Collections.emptyMap(), "Định dạng Email không hợp lệ!", 400);
-            }
-
-            if (password.trim().length() < 6) {
-                return new ApiResult(false, Collections.emptyMap(), "Mật khẩu phải có ít nhất 6 ký tự!", 400);
             }
 
             Staff existing = staffRepository.findByEmail(email);
@@ -47,7 +44,13 @@ public class StaffService {
                 return new ApiResult(false, Collections.emptyMap(), "Chức vụ không hợp lệ!", 400);
             }
 
-            int inserted = staffRepository.insertStaff(fullName.trim(), email, PasswordUtil.sha256(password.trim()), roleId.intValue());
+            // Password is fixed by business rule; ignore any client-provided password.
+            int inserted = staffRepository.insertStaff(
+                    fullName.trim(),
+                    email,
+                    PasswordUtil.sha256(DEFAULT_STAFF_PASSWORD),
+                    roleId.intValue()
+            );
             if (inserted > 0) {
                 return new ApiResult(true, Collections.emptyMap(), "Account created successfully", 201);
             }

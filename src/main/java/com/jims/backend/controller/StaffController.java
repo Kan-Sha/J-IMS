@@ -38,7 +38,6 @@ public class StaffController {
                         requesterRole,
                         getString(body, "fullName"),
                         getString(body, "email"),
-                        getString(body, "password"),
                         getString(body, "role")
                 );
                 ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());

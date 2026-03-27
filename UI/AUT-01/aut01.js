@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let dangHienMatKhau = false;
   const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
   const API_BASE = 'http://127.0.0.1:8080';
+  const DEFAULT_STAFF_PASSWORD = 'JoyEnglish@123';
 
   async function kiemTraSessionVaQuyenAut01() {
     try {
@@ -120,10 +121,14 @@ document.addEventListener('DOMContentLoaded', function () {
     capNhatNutLuu();
   });
 
-  inputMatKhau.addEventListener('input', function () {
-    xoaLoi(khungMatKhau, loiMatKhau);
-    capNhatNutLuu();
-  });
+  if (inputMatKhau) {
+    inputMatKhau.value = DEFAULT_STAFF_PASSWORD;
+    inputMatKhau.disabled = true;
+  }
+  if (nutToggleMK) {
+    nutToggleMK.style.display = 'none';
+    nutToggleMK.disabled = true;
+  }
 
   inputEmail.addEventListener('input', function () {
     xoaLoi(khungEmail, loiEmail);
@@ -138,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
   nutHuy.addEventListener('click', function () {
     inputHoTen.value   = '';
     inputEmail.value   = '';
-    inputMatKhau.value = 'JoyEnglish@123';
+    inputMatKhau.value = DEFAULT_STAFF_PASSWORD;
     inputChucVu.value  = '';
 
     selectHienThi.textContent = '-- Chọn chức vụ --';
@@ -146,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     xoaLoi(khungHoTen,   loiHoTen);
     xoaLoi(khungEmail,   loiEmail);
-    xoaLoi(khungMatKhau, loiMatKhau);
     xoaLoi(khungChucVu,  loiChucVu);
 
     iconTickEmail.classList.remove('hien');
@@ -161,12 +165,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const hoTen   = inputHoTen.value.trim();
     const email   = inputEmail.value.trim();
-    const matKhau = inputMatKhau.value;
     const chucVu  = inputChucVu.value;
 
     xoaLoi(khungHoTen,   loiHoTen);
     xoaLoi(khungEmail,   loiEmail);
-    xoaLoi(khungMatKhau, loiMatKhau);
     xoaLoi(khungChucVu,  loiChucVu);
     thongBao.style.display = 'none';
     thongBao.className = 'thong-bao';
@@ -191,13 +193,6 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
-    if (!matKhau) {
-      hienLoi(khungMatKhau, loiMatKhau, 'Mục này không được để trống!');
-      coLoi = true;
-    } else if (matKhau.length < 6) {
-      hienLoi(khungMatKhau, loiMatKhau, 'Mật khẩu phải có ít nhất 6 ký tự!');
-      coLoi = true;
-    }
     if (!chucVu) {
       hienLoi(khungChucVu, loiChucVu, 'Mục này không được để trống!');
       coLoi = true;
@@ -215,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    taoTaiKhoan(hoTen, email, matKhau, chucVu);
+    taoTaiKhoan(hoTen, email, chucVu);
   });
 
   document.addEventListener('keydown', function (e) {
@@ -279,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  async function taoTaiKhoan(hoTen, email, matKhau, chucVu) {
+  async function taoTaiKhoan(hoTen, email, chucVu) {
     nutLuu.textContent = 'Đang lưu...';
     nutLuu.disabled = true;
 
@@ -297,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function () {
         body: JSON.stringify({
           fullName: hoTen,
           email,
-          password: matKhau,
           role
         })
       });
@@ -320,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       inputHoTen.value = '';
       inputEmail.value = '';
-      inputMatKhau.value = 'JoyEnglish@123';
+      inputMatKhau.value = DEFAULT_STAFF_PASSWORD;
       inputChucVu.value = '';
       selectHienThi.textContent = '-- Chọn chức vụ --';
       selectHienThi.classList.remove('co-gia-tri');
