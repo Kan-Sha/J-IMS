@@ -23,13 +23,14 @@ body {
   font-family: var(--font-chinh);
   background-color: var(--mau-nen);
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .trang-chinh {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
 }
 .sidebar {
   width: var(--rong-sidebar);
@@ -97,7 +98,8 @@ body {
 .noi-dung {
   flex: 5;
   display: flex;
-  overflow: hidden;
+  overflow: visible;
+  min-width: 0;
 }
 .sub-sidebar {
   width: var(--rong-sub-sidebar);
@@ -404,7 +406,7 @@ body {
   top: 0;
   bottom: 0;
   right: 0;
-  left: calc(var(--rong-sidebar) + var(--rong-sub-sidebar));
+  left: 0;
   background: rgba(0, 0, 0, 0.35);
   z-index: 100;
 }
@@ -417,17 +419,18 @@ body {
   display: none;
   position: fixed;
   top: 50%;
-  left: calc(var(--rong-sidebar) + var(--rong-sub-sidebar) + (100vw - var(--rong-sidebar) - var(--rong-sub-sidebar)) / 2);
+  left: 50%;
   transform: translate(-50%, -50%);
   background: var(--mau-trang);
   border: 1px solid #8e8edf;
   border-radius: 12px;
   padding: 0;
   z-index: 101;
-  min-width: 420px;
-  max-width: 520px;
+  width: min(520px, 90vw);
+  max-width: 90vw;
+  max-height: 90vh;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .popup.hien {
@@ -500,6 +503,106 @@ body {
   box-shadow: none !important;
 }
 
+@media (min-width: 641px) and (max-width: 1024px) {
+  .trang-chinh {
+    display: block;
+  }
+
+  .sidebar,
+  .sub-sidebar {
+    display: none;
+  }
+
+  .noi-dung {
+    display: block;
+    width: 100%;
+  }
+
+  .vung-form {
+    width: 100%;
+    padding: 28px 24px;
+  }
+
+  .hang-input {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .nhom-input {
+    min-width: 220px;
+    flex: 1 1 48% !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .trang-chinh {
+    display: block;
+  }
+
+  .sidebar,
+  .sub-sidebar {
+    display: none;
+  }
+
+  .noi-dung {
+    display: block;
+    width: 100%;
+  }
+
+  .vung-form {
+    width: 100%;
+    padding: 20px 14px;
+  }
+
+  .form-tieu-de {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .hang-input {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .nhom-input {
+    width: 100%;
+    flex: 1 1 100% !important;
+  }
+
+  .form-noi-dung > div[style*="display:flex"] {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .nhom-nut {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .nut-luu,
+  .nut-huy,
+  .popup-nut .nut-luu {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .popup {
+    width: 90vw;
+  }
+
+  #popup-dang-xuat {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    min-width: 0 !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}
 
 
 

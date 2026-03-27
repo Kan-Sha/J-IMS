@@ -49,6 +49,7 @@
 
 .bang-hoc-sinh {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -109,4 +110,48 @@
   text-align: center;
   padding: 40px 28px 32px;
   border-bottom: 1px solid #8e8edf;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .bo-loc-hang {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .bo-loc-nhom {
+    flex: 1 1 48% !important;
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .bo-loc {
+    padding: 14px;
+  }
+
+  .bo-loc-hang {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .bo-loc-nhom {
+    width: 100%;
+    flex: 1 1 100% !important;
+  }
+
+  .bo-loc-nut {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .bo-loc-nut .nut-luu,
+  .bo-loc-nut .nut-huy {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .bang-hoc-sinh {
+    min-width: 640px;
+  }
 }
