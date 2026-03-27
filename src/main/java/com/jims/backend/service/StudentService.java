@@ -4,16 +4,21 @@ import com.jims.backend.model.Student;
 import com.jims.backend.repository.ClassRepository;
 import com.jims.backend.repository.StudentRepository;
 import com.jims.backend.util.StudentIdGenerator;
+import com.jims.backend.util.StudentDobValidator;
+import com.jims.backend.util.StudentNameValidator;
 
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class StudentService {
@@ -38,13 +43,33 @@ public class StudentService {
                                    String address,
                                    Integer classId) {
         try {
+            Map<String, String> fieldErrors = new LinkedHashMap<String, String>();
+
             if (isBlank(firstName) || isBlank(lastName) || isBlank(dob) || isBlank(gender)
                     || isBlank(parentName) || isBlank(phone)) {
-                return new ApiResult(false, Collections.emptyMap(), "Mục này không được để trống!", 400);
+                // Keep legacy behavior for required fields, but also attach field-level errors for UI.
+                if (isBlank(firstName)) fieldErrors.put("firstName", "Mục này không được để trống!");
+                if (isBlank(lastName)) fieldErrors.put("lastName", "Mục này không được để trống!");
+                if (isBlank(dob)) fieldErrors.put("dob", "Ngày sinh không được để trống!");
+                if (isBlank(parentName)) fieldErrors.put("parentName", "Mục này không được để trống!");
+                if (isBlank(phone)) fieldErrors.put("phone", "Mục này không được để trống!");
+                if (isBlank(gender)) fieldErrors.put("gender", "Mục này không được để trống!");
+                return new ApiResult(false, fieldErrors, "Mục này không được để trống!", 400);
+            }
+
+            // Note: UI sends { firstName: Họ, lastName: Tên } for STU-01.
+            Optional<String> hoErr = StudentNameValidator.validateLastNameLettersOnly(firstName);
+            if (hoErr.isPresent()) {
+                fieldErrors.put("firstName", hoErr.get());
+            }
+            Optional<String> tenErr = StudentNameValidator.validateFirstNameLettersOnly(lastName);
+            if (tenErr.isPresent()) {
+                fieldErrors.put("lastName", tenErr.get());
             }
 
             String fullName = (firstName + " " + lastName).trim();
             if (fullName.length() < 8 || fullName.length() > 100) {
+                // Not requested, but keep existing rule as a general message.
                 return new ApiResult(false, Collections.emptyMap(), "Họ tên phải từ 8 đến 100 ký tự!", 400);
             }
 
@@ -56,7 +81,25 @@ public class StudentService {
                 return new ApiResult(false, Collections.emptyMap(), "Sai định dạng email!", 400);
             }
 
-            Date dateOfBirth = Date.valueOf(LocalDate.parse(dob));
+            LocalDate dobLocalDate;
+            try {
+                dobLocalDate = LocalDate.parse(dob);
+            } catch (DateTimeParseException e) {
+                fieldErrors.put("dob", "Ngày sinh không hợp lệ!");
+                return new ApiResult(false, fieldErrors, "Ngày sinh không hợp lệ!", 400);
+            }
+
+            Optional<String> dobErr = StudentDobValidator.validateAgeBetween3And20Inclusive(dobLocalDate);
+            if (dobErr.isPresent()) {
+                fieldErrors.put("dob", dobErr.get());
+            }
+
+            if (!fieldErrors.isEmpty()) {
+                // Let UI render inline errors for each field.
+                return new ApiResult(false, fieldErrors, "Validation failed", 400);
+            }
+
+            Date dateOfBirth = Date.valueOf(dobLocalDate);
             if (studentRepository.existsDuplicate(firstName.trim(), lastName.trim(), dateOfBirth, phone.trim())) {
                 return new ApiResult(false, Collections.emptyMap(), "Học sinh này đã tồn tại trong hệ thống.", 409);
             }
@@ -92,8 +135,6 @@ public class StudentService {
             } finally {
                 conn.close();
             }
-        } catch (IllegalArgumentException e) {
-            return new ApiResult(false, Collections.emptyMap(), "Ngày sinh không hợp lệ!", 400);
         } catch (SQLException e) {
             return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
         }

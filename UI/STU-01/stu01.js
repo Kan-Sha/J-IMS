@@ -56,7 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const khungSdt      = document.getElementById('khung-sdt');
   const khungDiaChi   = document.getElementById('khung-dia-chi');
 
-  const loiHoTen    = document.getElementById('loi-ho-ten');
+  const loiHo       = document.getElementById('loi-ho');
+  const loiTen      = document.getElementById('loi-ten');
   const loiNgaySinh = document.getElementById('loi-ngay-sinh');
   const loiHoTenPH  = document.getElementById('loi-ho-ten-ph');
   const loiEmail    = document.getElementById('loi-email');
@@ -150,11 +151,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function kiemTraHoTen(ho, ten) {
-    if (!ho || !ten) return { loiHo: !ho, loiTen: !ten, msg: 'Mục này không được để trống!' };
-    const full = (ho + ' ' + ten).trim();
-    if (full.length < 8)   return { msg: 'Họ và tên phải có ít nhất 8 ký tự!' };
-    if (full.length > 100) return { msg: 'Họ và tên không được vượt quá 100 ký tự!' };
+  function isLettersOnlyUnicode(val) {
+    const s = (val || '').trim();
+    if (!s) return true;
+    // Unicode letters only, allow spaces between words.
+    return /^[\p{L}]+(?:\s+[\p{L}]+)*$/u.test(s);
+  }
+
+  function kiemTraHo(ho) {
+    if (!ho) return 'Mục này không được để trống!';
+    if (!isLettersOnlyUnicode(ho)) return 'Họ chỉ được chứa chữ cái';
+    return null;
+  }
+
+  function kiemTraTen(ten) {
+    if (!ten) return 'Mục này không được để trống!';
+    if (!isLettersOnlyUnicode(ten)) return 'Tên chỉ được chứa chữ cái';
     return null;
   }
 
@@ -179,6 +191,12 @@ document.addEventListener('DOMContentLoaded', function () {
     ) return 'Ngày sinh không tồn tại!';
 
     if (date > new Date()) return 'Ngày sinh không được ở tương lai!';
+
+    // Age validation: between 3 and 20 (inclusive) based on system date.
+    const today = new Date();
+    const minDob = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate());
+    const maxDob = new Date(today.getFullYear() - 3, today.getMonth(), today.getDate());
+    if (date < minDob || date > maxDob) return 'Độ tuổi học sinh phải từ 3 đến 20 tuổi';
     return null;
   }
   function kiemTraSdt(val) {
@@ -204,18 +222,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   inputHo.addEventListener('input', function () {
     xoaLoi(khungHo, null);
-    if (this.value.trim() && inputTen.value.trim()) {
-      loiHoTen.textContent = '';
-      loiHoTen.classList.remove('hien');
-    }
+    if (loiHo) { loiHo.textContent = ''; loiHo.classList.remove('hien'); }
   });
 
   inputTen.addEventListener('input', function () {
     xoaLoi(khungTen, null);
-    if (inputHo.value.trim() && this.value.trim()) {
-      loiHoTen.textContent = '';
-      loiHoTen.classList.remove('hien');
-    }
+    if (loiTen) { loiTen.textContent = ''; loiTen.classList.remove('hien'); }
   });
 
   inputNgaySinh.addEventListener('input', function () {
@@ -282,8 +294,8 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungSdt,      loiSdt);
     xoaLoi(khungDiaChi,   loiDiaChi);
 
-    loiHoTen.textContent = '';
-    loiHoTen.classList.remove('hien');
+    if (loiHo) { loiHo.textContent = ''; loiHo.classList.remove('hien'); }
+    if (loiTen) { loiTen.textContent = ''; loiTen.classList.remove('hien'); }
 
     anIcon(iconEmail);
     anIcon(iconSdt);
@@ -305,17 +317,19 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungEmail,    loiEmail);
     xoaLoi(khungSdt,      loiSdt);
     xoaLoi(khungDiaChi,   loiDiaChi);
-    loiHoTen.textContent = '';
-    loiHoTen.classList.remove('hien');
+    if (loiHo) { loiHo.textContent = ''; loiHo.classList.remove('hien'); }
+    if (loiTen) { loiTen.textContent = ''; loiTen.classList.remove('hien'); }
 
     let coLoi = false;
 
-    const loiHoTenKQ = kiemTraHoTen(ho, ten);
-    if (loiHoTenKQ) {
-      if (loiHoTenKQ.loiHo)  hienLoi(khungHo,  null, '');
-      if (loiHoTenKQ.loiTen) hienLoi(khungTen, null, '');
-      loiHoTen.textContent = loiHoTenKQ.msg;
-      loiHoTen.classList.add('hien');
+    const loiHoMsg = kiemTraHo(ho);
+    if (loiHoMsg) {
+      hienLoi(khungHo, loiHo, loiHoMsg);
+      coLoi = true;
+    }
+    const loiTenMsg = kiemTraTen(ten);
+    if (loiTenMsg) {
+      hienLoi(khungTen, loiTen, loiTenMsg);
       coLoi = true;
     }
 
@@ -388,6 +402,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!success) {
           if (res.status === 401) {
             window.location.href = '../AUT-02/aut02.html';
+            return;
+          }
+          // Inline field validation errors (no popup)
+          const data = payload && payload.data && typeof payload.data === 'object' ? payload.data : null;
+          if (res.status === 400 && data) {
+            if (data.firstName) hienLoi(khungHo, loiHo, String(data.firstName));
+            if (data.lastName) hienLoi(khungTen, loiTen, String(data.lastName));
+            if (data.dob) hienLoi(khungNgaySinh, loiNgaySinh, String(data.dob));
+            if (data.parentName) hienLoi(khungHoTenPH, loiHoTenPH, String(data.parentName));
+            if (data.phone) hienLoi(khungSdt, loiSdt, String(data.phone));
+            if (data.email) hienLoi(khungEmail, loiEmail, String(data.email));
+            if (data.address) hienLoi(khungDiaChi, loiDiaChi, String(data.address));
             return;
           }
           hienPopup(message);
