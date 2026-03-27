@@ -73,6 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const popup    = document.getElementById('popup');
   const popupNoiDung = document.getElementById('popup-noi-dung');
   const popupNutHuy  = document.getElementById('popup-nut-huy');
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
 
   function taoSelectHienThi(khungSelect, selectEl) {
     const span = document.createElement('span');
@@ -192,11 +194,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (date > new Date()) return 'Ngày sinh không được ở tương lai!';
 
-    // Age validation: between 3 and 20 (inclusive) based on system date.
+    // Age validation: minimum 5 years old based on current system date.
     const today = new Date();
-    const minDob = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate());
-    const maxDob = new Date(today.getFullYear() - 3, today.getMonth(), today.getDate());
-    if (date < minDob || date > maxDob) return 'Độ tuổi học sinh phải từ 3 đến 20 tuổi';
+    const maxDob = new Date(today.getFullYear() - 5, today.getMonth(), today.getDate());
+    if (date > maxDob) return 'Độ tuổi học sinh phải từ 5 tuổi trở lên';
     return null;
   }
   function kiemTraSdt(val) {
@@ -488,5 +489,23 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
         anPopupDangXuat();
         window.location.href = '../AUT-02/aut02.html';
       });
+  });
+
+  function closeMobileSidebar() {
+    document.body.classList.remove('mobile-sidebar-open');
+  }
+
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', function () {
+      document.body.classList.toggle('mobile-sidebar-open');
+    });
+  }
+  if (mobileSidebarBackdrop) {
+    mobileSidebarBackdrop.addEventListener('click', closeMobileSidebar);
+  }
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 768) {
+      closeMobileSidebar();
+    }
   });
 });

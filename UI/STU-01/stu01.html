@@ -15,6 +15,11 @@
 
 <body>
 
+<button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Mở menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop"></div>
+
 <div class="trang-chinh">
   <div class="sidebar">
     <div class="sidebar-logo">
@@ -125,18 +130,21 @@
             <div class="khung-input" id="khung-ho">
               <input type="text" id="ho" class="o-nhap" placeholder="Nguyễn">
             </div>
+            <div class="loi-text" id="loi-ho"></div>
           </div>
           <div class="nhom-input" style="flex:1.5">
             <label class="nhan" for="ten">Tên</label>
             <div class="khung-input" id="khung-ten">
               <input type="text" id="ten" class="o-nhap" placeholder="Văn A">
             </div>
+            <div class="loi-text" id="loi-ten"></div>
           </div>
           <div class="nhom-input" style="flex:1.5">
             <label class="nhan" for="ngay-sinh">Ngày sinh</label>
             <div class="khung-input" id="khung-ngay-sinh">
               <input type="text" id="ngay-sinh" class="o-nhap" placeholder="DD/MM/YYYY">
             </div>
+            <div class="loi-text" id="loi-ngay-sinh"></div>
           </div>
           <div class="nhom-input" style="flex:0.9">
             <label class="nhan" for="gioi-tinh">Giới tính</label>
@@ -149,13 +157,8 @@
                 <polyline points="6,9 12,15 18,9"/>
               </svg>
             </div>
+            <div class="loi-text"></div>
           </div>
-        </div>
-        <div style="display:flex; gap:12px;">
-          <div style="flex:1.1"><div class="loi-text" id="loi-ho"></div></div>
-          <div style="flex:1.5"><div class="loi-text" id="loi-ten"></div></div>
-          <div style="flex:1.5"><div class="loi-text" id="loi-ngay-sinh"></div></div>
-          <div style="flex:0.9"></div>
         </div>
         <div class="hang-input" style="margin-top:16px">
           <div class="nhom-input" style="flex:2.5">
@@ -163,17 +166,15 @@
             <div class="khung-input" id="khung-ho-ten-ph">
               <input type="text" id="ho-ten-ph" class="o-nhap" placeholder="Nguyễn Văn B">
             </div>
+            <div class="loi-text" id="loi-ho-ten-ph"></div>
           </div>
           <div class="nhom-input" style="flex:1.5">
             <label class="nhan" for="ma-hv">Mã học viên</label>
             <div class="khung-input ma-hv-khung" id="khung-ma-hv">
               <input type="text" id="ma-hv" class="o-nhap" placeholder="JS-202603-001" readonly>
             </div>
+            <div class="loi-text"></div>
           </div>
-        </div>
-        <div style="display:flex; gap:12px;">
-          <div style="flex:2.5"><div class="loi-text" id="loi-ho-ten-ph"></div></div>
-          <div style="flex:1.5"></div>
         </div>
 
         <div class="nhom-input" style="margin-top:16px">
@@ -199,9 +200,8 @@
           <div class="khung-input" id="khung-dia-chi">
             <input type="text" id="dia-chi" class="o-nhap" placeholder="123 Nguyen Trai, Ha Noi">
           </div>
-        </div>
-
           <div class="loi-text" id="loi-dia-chi"></div>
+        </div>
 
         <div class="nhom-nut">
           <button class="nut-huy" id="nut-huy" type="button">Hủy</button>

@@ -179,7 +179,7 @@ body {
 .hang-input {
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .nhom-input {
@@ -503,50 +503,80 @@ body {
   box-shadow: none !important;
 }
 
-@media (min-width: 641px) and (max-width: 1024px) {
-  .trang-chinh {
-    display: block;
-  }
-
-  .sidebar,
-  .sub-sidebar {
-    display: none;
-  }
-
-  .noi-dung {
-    display: block;
-    width: 100%;
-  }
-
-  .vung-form {
-    width: 100%;
-    padding: 28px 24px;
-  }
-
-  .hang-input {
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-
-  .nhom-input {
-    min-width: 220px;
-    flex: 1 1 48% !important;
-  }
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 220;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: var(--mau-xanh-dam);
+  cursor: pointer;
+  padding: 10px 9px;
 }
 
-@media (max-width: 640px) {
-  .trang-chinh {
+.mobile-menu-toggle span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: #fff;
+  margin: 4px 0;
+}
+
+.mobile-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 180;
+}
+
+@media (max-width: 767px) {
+  .mobile-menu-toggle {
     display: block;
   }
 
-  .sidebar,
+  .trang-chinh {
+    padding-top: 56px;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 210;
+  }
+
   .sub-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: var(--rong-sidebar);
+    bottom: 0;
+    transform: translateX(-120%);
+    transition: transform 0.25s ease;
+    z-index: 205;
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.12);
+  }
+
+  body.mobile-sidebar-open .sidebar,
+  body.mobile-sidebar-open .sub-sidebar {
+    transform: translateX(0);
+  }
+
+  body.mobile-sidebar-open .mobile-sidebar-backdrop {
+    display: block;
   }
 
   .noi-dung {
-    display: block;
     width: 100%;
+    display: block;
   }
 
   .vung-form {
@@ -570,11 +600,6 @@ body {
     flex: 1 1 100% !important;
   }
 
-  .form-noi-dung > div[style*="display:flex"] {
-    flex-direction: column !important;
-    gap: 6px !important;
-  }
-
   .nhom-nut {
     flex-direction: column;
     align-items: stretch;
@@ -588,10 +613,6 @@ body {
     min-height: 44px;
   }
 
-  .popup {
-    width: 90vw;
-  }
-
   #popup-dang-xuat {
     top: 50% !important;
     left: 50% !important;
@@ -601,6 +622,13 @@ body {
     max-width: 90vw !important;
     max-height: 90vh !important;
     overflow-y: auto !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-toggle,
+  .mobile-sidebar-backdrop {
+    display: none !important;
   }
 }
 

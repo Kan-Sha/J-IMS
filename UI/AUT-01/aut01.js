@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const popupDX   = document.getElementById('popup-dang-xuat');
   const popupDXNutHuy = document.getElementById('popup-dx-huy');
   const popupDXNutXacNhan = document.getElementById('popup-dx-xac-nhan');
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
 
   let dangHienMatKhau = false;
   const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
@@ -327,4 +329,22 @@ document.addEventListener('DOMContentLoaded', function () {
       nutLuu.disabled = false;
     }
   }
+
+  function closeMobileSidebar() {
+    document.body.classList.remove('mobile-sidebar-open');
+  }
+
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', function () {
+      document.body.classList.toggle('mobile-sidebar-open');
+    });
+  }
+  if (mobileSidebarBackdrop) {
+    mobileSidebarBackdrop.addEventListener('click', closeMobileSidebar);
+  }
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 768) {
+      closeMobileSidebar();
+    }
+  });
 });

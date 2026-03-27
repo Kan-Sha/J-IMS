@@ -70,6 +70,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const popupDXNutHuy = document.getElementById('popup-dx-huy');
   const popupDXNutXacNhan = document.getElementById('popup-dx-xac-nhan');
   const nutDangXuatSidebar = document.querySelector('[title="Đăng xuất"]');
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
   selectLop.addEventListener('change', function () {
     hienThiLop.textContent = this.value ? this.options[this.selectedIndex].text : 'Chọn lớp';
   });
@@ -294,5 +296,23 @@ document.addEventListener('DOMContentLoaded', function () {
   taiDanhSachLop();
   taiDanhSachTrangThai();
   taiDanhSachHocSinh();
+
+  function closeMobileSidebar() {
+    document.body.classList.remove('mobile-sidebar-open');
+  }
+
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', function () {
+      document.body.classList.toggle('mobile-sidebar-open');
+    });
+  }
+  if (mobileSidebarBackdrop) {
+    mobileSidebarBackdrop.addEventListener('click', closeMobileSidebar);
+  }
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 768) {
+      closeMobileSidebar();
+    }
+  });
 
 });
