@@ -506,9 +506,9 @@ body {
 .mobile-menu-toggle {
   display: none;
   position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 220;
+  top: 16px;
+  left: 16px;
+  z-index: 1200;
   width: 44px;
   height: 44px;
   border: none;
@@ -531,8 +531,16 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 180;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
+}
+
+#overlay-dang-xuat {
+  z-index: 2000 !important;
+}
+
+#popup-dang-xuat {
+  z-index: 2100 !important;
 }
 
 @media (max-width: 767px) {
@@ -547,27 +555,32 @@ body {
   .sidebar {
     position: fixed;
     top: 0;
-    left: 0;
     bottom: 0;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-    z-index: 210;
+    left: calc(-1 * (var(--rong-sidebar) + var(--rong-sub-sidebar)));
+    width: var(--rong-sidebar);
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: 999;
   }
 
   .sub-sidebar {
     position: fixed;
     top: 0;
-    left: var(--rong-sidebar);
     bottom: 0;
-    transform: translateX(-120%);
-    transition: transform 0.25s ease;
-    z-index: 205;
+    left: calc(-1 * var(--rong-sub-sidebar));
+    width: var(--rong-sub-sidebar);
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: 999;
     box-shadow: 6px 0 24px rgba(0, 0, 0, 0.12);
   }
 
-  body.mobile-sidebar-open .sidebar,
+  body.mobile-sidebar-open .sidebar {
+    left: 0;
+  }
+
   body.mobile-sidebar-open .sub-sidebar {
-    transform: translateX(0);
+    left: var(--rong-sidebar);
   }
 
   body.mobile-sidebar-open .mobile-sidebar-backdrop {

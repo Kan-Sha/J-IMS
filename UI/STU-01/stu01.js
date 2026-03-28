@@ -457,6 +457,7 @@ const nutDangXuatSidebar = document.querySelector('[title="Đăng xuất"]');
   const popupDX   = document.getElementById('popup-dang-xuat');
 const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]');
   function hienPopupDangXuat() {
+    document.body.classList.remove('mobile-sidebar-open');
     overlayDX.style.display = 'block';
     popupDX.style.display   = 'block';
     nutHocSinhSidebar.classList.remove('active');
