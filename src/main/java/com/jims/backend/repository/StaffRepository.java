@@ -10,6 +10,53 @@ import java.sql.SQLException;
 
 public class StaffRepository {
 
+    public Staff findById(int staffId) throws SQLException {
+        String sql = "SELECT s.staff_id, s.full_name, s.email, s.password_hash, s.role_id, r.role_name " +
+                "FROM staff s JOIN roles r ON s.role_id = r.role_id WHERE s.staff_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, staffId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Staff staff = new Staff();
+                    staff.setStaffId(rs.getInt("staff_id"));
+                    staff.setFullName(rs.getString("full_name"));
+                    staff.setEmail(rs.getString("email"));
+                    staff.setPasswordHash(rs.getString("password_hash"));
+                    staff.setRoleId(rs.getInt("role_id"));
+                    staff.setRoleName(rs.getString("role_name"));
+                    return staff;
+                }
+            }
+        }
+        return null;
+    }
+
+    public int updatePasswordHash(int staffId, String passwordHash) throws SQLException {
+        String sql = "UPDATE staff SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE staff_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, passwordHash);
+            stmt.setInt(2, staffId);
+            return stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Only Giáo viên / Trợ giảng may be assigned as class teacher (OPE-01).
+     */
+    public boolean isEligibleClassTeacher(int staffId) throws SQLException {
+        String sql = "SELECT 1 FROM staff s JOIN roles r ON s.role_id = r.role_id " +
+                "WHERE s.staff_id = ? AND r.role_name IN ('Giáo viên', 'Trợ giảng', 'Teacher', 'Assistant', 'TA')";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, staffId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public Staff findByEmail(String email) throws SQLException {
         String sql = "SELECT s.staff_id, s.full_name, s.email, s.password_hash, s.role_id, r.role_name " +
                 "FROM staff s JOIN roles r ON s.role_id = r.role_id WHERE s.email = ?";

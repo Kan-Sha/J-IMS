@@ -65,6 +65,32 @@ public class AuthController {
         };
     }
 
+    public HttpHandler changePasswordHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.handleOptions(exchange);
+                    return;
+                }
+                if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+
+                String token = resolveToken(exchange);
+                JsonObject body = JsonUtil.parseBody(exchange);
+                ApiResult result = authService.changePassword(
+                        token,
+                        getString(body, "currentPassword"),
+                        getString(body, "newPassword"),
+                        getString(body, "confirmPassword")
+                );
+                ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+            }
+        };
+    }
+
     public HttpHandler sessionHandler() {
         return new HttpHandler() {
             @Override

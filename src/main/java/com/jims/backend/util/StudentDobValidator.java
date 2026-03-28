@@ -8,22 +8,19 @@ public final class StudentDobValidator {
     }
 
     /**
-     * Business rule:
-     * - Age must be between 3 and 20 years old (inclusive), calculated based on system date.
+     * Student must be at least 5 years old (no maximum age).
      */
-    public static Optional<String> validateAgeBetween3And20Inclusive(LocalDate dob) {
+    public static Optional<String> validateMinimumAgeFive(LocalDate dob) {
         if (dob == null) {
             return Optional.of("Ngày sinh không hợp lệ!");
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate minDob = today.minusYears(20); // oldest allowed (inclusive)
-        LocalDate maxDob = today.minusYears(3);  // youngest allowed (inclusive)
+        LocalDate minDob = today.minusYears(5);
 
-        if (dob.isBefore(minDob) || dob.isAfter(maxDob)) {
-            return Optional.of("Độ tuổi học sinh phải từ 3 đến 20 tuổi");
+        if (dob.isAfter(minDob)) {
+            return Optional.of("Độ tuổi học sinh phải từ 5 tuổi trở lên");
         }
         return Optional.empty();
     }
 }
-

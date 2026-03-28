@@ -2,6 +2,7 @@ package com.jims.backend.service;
 
 import com.jims.backend.model.Staff;
 import com.jims.backend.repository.StaffRepository;
+import com.jims.backend.util.PasswordPolicyUtil;
 import com.jims.backend.util.PasswordUtil;
 import com.jims.backend.util.SessionManager;
 
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class AuthService {
@@ -60,6 +62,45 @@ public class AuthService {
     public ApiResult logout(String token) {
         SessionManager.removeSession(token);
         return new ApiResult(true, Collections.emptyMap(), "Logout successful", 200);
+    }
+
+    public ApiResult changePassword(String token, String currentPassword, String newPassword, String confirmPassword) {
+        try {
+            SessionManager.SessionData session = SessionManager.getSession(token);
+            if (session == null) {
+                return new ApiResult(false, Collections.emptyMap(), "Bạn chưa đăng nhập!", 401);
+            }
+
+            if (isBlank(currentPassword)) {
+                return new ApiResult(false, Collections.emptyMap(), "Mật khẩu hiện tại không được để trống!", 400);
+            }
+
+            Optional<String> policyErr = PasswordPolicyUtil.validateNewPassword(newPassword);
+            if (policyErr.isPresent()) {
+                return new ApiResult(false, Collections.emptyMap(), policyErr.get(), 400);
+            }
+
+            if (newPassword == null || confirmPassword == null || !newPassword.equals(confirmPassword)) {
+                return new ApiResult(false, Collections.emptyMap(), "Xác nhận mật khẩu không khớp!", 400);
+            }
+
+            Staff staff = staffRepository.findById(session.getStaffId());
+            if (staff == null) {
+                return new ApiResult(false, Collections.emptyMap(), "Tài khoản không tồn tại!", 404);
+            }
+
+            if (!PasswordUtil.sha256(currentPassword).equals(staff.getPasswordHash())) {
+                return new ApiResult(false, Collections.emptyMap(), "Mật khẩu hiện tại không đúng!", 400);
+            }
+
+            int updated = staffRepository.updatePasswordHash(staff.getStaffId(), PasswordUtil.sha256(newPassword));
+            if (updated > 0) {
+                return new ApiResult(true, Collections.emptyMap(), "Đổi mật khẩu thành công", 200);
+            }
+            return new ApiResult(false, Collections.emptyMap(), "Đổi mật khẩu thất bại!", 500);
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
     }
 
     public ApiResult sessionInfo(String token) {

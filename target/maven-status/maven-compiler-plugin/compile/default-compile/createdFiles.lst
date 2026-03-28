@@ -1,3 +1,5 @@
+com\jims\backend\controller\InvoiceController$1.class
+com\jims\backend\repository\InvoiceRepository.class
 com\jims\backend\repository\StaffRepository.class
 com\jims\backend\repository\StudentRepository.class
 com\jims\backend\Application.class
@@ -7,10 +9,14 @@ com\jims\backend\model\Student.class
 com\jims\backend\service\ApiResult.class
 com\jims\backend\repository\LearningStatusRepository.class
 com\jims\backend\service\StudentService.class
+com\jims\backend\service\ClassService.class
+com\jims\backend\service\InvoiceService.class
 com\jims\backend\util\ResponseUtil.class
+com\jims\backend\controller\ClassController$3.class
 com\jims\backend\controller\StaffController.class
 com\jims\backend\controller\AuthController$1.class
 com\jims\backend\controller\StudentController$1.class
+com\jims\backend\util\PasswordPolicyUtil.class
 com\jims\backend\controller\StaffController$1.class
 com\jims\backend\util\StudentIdGenerator.class
 com\jims\backend\controller\ClassController.class
@@ -19,15 +25,19 @@ com\jims\backend\model\Role.class
 com\jims\backend\service\AuthService.class
 com\jims\backend\util\SessionManager$1.class
 com\jims\backend\service\StaffService.class
+com\jims\backend\controller\AuthController$4.class
 com\jims\backend\util\DBConnection.class
 com\jims\backend\util\PasswordUtil.class
 com\jims\backend\controller\LearningStatusController$1.class
 com\jims\backend\controller\AuthController.class
 com\jims\backend\controller\StudentController.class
+com\jims\backend\util\UrlEncodingUtil.class
+com\jims\backend\controller\InvoiceController.class
 com\jims\backend\util\CorsUtil.class
 com\jims\backend\controller\ClassController$1.class
 com\jims\backend\service\StaffService$1.class
 com\jims\backend\repository\ClassRepository.class
+com\jims\backend\controller\ClassController$2.class
 com\jims\backend\util\SessionManager.class
 com\jims\backend\controller\AuthController$2.class
 com\jims\backend\util\SessionManager$SessionData.class
@@ -35,3 +45,4 @@ com\jims\backend\util\JsonUtil.class
 com\jims\backend\util\StudentDobValidator.class
 com\jims\backend\model\Staff.class
 com\jims\backend\util\StudentNameValidator.class
+com\jims\backend\service\InvoiceService$InvoiceLine.class

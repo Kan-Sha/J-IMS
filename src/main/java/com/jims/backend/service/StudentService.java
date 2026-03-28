@@ -89,7 +89,7 @@ public class StudentService {
                 return new ApiResult(false, fieldErrors, "Ngày sinh không hợp lệ!", 400);
             }
 
-            Optional<String> dobErr = StudentDobValidator.validateAgeBetween3And20Inclusive(dobLocalDate);
+            Optional<String> dobErr = StudentDobValidator.validateMinimumAgeFive(dobLocalDate);
             if (dobErr.isPresent()) {
                 fieldErrors.put("dob", dobErr.get());
             }
@@ -97,6 +97,10 @@ public class StudentService {
             if (!fieldErrors.isEmpty()) {
                 // Let UI render inline errors for each field.
                 return new ApiResult(false, fieldErrors, "Validation failed", 400);
+            }
+
+            if (classId != null && !classRepository.isClassAvailable(classId.intValue())) {
+                return new ApiResult(false, Collections.emptyMap(), "Lớp đã đủ sĩ số hoặc không tồn tại!", 400);
             }
 
             Date dateOfBirth = Date.valueOf(dobLocalDate);
@@ -124,6 +128,9 @@ public class StudentService {
             try {
                 conn.setAutoCommit(false);
                 boolean inserted = studentRepository.insertStudent(conn, student);
+                if (inserted && classId != null) {
+                    inserted = classRepository.incrementClassSize(conn, classId.intValue());
+                }
                 if (inserted) {
                     conn.commit();
                     Map<String, Object> data = new HashMap<String, Object>();

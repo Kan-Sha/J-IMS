@@ -71,6 +71,78 @@ public class StudentRepository {
         return DBConnection.getConnection();
     }
 
+    public Integer findClassIdByStudentId(Connection conn, String studentId) throws SQLException {
+        String sql = "SELECT class_id FROM students WHERE student_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, studentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int cid = rs.getInt("class_id");
+                    return rs.wasNull() ? null : Integer.valueOf(cid);
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean updateStudentClassId(Connection conn, String studentId, Integer classId) throws SQLException {
+        String sql = "UPDATE students SET class_id = ? WHERE student_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (classId == null) {
+                stmt.setNull(1, java.sql.Types.INTEGER);
+            } else {
+                stmt.setInt(1, classId.intValue());
+            }
+            stmt.setString(2, studentId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public boolean isStudentUnassigned(Connection conn, String studentId) throws SQLException {
+        String sql = "SELECT 1 FROM students WHERE student_id = ? AND class_id IS NULL";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, studentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public boolean isStudentInClass(Connection conn, String studentId, int classId) throws SQLException {
+        String sql = "SELECT 1 FROM students WHERE student_id = ? AND class_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, studentId);
+            stmt.setInt(2, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public List<String> listStudentIdsInClass(Connection conn, int classId) throws SQLException {
+        String sql = "SELECT student_id FROM students WHERE class_id = ? ORDER BY student_id";
+        List<String> ids = new ArrayList<String>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getString("student_id"));
+                }
+            }
+        }
+        return ids;
+    }
+
+    public boolean studentExists(Connection conn, String studentId) throws SQLException {
+        String sql = "SELECT 1 FROM students WHERE student_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, studentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public List<Map<String, Object>> listStudents() throws SQLException {
         String sql = "SELECT s.student_id, s.first_name, s.last_name, s.date_of_birth, s.gender, s.class_id, " +
                 "c.class_name, s.status_id, COALESCE(ls.status_name, '') AS status_name " +
