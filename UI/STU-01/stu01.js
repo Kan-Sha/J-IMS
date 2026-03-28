@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
     this.value = val;
     xoaLoi(khungNgaySinh, loiNgaySinh);
   });
-  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
+  const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
 
   inputHoTenPH.addEventListener('input', function () {
     xoaLoi(khungHoTenPH, loiHoTenPH);
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungEmail, loiEmail);
     anIcon(iconEmail);
     const val = this.value.trim();
-    if (val && EMAIL_REGEX_COM.test(val)) hienTick(iconEmail);
+    if (val && EMAIL_REGEX_GMAIL.test(val)) hienTick(iconEmail);
   });
 
   inputSdt.addEventListener('input', function () {
