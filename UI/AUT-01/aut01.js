@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
 
   let dangHienMatKhau = false;
-  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
+  const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
   const API_BASE = 'http://127.0.0.1:8080';
   const DEFAULT_STAFF_PASSWORD = 'JoyEnglish@123';
 
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoi(khungEmail, loiEmail);
     iconTickEmail.classList.remove('hien');
 
-    if (EMAIL_REGEX_COM.test(this.value.trim())) {
+    if (EMAIL_REGEX_GMAIL.test(this.value.trim())) {
       iconTickEmail.classList.add('hien');
     }
     capNhatNutLuu();
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
-    const emailHopLe = EMAIL_REGEX_COM.test(email);
+    const emailHopLe = EMAIL_REGEX_GMAIL.test(email);
 
     if (!email) {
       hienLoi(khungEmail, loiEmail, 'Mục này không được để trống!');
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Lớp bảo vệ cuối cùng: không gọi API nếu email không đúng dạng username@provider.com
-    if (!EMAIL_REGEX_COM.test(email)) {
+    if (!EMAIL_REGEX_GMAIL.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Định dạng email không hợp lệ!');
       capNhatNutLuu();
       return;
