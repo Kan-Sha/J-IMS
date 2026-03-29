@@ -179,17 +179,18 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
   function kiemTraDiaChi(val) {
-    if (!val) return null; 
-    if (val.length < 8)   return 'Địa chỉ phải có ít nhất 8 ký tự!';
-    if (val.length > 255) return 'Địa chỉ không được vượt quá 255 ký tự!';
+    const value = (val == null ? '' : String(val)).trim();
+    if (!value) return 'Địa chỉ không được để trống!';
+    if (value.length < 8) return 'Địa chỉ phải có ít nhất 8 ký tự!';
+    if (value.length > 255) return 'Địa chỉ không được vượt quá 255 ký tự!';
     return null;
   }
 
   function kiemTraHoTenPH(val) {
-    const t = (val || '').trim();
-    if (!t) return 'Họ tên phụ huynh không được để trống!';
-    if (t.length < 8) return 'Họ tên phụ huynh phải có ít nhất 8 ký tự!';
-    if (t.length > 100) return 'Họ tên phụ huynh không được vượt quá 100 ký tự!';
+    const value = (val == null ? '' : String(val)).trim();
+    if (!value) return 'Họ tên phụ huynh không được để trống!';
+    if (value.length < 8) return 'Họ tên phụ huynh phải có ít nhất 8 ký tự!';
+    if (value.length > 100) return 'Họ tên phụ huynh không được vượt quá 100 ký tự!';
     return null;
   }
 
@@ -222,8 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
 
   inputHoTenPH.addEventListener('input', function () {
-    const t = (this.value || '').trim();
-    const err = kiemTraHoTenPH(t);
+    const err = kiemTraHoTenPH(this.value);
     if (err) {
       hienLoi(khungHoTenPH, loiHoTenPH, err);
     } else {
@@ -232,8 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   inputHoTenPH.addEventListener('blur', function () {
-    const hoTenPH = inputHoTenPH.value.trim();
-    const err = kiemTraHoTenPH(hoTenPH);
+    const err = kiemTraHoTenPH(inputHoTenPH.value);
     if (err) {
       hienLoi(khungHoTenPH, loiHoTenPH, err);
     } else {
@@ -319,6 +318,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let coLoi = false;
 
+    const loiHoTenPHMsg = kiemTraHoTenPH(hoTenPH);
+    if (loiHoTenPHMsg) {
+      hienLoi(khungHoTenPH, loiHoTenPH, loiHoTenPHMsg);
+      coLoi = true;
+    }
+
     const loiHoMsg = kiemTraHo(ho);
     if (loiHoMsg) {
       hienLoi(khungHo, loiHo, loiHoMsg);
@@ -333,12 +338,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const loiNgay = kiemTraNgaySinh(ngaySinh);
     if (loiNgay) {
       hienLoi(khungNgaySinh, loiNgaySinh, loiNgay);
-      coLoi = true;
-    }
-
-    const loiHoTenPHMsg = kiemTraHoTenPH(hoTenPH);
-    if (loiHoTenPHMsg) {
-      hienLoi(khungHoTenPH, loiHoTenPH, loiHoTenPHMsg);
       coLoi = true;
     }
 
