@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+  const API_BASE = 'http://127.0.0.1:8080';
+
+  function runAut01() {
 
   const inputHoTen    = document.getElementById('ho-ten');
   const inputEmail    = document.getElementById('email');
@@ -32,39 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let dangHienMatKhau = false;
   const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
-  const API_BASE = 'http://127.0.0.1:8080';
   const DEFAULT_STAFF_PASSWORD = 'JoyEnglish@123';
-
-  async function kiemTraSessionVaQuyenAut01() {
-    try {
-      const token = localStorage.getItem('JIMS_TOKEN');
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-      const res = await fetch(`${API_BASE}/api/auth/session`, {
-        method: 'GET',
-        credentials: 'include',
-        headers
-      });
-      const payload = await res.json().catch(() => null);
-      if (!res.ok || !payload || !payload.success) {
-        localStorage.removeItem('JIMS_TOKEN');
-        window.location.href = '../AUT-02/aut02.html';
-        return null;
-      }
-      const data = payload.data || {};
-      const role = data.role ? String(data.role) : null;
-      if (role && role.toLowerCase() !== 'admin') {
-        window.location.href = '../STU-03/stu03.html';
-        return null;
-      }
-      return role;
-    } catch (e) {
-      localStorage.removeItem('JIMS_TOKEN');
-      window.location.href = '../AUT-02/aut02.html';
-      return null;
-    }
-  }
-
-  kiemTraSessionVaQuyenAut01();
 
   const danhSachEmailTonTai = [
     'admin@gmail.com',
@@ -347,4 +318,43 @@ document.addEventListener('DOMContentLoaded', function () {
       closeMobileSidebar();
     }
   });
+  }
+
+  if (window.JIMS && window.JIMS.ready) {
+    window.JIMS.ready.then(function (role) {
+      if (role && String(role).toLowerCase() === 'admin') {
+        runAut01();
+      }
+    });
+  } else {
+    (async function legacyShell() {
+      try {
+        const token = localStorage.getItem('JIMS_TOKEN');
+        if (!token) {
+          window.location.href = '../AUT-02/aut02.html';
+          return;
+        }
+        const res = await fetch(`${API_BASE}/api/auth/session`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const payload = await res.json().catch(() => null);
+        if (!res.ok || !payload || !payload.success) {
+          localStorage.removeItem('JIMS_TOKEN');
+          window.location.href = '../AUT-02/aut02.html';
+          return;
+        }
+        const r = payload.data && payload.data.role ? String(payload.data.role) : null;
+        if (r && r.toLowerCase() !== 'admin') {
+          window.location.href = '../STU-03/stu03.html';
+          return;
+        }
+        runAut01();
+      } catch (e) {
+        localStorage.removeItem('JIMS_TOKEN');
+        window.location.href = '../AUT-02/aut02.html';
+      }
+    })();
+  }
 });

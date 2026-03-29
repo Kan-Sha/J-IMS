@@ -1,0 +1,23 @@
+/* J-IMS: role-based shell — hide main UI until session + sidebar applied (no Admin flash). */
+.jims-shell-loading .trang-chinh {
+  visibility: hidden;
+}
+
+body.jims-shell-ready .trang-chinh {
+  visibility: visible;
+}
+
+/* Bottom account + settings: fixed stack, same order on all screens */
+.sidebar-footer-jims {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.sidebar-footer-jims .sidebar-settings {
+  margin-top: 0;
+}

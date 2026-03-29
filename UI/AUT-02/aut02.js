@@ -143,15 +143,31 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('JIMS_TOKEN', token);
       }
 
-      const redirect = payload && payload.data && payload.data.redirect ? payload.data.redirect : null;
+      const data = payload && payload.data ? payload.data : {};
+      const staffId = data.staffId != null ? String(data.staffId) : null;
+      const role = data.role != null ? String(data.role) : '';
+      const setupKey = staffId ? 'JIMS_SETUP_DONE_' + staffId : null;
+
+      if (setupKey && !localStorage.getItem(setupKey)) {
+        window.location.href = '../AUT-03/aut03.html';
+        return;
+      }
+
+      const redirect = data.redirect ? String(data.redirect) : null;
       if (redirect) {
         let target = redirect;
-        // Giữ tương thích với các giá trị cũ nếu còn
         target = target
           .replace(/^\/AUT01\//, '/UI/AUT-01/')
           .replace(/^\/AUT02\//, '/UI/AUT-02/')
           .replace(/^\/STU01-03\//, '/UI/STU-01/');
         window.location.href = target;
+        return;
+      }
+
+      if (role && role.toLowerCase() === 'admin') {
+        window.location.href = '../AUT-01/aut01.html';
+      } else {
+        window.location.href = '../STU-03/stu03.html';
       }
     } catch (err) {
       showThongBao('error', 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.');

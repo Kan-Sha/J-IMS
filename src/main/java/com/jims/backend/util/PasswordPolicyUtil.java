@@ -8,6 +8,10 @@ public final class PasswordPolicyUtil {
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
     );
 
+    /** AUT-03: single message for empty / weak new password (after trim). */
+    public static final String NEW_PASSWORD_POLICY_MESSAGE =
+            "Yêu cầu : Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ thường, chữ hoa, số và kí tự đặc biệt";
+
     private PasswordPolicyUtil() {
     }
 
@@ -16,10 +20,10 @@ public final class PasswordPolicyUtil {
      */
     public static Optional<String> validateNewPassword(String password) {
         if (password == null || password.isEmpty()) {
-            return Optional.of("Mật khẩu mới không được để trống!");
+            return Optional.of(NEW_PASSWORD_POLICY_MESSAGE);
         }
         if (!STRONG_PASSWORD.matcher(password).matches()) {
-            return Optional.of("Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ thường, chữ hoa, số và ký tự đặc biệt!");
+            return Optional.of(NEW_PASSWORD_POLICY_MESSAGE);
         }
         return Optional.empty();
     }

@@ -12,9 +12,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../STU-01/stu01.css">
   <link rel="stylesheet" href="stu03.css">
+  <link rel="stylesheet" href="../css/jims-shell.css">
 </head>
 
-<body>
+<body class="jims-shell-loading" data-jims-page="stu03">
 
 <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Mở menu">
   <span></span><span></span><span></span>
@@ -54,14 +55,14 @@
           <path d="M15 9.5C15 8.1 13.7 7 12 7s-3 1.1-3 2.5c0 1.4 1.3 2 3 2.5s3 1.1 3 2.5c0 1.4-1.3 2.5-3 2.5s-3-1.1-3-2.5"/>
         </svg>
       </a>
-      <a href="../STU-01/stu01.html" class="menu-icon active" title="Hồ sơ học sinh">
+      <a href="stu03.html" class="menu-icon active" title="Hồ sơ học sinh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
           <path d="M22 10v6"/>
           <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
         </svg>
       </a>
-      <a href="../AUT-01/aut01.html" class="menu-icon" title="Nhân viên">
+      <a href="../AUT-01/aut01.html" class="menu-icon jims-admin-only" title="Nhân viên">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="3" width="20" height="18" rx="2"/>
           <circle cx="9" cy="10" r="3"/>
@@ -77,12 +78,20 @@
         </svg>
       </a>
     </nav>
+    <div class="sidebar-footer-jims">
+    <a href="../AUT-03/aut03.html" class="menu-icon sidebar-avatar" title="Thông tin cá nhân">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </a>
     <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
     </a>
+    </div>
   </div>
 
   <div class="noi-dung">
@@ -96,7 +105,7 @@
         <span>Hồ sơ học sinh</span>
       </div>
       <nav class="sub-menu">
-        <a href="../STU-01/stu01.html" class="sub-menu-item">
+        <a href="../STU-01/stu01.html" class="sub-menu-item jims-admin-only">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 20h9"/>
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -112,7 +121,7 @@
           </svg>
           Danh sách học sinh
         </a>
-        <a href="#" class="sub-menu-item">
+        <a href="#" class="sub-menu-item jims-admin-only">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/>
             <polyline points="1 20 1 14 7 14"/>
@@ -211,6 +220,7 @@
   </div>
 </div>
 
+<script src="../js/jims-shell.js"></script>
 <script src="stu03.js"></script>
 </body>
 </html>

@@ -13,9 +13,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="aut01.css">
+  <link rel="stylesheet" href="../css/jims-shell.css">
 </head>
 
-<body>
+<body class="jims-shell-loading" data-jims-page="aut01">
 
   <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Mở menu">
     <span></span><span></span><span></span>
@@ -87,12 +88,20 @@
         </a>
       </nav>
 
-      <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
+        <div class="sidebar-footer-jims">
+        <a href="../AUT-03/aut03.html" class="menu-icon sidebar-avatar" title="Thông tin cá nhân">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </a>
+        <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="3"/>
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
   </svg>
 </a>
+        </div>
 
     </div>
 
@@ -227,6 +236,7 @@
     </div>
   </div>
 
+  <script src="../js/jims-shell.js"></script>
   <script src="aut01.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const API_BASE = 'http://127.0.0.1:8080';
+  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
 
   function authHeaders(extra) {
     const token = localStorage.getItem('JIMS_TOKEN');
@@ -7,37 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (token) base.Authorization = `Bearer ${token}`;
     return base;
   }
-  async function kiemTraSessionVaQuyenStu01() {
-    try {
-      const token = localStorage.getItem('JIMS_TOKEN');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${API_BASE}/api/auth/session`, {
-        method: 'GET',
-        credentials: 'include',
-        headers
-      });
-      const payload = await res.json().catch(() => null);
-      if (!res.ok || !payload || !payload.success) {
-        localStorage.removeItem('JIMS_TOKEN');
-        window.location.href = '../AUT-02/aut02.html';
-        return null;
-      }
-      const data = payload.data || {};
-      const role = data.role ? String(data.role) : null;
-      if (role && role.toLowerCase() !== 'admin') {
-        window.location.href = '../STU-03/stu03.html';
-        return null;
-      }
-      return role;
-    } catch (e) {
-      localStorage.removeItem('JIMS_TOKEN');
-      window.location.href = '../AUT-02/aut02.html';
-      return null;
-    }
-  }
 
-  kiemTraSessionVaQuyenStu01();
-
+  function runStu01() {
   const inputHo       = document.getElementById('ho');
   const inputTen      = document.getElementById('ten');
   const inputNgaySinh = document.getElementById('ngay-sinh');
@@ -213,6 +185,14 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
+  function kiemTraHoTenPH(val) {
+    const t = (val || '').trim();
+    if (!t) return 'Họ tên phụ huynh không được để trống!';
+    if (t.length < 8) return 'Họ tên phụ huynh phải có ít nhất 8 ký tự!';
+    if (t.length > 100) return 'Họ tên phụ huynh không được vượt quá 100 ký tự!';
+    return null;
+  }
+
   function doiNgaySinhSangISO(val) {
     const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     if (!match) return null;
@@ -242,7 +222,23 @@ document.addEventListener('DOMContentLoaded', function () {
   const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
 
   inputHoTenPH.addEventListener('input', function () {
-    xoaLoi(khungHoTenPH, loiHoTenPH);
+    const t = (this.value || '').trim();
+    const err = kiemTraHoTenPH(t);
+    if (err) {
+      hienLoi(khungHoTenPH, loiHoTenPH, err);
+    } else {
+      xoaLoi(khungHoTenPH, loiHoTenPH);
+    }
+  });
+
+  inputHoTenPH.addEventListener('blur', function () {
+    const hoTenPH = inputHoTenPH.value.trim();
+    const err = kiemTraHoTenPH(hoTenPH);
+    if (err) {
+      hienLoi(khungHoTenPH, loiHoTenPH, err);
+    } else {
+      xoaLoi(khungHoTenPH, loiHoTenPH);
+    }
   });
 
   inputEmail.addEventListener('input', function () {
@@ -340,8 +336,9 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
-    if (!hoTenPH) {
-      hienLoi(khungHoTenPH, loiHoTenPH, 'Mục này không được để trống!');
+    const loiHoTenPHMsg = kiemTraHoTenPH(hoTenPH);
+    if (loiHoTenPHMsg) {
+      hienLoi(khungHoTenPH, loiHoTenPH, loiHoTenPHMsg);
       coLoi = true;
     }
 
@@ -509,4 +506,43 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
       closeMobileSidebar();
     }
   });
+  }
+
+  if (window.JIMS && window.JIMS.ready) {
+    window.JIMS.ready.then(function (role) {
+      if (role && String(role).toLowerCase() === 'admin') {
+        runStu01();
+      }
+    });
+  } else {
+    (async function legacyShell() {
+      try {
+        const token = localStorage.getItem('JIMS_TOKEN');
+        if (!token) {
+          window.location.href = '../AUT-02/aut02.html';
+          return;
+        }
+        const res = await fetch(`${API_BASE}/api/auth/session`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const payload = await res.json().catch(() => null);
+        if (!res.ok || !payload || !payload.success) {
+          localStorage.removeItem('JIMS_TOKEN');
+          window.location.href = '../AUT-02/aut02.html';
+          return;
+        }
+        const r = payload.data && payload.data.role ? String(payload.data.role) : null;
+        if (r && r.toLowerCase() !== 'admin') {
+          window.location.href = '../STU-03/stu03.html';
+          return;
+        }
+        runStu01();
+      } catch (e) {
+        localStorage.removeItem('JIMS_TOKEN');
+        window.location.href = '../AUT-02/aut02.html';
+      }
+    })();
+  }
 });

@@ -45,16 +45,29 @@ public class StudentService {
         try {
             Map<String, String> fieldErrors = new LinkedHashMap<String, String>();
 
-            if (isBlank(firstName) || isBlank(lastName) || isBlank(dob) || isBlank(gender)
-                    || isBlank(parentName) || isBlank(phone)) {
-                // Keep legacy behavior for required fields, but also attach field-level errors for UI.
-                if (isBlank(firstName)) fieldErrors.put("firstName", "Mục này không được để trống!");
-                if (isBlank(lastName)) fieldErrors.put("lastName", "Mục này không được để trống!");
-                if (isBlank(dob)) fieldErrors.put("dob", "Ngày sinh không được để trống!");
-                if (isBlank(parentName)) fieldErrors.put("parentName", "Mục này không được để trống!");
-                if (isBlank(phone)) fieldErrors.put("phone", "Mục này không được để trống!");
-                if (isBlank(gender)) fieldErrors.put("gender", "Mục này không được để trống!");
-                return new ApiResult(false, fieldErrors, "Mục này không được để trống!", 400);
+            Optional<String> parentNameErr = validateParentFullName(parentName);
+            if (parentNameErr.isPresent()) {
+                fieldErrors.put("parentName", parentNameErr.get());
+            }
+
+            if (isBlank(firstName)) {
+                fieldErrors.put("firstName", "Mục này không được để trống!");
+            }
+            if (isBlank(lastName)) {
+                fieldErrors.put("lastName", "Mục này không được để trống!");
+            }
+            if (isBlank(dob)) {
+                fieldErrors.put("dob", "Ngày sinh không được để trống!");
+            }
+            if (isBlank(phone)) {
+                fieldErrors.put("phone", "Mục này không được để trống!");
+            }
+            if (isBlank(gender)) {
+                fieldErrors.put("gender", "Mục này không được để trống!");
+            }
+
+            if (!fieldErrors.isEmpty()) {
+                return new ApiResult(false, fieldErrors, "Validation failed", 400);
             }
 
             // Note: UI sends { firstName: Họ, lastName: Tên } for STU-01.
@@ -171,5 +184,25 @@ public class StudentService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    /**
+     * STU-01: "Họ tên phụ huynh" — required, 8–100 chars after trim.
+     */
+    private Optional<String> validateParentFullName(String raw) {
+        if (raw == null) {
+            return Optional.of("Họ tên phụ huynh không được để trống!");
+        }
+        String t = raw.trim();
+        if (t.isEmpty()) {
+            return Optional.of("Họ tên phụ huynh không được để trống!");
+        }
+        if (t.length() < 8) {
+            return Optional.of("Họ tên phụ huynh phải có ít nhất 8 ký tự!");
+        }
+        if (t.length() > 100) {
+            return Optional.of("Họ tên phụ huynh không được vượt quá 100 ký tự!");
+        }
+        return Optional.empty();
     }
 }
