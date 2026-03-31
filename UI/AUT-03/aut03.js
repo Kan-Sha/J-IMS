@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function hienLoi(loiId, khungId, msg) {
+    msg = msg == null ? '' : String(msg).trim();
     var loi = document.getElementById(loiId);
     var khung = document.getElementById(khungId);
     if (loi) {
@@ -216,11 +217,13 @@ document.addEventListener('DOMContentLoaded', function () {
       if (dangGui) return;
       xoaLoiTatCa();
       xoaThongBao();
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = '../AUT-01/aut01.html';
-      }
+      var i1 = document.getElementById('mk-hien-tai');
+      var i2 = document.getElementById('mk-moi');
+      var i3 = document.getElementById('mk-xac-nhan');
+      if (i1) i1.value = '';
+      if (i2) i2.value = '';
+      if (i3) i3.value = '';
+      daLuuLanDau = false;
     });
   }
 
@@ -348,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         seChuyenTrang = true;
-        nutLuu.textContent = 'Đang chuyển trang...';
+        nutLuu.textContent = 'Đang lưu...';
         hienPopupThanhCong();
       } catch (e) {
         setThongBao('error', 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.');

@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function hienLoi(loiId, khungId, msg) {
+    msg = msg == null ? '' : String(msg).trim();
     var loi = document.getElementById(loiId);
     var khung = document.getElementById(khungId);
     if (loi) {
@@ -267,8 +268,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!className) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Mục này không được để trống!');
       hopLe = false;
-    } else if (className.length < 3 || className.length > 50) {
-      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
+    } else if (className.length > 10) {
+      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học cần ít hơn 10 ký tự');
       hopLe = false;
     }
 
@@ -288,17 +289,8 @@ document.addEventListener('DOMContentLoaded', function () {
       hopLe = false;
     }
 
-    var capRaw = inputSoLuong ? String(inputSoLuong.value).trim() : '';
-    if (!capRaw) {
-      hienLoi('loi-so-luong-hs', 'khung-so-luong-hs', 'Mục này không được để trống!');
-      hopLe = false;
-    } else {
-      var cap = parseInt(capRaw, 10);
-      if (isNaN(cap) || cap < 3 || cap > 18) {
-        hienLoi('loi-so-luong-hs', 'khung-so-luong-hs', 'Số lượng học sinh không phù hợp!');
-        hopLe = false;
-      }
-    }
+    // Fixed business rule: 15
+    var cap = 15;
 
     var days = getLessonDays();
     if (days.length !== 2) {
@@ -391,7 +383,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function initDropdowns() {
-    var levels = await taiLevels();
+    // Business rule: only 2 levels allowed
+    var levels = [
+      { levelId: 1, levelName: 'Cơ bản', pricePerSession: 130000 },
+      { levelId: 2, levelName: 'Nâng cao', pricePerSession: 150000 }
+    ];
     var teachers = await taiTeachers();
 
     if (selectCapDo) {
@@ -489,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var levelId = parseInt(selectCapDo.value, 10);
     var teacherId = parseInt(selectGiaoVien.value, 10);
     var startDateIso = parseDdMmYyyyToIso(inputNgay.value);
-    var capacity = parseInt(String(inputSoLuong.value).trim(), 10);
+    var capacity = 15;
     var days = getLessonDays();
     var startMins = timeToMinutes(inputGioBatDau.value);
     var endMins = timeToMinutes(inputGioKetThuc.value);

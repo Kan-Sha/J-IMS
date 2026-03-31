@@ -72,6 +72,7 @@ CREATE TABLE class_schedule (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     CONSTRAINT chk_schedule_time_order CHECK (end_time > start_time),
+    CONSTRAINT chk_schedule_day_of_week CHECK (day_of_week IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')),
     FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE
 );
 
@@ -187,4 +188,4 @@ SELECT c.class_id, 'Friday', '10:00:00', '11:30:00' FROM classes c WHERE c.class
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
 SELECT c.class_id, 'Saturday', '08:30:00', '10:00:00' FROM classes c WHERE c.class_name = '5E1' LIMIT 1;
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Sunday', '08:30:00', '10:00:00' FROM classes c WHERE c.class_name = '5E1' LIMIT 1;
+SELECT c.class_id, 'Friday', '08:30:00', '10:00:00' FROM classes c WHERE c.class_name = '5E1' LIMIT 1;

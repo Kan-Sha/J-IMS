@@ -1,0 +1,165 @@
+@import url('../OPE-01/ope01.css');
+
+.search-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 16px;
+    background: #ffffff;
+    margin-bottom: 30px;
+}
+
+.search-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.search-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.btn-search {
+    padding: 0 16px;
+    height: 32px;
+    font-family: var(--font-chinh);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    background: var(--mau-xanh-dam);
+    color: white;
+    border: none;
+    cursor: pointer;
+    line-height: 32px;
+}
+
+.btn-reset {
+    padding: 0 16px;
+    height: 32px;
+    font-family: var(--font-chinh);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--mau-xanh-dam);
+    border: 1.5px solid var(--mau-xanh-dam);
+    cursor: pointer;
+    line-height: 29px;
+}
+
+.bang-danh-sach {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bang-danh-sach th {
+    background-color: var(--mau-xanh-dam);
+    color: var(--mau-trang);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 14px 16px;
+    text-align: center;
+}
+
+.bang-danh-sach td {
+    padding: 16px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mau-chu);
+    text-align: center;
+    border: none;
+}
+
+.bang-danh-sach tbody tr:nth-child(odd) {
+    background-color: var(--mau-trang);
+}
+
+.bang-danh-sach tbody tr:nth-child(even) {
+    background-color: #f7f9fc;
+}
+
+.btn-xem {
+    background-color: #8bd2f0;
+    color: var(--mau-chu);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-family: var(--font-chinh);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.btn-xem:hover {
+    filter: brightness(0.9);
+}
+
+.tabs-container {
+    display: flex;
+    gap: 32px;
+    border-bottom: 2px solid #f4f6fb;
+    margin-bottom: 24px;
+}
+
+.tab-item {
+    padding-bottom: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--mau-chu-phu);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-bottom 0.2s;
+    margin-bottom: -2px;
+}
+
+.tab-item.active {
+    color: var(--mau-chu);
+    border-bottom: 2px solid var(--mau-chu);
+}
+
+.tab-item:hover:not(.active) {
+    color: #4a4a4a;
+}
+
+.khung-disabled {
+    background-color: #f6f7fb;
+    box-shadow: none !important;
+}
+
+.input-disabled {
+    color: #000000 !important;
+    font-weight: 500;
+    background: transparent;
+}
+
+.nhom-hien-thi {
+    display: flex;
+    flex-direction: column;
+}
+
+.hien-thi-gia-tri {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mau-chu);
+    line-height: 1.5;
+}
+
+.nav-chi-tiet-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mau-chu);
+}
+
+.nav-chi-tiet-line {
+    width: 2px;
+    height: 16px;
+    background-color: var(--mau-chu);
+}

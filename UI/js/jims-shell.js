@@ -51,6 +51,13 @@
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
         ope01: 'ope01.html'
+      },
+      ope02: {
+        stu01: '../STU-01/stu01.html',
+        stu03: '../STU-03/stu03.html',
+        aut01: '../AUT-01/aut01.html',
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html'
       }
     };
     return m[page] || m.stu01;
@@ -160,7 +167,7 @@
           window.location.href = u.stu03;
           return;
         }
-        if (page === 'ope01' && lower !== 'admin') {
+        if ((page === 'ope01' || page === 'ope02') && lower !== 'admin') {
           alert('Bạn không có quyền truy cập!');
           window.location.href = u.stu03;
           return;

@@ -25,6 +25,7 @@ public class ClassService {
     private final ClassRepository classRepository;
     private final StaffRepository staffRepository;
     private final StudentRepository studentRepository;
+    private static final int OPE_FIXED_CAPACITY = 15;
 
     public ClassService(ClassRepository classRepository,
                         StaffRepository staffRepository,
@@ -48,21 +49,26 @@ public class ClassService {
                 return new ApiResult(false, Collections.emptyMap(), "Thiếu thông tin bắt buộc!", 400);
             }
             String normalizedClassName = className.trim().toUpperCase();
-            if (normalizedClassName.length() < 3 || normalizedClassName.length() > 50) {
-                return new ApiResult(false, Collections.emptyMap(), "Tên lớp học không hợp lệ!", 400);
+            if (normalizedClassName.length() < 1 || normalizedClassName.length() > 10) {
+                return new ApiResult(false, Collections.emptyMap(), "Tên lớp học cần ít hơn 10 ký tự", 400);
             }
-            if (capacity.intValue() < 3 || capacity.intValue() > 18) {
+            // Business rule: fixed max students = 15. Do not trust client input.
+            int enforcedCapacity = OPE_FIXED_CAPACITY;
+            if (enforcedCapacity < 3 || enforcedCapacity > 18) {
                 return new ApiResult(false, Collections.emptyMap(), "Số lượng học sinh không phù hợp!", 400);
             }
             if (days.size() != 2) {
                 return new ApiResult(false, Collections.emptyMap(), "Mỗi lớp phải có đúng 2 buổi học trong tuần!", 400);
             }
             Set<String> distinctDays = new LinkedHashSet<String>();
+            List<String> canonicalDays = new ArrayList<String>();
             for (String d : days) {
-                if (d == null || d.trim().isEmpty()) {
+                String canon = normalizeDayOfWeek(d);
+                if (canon == null) {
                     return new ApiResult(false, Collections.emptyMap(), "Ngày học không hợp lệ!", 400);
                 }
-                distinctDays.add(d.trim().toLowerCase());
+                distinctDays.add(canon.toLowerCase());
+                canonicalDays.add(canon);
             }
             if (distinctDays.size() != 2) {
                 return new ApiResult(false, Collections.emptyMap(), "Hai ngày học phải khác nhau!", 400);
@@ -102,13 +108,20 @@ public class ClassService {
                     conn.rollback();
                     return new ApiResult(false, Collections.emptyMap(), "Cấp độ (level) không tồn tại!", 400);
                 }
+                // Only allow 2 levels by tuition snapshot rule (130k / 150k).
+                BigDecimal p130 = new BigDecimal("130000.00");
+                BigDecimal p150 = new BigDecimal("150000.00");
+                if (!(price.compareTo(p130) == 0 || price.compareTo(p150) == 0)) {
+                    conn.rollback();
+                    return new ApiResult(false, Collections.emptyMap(), "Cấp độ không hợp lệ!", 400);
+                }
 
                 if (classRepository.classNameExists(conn, normalizedClassName)) {
                     conn.rollback();
                     return new ApiResult(false, Collections.emptyMap(), "Tên lớp học này đã tồn tại!", 400);
                 }
 
-                for (String day : days) {
+                for (String day : canonicalDays) {
                     if (classRepository.hasTeacherScheduleOverlap(conn, teacherId.intValue(), day, sqlStart, sqlEnd, null)) {
                         conn.rollback();
                         return new ApiResult(false, Collections.emptyMap(), "Giáo viên đã có lịch trùng vào cùng ngày và khung giờ!", 400);
@@ -116,9 +129,9 @@ public class ClassService {
                 }
 
                 int classId = classRepository.insertClass(conn, normalizedClassName, levelId.intValue(), teacherId.intValue(),
-                        Date.valueOf(sd), capacity.intValue(), price);
+                        Date.valueOf(sd), enforcedCapacity, price);
 
-                for (String day : days) {
+                for (String day : canonicalDays) {
                     classRepository.insertSchedule(conn, classId, day, sqlStart, sqlEnd);
                 }
 
@@ -148,6 +161,27 @@ public class ClassService {
             return s + ":00";
         }
         return s;
+    }
+
+    /**
+     * Canonical storage format: English day strings (Mon-Sat only).
+     * Accepts legacy numeric values (2..7) and common variants; rejects Sunday.
+     */
+    private static String normalizeDayOfWeek(String raw) {
+        if (raw == null) return null;
+        String s = raw.trim();
+        if (s.isEmpty()) return null;
+        String lower = s.toLowerCase();
+        if ("sunday".equals(lower) || "sun".equals(lower) || "cn".equals(lower) || "chu nhat".equals(lower) || "chủ nhật".equals(lower) || "1".equals(lower) || "0".equals(lower) || "8".equals(lower)) {
+            return null;
+        }
+        if ("2".equals(lower) || "monday".equals(lower) || "mon".equals(lower)) return "Monday";
+        if ("3".equals(lower) || "tuesday".equals(lower) || "tue".equals(lower) || "tues".equals(lower)) return "Tuesday";
+        if ("4".equals(lower) || "wednesday".equals(lower) || "wed".equals(lower)) return "Wednesday";
+        if ("5".equals(lower) || "thursday".equals(lower) || "thu".equals(lower) || "thur".equals(lower) || "thurs".equals(lower)) return "Thursday";
+        if ("6".equals(lower) || "friday".equals(lower) || "fri".equals(lower)) return "Friday";
+        if ("7".equals(lower) || "saturday".equals(lower) || "sat".equals(lower)) return "Saturday";
+        return null;
     }
 
     public ApiResult searchClassesForManage(String search) {

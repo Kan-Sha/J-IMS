@@ -20,3 +20,10 @@ ALTER TABLE classes
 ALTER TABLE classes
   ADD CONSTRAINT chk_classes_capacity CHECK (capacity >= 3 AND capacity <= 18);
 
+-- OPE-01/OPE-02 schedule day consistency (Mon-Sat only)
+ALTER TABLE class_schedule
+  DROP CHECK chk_schedule_day_of_week;
+
+ALTER TABLE class_schedule
+  ADD CONSTRAINT chk_schedule_day_of_week CHECK (day_of_week IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'));
+

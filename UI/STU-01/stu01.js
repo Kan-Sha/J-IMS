@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function hienLoi(khung, loiEl, noiDung) {
     khung.classList.add('loi-input');
     if (loiEl) {
-      loiEl.textContent = noiDung;
+      loiEl.textContent = (noiDung == null ? '' : String(noiDung).trim());
       loiEl.classList.add('hien');
     }
   }

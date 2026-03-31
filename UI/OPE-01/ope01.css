@@ -447,6 +447,18 @@ body {
     margin-top: 36px;
 }
 
+/* Mobile: keep action buttons always visible */
+@media (max-width: 767px) {
+    .nhom-nut {
+        position: sticky;
+        bottom: 0;
+        background: var(--mau-trang);
+        padding: 12px 0 4px;
+        margin-top: 20px;
+        z-index: 5;
+    }
+}
+
 .nut-huy {
     width: 120px;
     height: 44px;
