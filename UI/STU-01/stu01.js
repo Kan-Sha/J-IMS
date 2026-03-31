@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
   const API_BASE = 'http://127.0.0.1:8080';
-  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
 
   function authHeaders(extra) {
     const token = localStorage.getItem('JIMS_TOKEN');
@@ -8,8 +7,37 @@ document.addEventListener('DOMContentLoaded', function () {
     if (token) base.Authorization = `Bearer ${token}`;
     return base;
   }
+  async function kiemTraSessionVaQuyenStu01() {
+    try {
+      const token = localStorage.getItem('JIMS_TOKEN');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE}/api/auth/session`, {
+        method: 'GET',
+        credentials: 'include',
+        headers
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || !payload || !payload.success) {
+        localStorage.removeItem('JIMS_TOKEN');
+        window.location.href = '../AUT-02/aut02.html';
+        return null;
+      }
+      const data = payload.data || {};
+      const role = data.role ? String(data.role) : null;
+      if (role && role.toLowerCase() !== 'admin') {
+        window.location.href = '../STU-03/stu03.html';
+        return null;
+      }
+      return role;
+    } catch (e) {
+      localStorage.removeItem('JIMS_TOKEN');
+      window.location.href = '../AUT-02/aut02.html';
+      return null;
+    }
+  }
 
-  function runStu01() {
+  kiemTraSessionVaQuyenStu01();
+
   const inputHo       = document.getElementById('ho');
   const inputTen      = document.getElementById('ten');
   const inputNgaySinh = document.getElementById('ngay-sinh');
@@ -112,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function hienLoi(khung, loiEl, noiDung) {
     khung.classList.add('loi-input');
     if (loiEl) {
-      loiEl.textContent = (noiDung == null ? '' : String(noiDung).trim());
+      loiEl.textContent = noiDung;
       loiEl.classList.add('hien');
     }
   }
@@ -179,18 +207,9 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
   function kiemTraDiaChi(val) {
-    const value = (val == null ? '' : String(val)).trim();
-    if (!value) return 'Địa chỉ không được để trống!';
-    if (value.length < 8) return 'Địa chỉ phải có ít nhất 8 ký tự!';
-    if (value.length > 255) return 'Địa chỉ không được vượt quá 255 ký tự!';
-    return null;
-  }
-
-  function kiemTraHoTenPH(val) {
-    const value = (val == null ? '' : String(val)).trim();
-    if (!value) return 'Họ tên phụ huynh không được để trống!';
-    if (value.length < 8) return 'Họ tên phụ huynh phải có ít nhất 8 ký tự!';
-    if (value.length > 100) return 'Họ tên phụ huynh không được vượt quá 100 ký tự!';
+    if (!val) return null; 
+    if (val.length < 8)   return 'Địa chỉ phải có ít nhất 8 ký tự!';
+    if (val.length > 255) return 'Địa chỉ không được vượt quá 255 ký tự!';
     return null;
   }
 
@@ -223,21 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
 
   inputHoTenPH.addEventListener('input', function () {
-    const err = kiemTraHoTenPH(this.value);
-    if (err) {
-      hienLoi(khungHoTenPH, loiHoTenPH, err);
-    } else {
-      xoaLoi(khungHoTenPH, loiHoTenPH);
-    }
-  });
-
-  inputHoTenPH.addEventListener('blur', function () {
-    const err = kiemTraHoTenPH(inputHoTenPH.value);
-    if (err) {
-      hienLoi(khungHoTenPH, loiHoTenPH, err);
-    } else {
-      xoaLoi(khungHoTenPH, loiHoTenPH);
-    }
+    xoaLoi(khungHoTenPH, loiHoTenPH);
   });
 
   inputEmail.addEventListener('input', function () {
@@ -318,12 +323,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let coLoi = false;
 
-    const loiHoTenPHMsg = kiemTraHoTenPH(hoTenPH);
-    if (loiHoTenPHMsg) {
-      hienLoi(khungHoTenPH, loiHoTenPH, loiHoTenPHMsg);
-      coLoi = true;
-    }
-
     const loiHoMsg = kiemTraHo(ho);
     if (loiHoMsg) {
       hienLoi(khungHo, loiHo, loiHoMsg);
@@ -341,11 +340,16 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
+    if (!hoTenPH) {
+      hienLoi(khungHoTenPH, loiHoTenPH, 'Mục này không được để trống!');
+      coLoi = true;
+    }
+
     if (!email) {
       hienLoi(khungEmail, loiEmail, 'Mục này không được để trống!');
       anIcon(iconEmail);
       coLoi = true;
-    } else if (!EMAIL_REGEX_COM.test(email)) {
+    } else if (!EMAIL_REGEX_GMAIL.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Sai định dạng email!');
       hienX(iconEmail);
       coLoi = true;
@@ -436,10 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
         hienPopup(studentId ? `Thêm học sinh thành công! Mã: ${studentId}` : 'Thêm học sinh thành công!');
       })
       .catch(() => {
-        var msg = !navigator.onLine
-          ? 'Mất kết nối internet. Vui lòng kiểm tra mạng.'
-          : 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
-        hienPopup(msg);
+        hienPopup('Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
       })
       .finally(() => {
         nutLuu.textContent = 'Lưu';
@@ -459,8 +460,6 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
     document.body.classList.remove('mobile-sidebar-open');
     overlayDX.style.display = 'block';
     popupDX.style.display   = 'block';
-    document.body.classList.add('popup-open');
-    document.body.style.overflow = 'hidden';
     nutHocSinhSidebar.classList.remove('active');
     nutDangXuatSidebar.classList.add('active');
   }
@@ -468,8 +467,6 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
   function anPopupDangXuat() {
     overlayDX.style.display = 'none';
     popupDX.style.display   = 'none';
-    document.body.classList.remove('popup-open');
-    document.body.style.overflow = '';
     nutDangXuatSidebar.classList.remove('active');
     nutHocSinhSidebar.classList.add('active');
   }
@@ -512,43 +509,4 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
       closeMobileSidebar();
     }
   });
-  }
-
-  if (window.JIMS && window.JIMS.ready) {
-    window.JIMS.ready.then(function (role) {
-      if (role && String(role).toLowerCase() === 'admin') {
-        runStu01();
-      }
-    });
-  } else {
-    (async function legacyShell() {
-      try {
-        const token = localStorage.getItem('JIMS_TOKEN');
-        if (!token) {
-          window.location.href = '../AUT-02/aut02.html';
-          return;
-        }
-        const res = await fetch(`${API_BASE}/api/auth/session`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-        const payload = await res.json().catch(() => null);
-        if (!res.ok || !payload || !payload.success) {
-          localStorage.removeItem('JIMS_TOKEN');
-          window.location.href = '../AUT-02/aut02.html';
-          return;
-        }
-        const r = payload.data && payload.data.role ? String(payload.data.role) : null;
-        if (r && r.toLowerCase() !== 'admin') {
-          window.location.href = '../STU-03/stu03.html';
-          return;
-        }
-        runStu01();
-      } catch (e) {
-        localStorage.removeItem('JIMS_TOKEN');
-        window.location.href = '../AUT-02/aut02.html';
-      }
-    })();
-  }
 });
