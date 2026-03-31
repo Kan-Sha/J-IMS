@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var dangGui = false;
   var sessionHopLe = false;
+  var sessionDangXuLy = false;
 
   function authHeaders(extra) {
     if (window.JIMS && typeof window.JIMS.authHeaders === 'function') {
@@ -16,22 +17,37 @@ document.addEventListener('DOMContentLoaded', function () {
     return h;
   }
 
+  function hienThongBaoDangNhapHetHan() {
+    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+  }
+
+  function getNetworkFailureMessage() {
+    if (!navigator.onLine) {
+      return 'Mất kết nối internet. Vui lòng kiểm tra mạng.';
+    }
+    return 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+  }
+
   async function kiemTraSessionOpe01() {
     try {
       var token = localStorage.getItem('JIMS_TOKEN');
       if (!token) {
+        hienThongBaoDangNhapHetHan();
         window.location.href = LOGIN_URL;
         sessionHopLe = false;
         return false;
       }
+
+      sessionDangXuLy = true;
       var res = await fetch(API_BASE + '/api/auth/session', {
         method: 'GET',
         credentials: 'include',
         headers: authHeaders()
       });
       var payload = await res.json().catch(function () { return null; });
-      if (!res.ok || !payload || !payload.success) {
+      if (res.status === 401 || !payload || !payload.success) {
         localStorage.removeItem('JIMS_TOKEN');
+        hienThongBaoDangNhapHetHan();
         window.location.href = LOGIN_URL;
         sessionHopLe = false;
         return false;
@@ -46,20 +62,19 @@ document.addEventListener('DOMContentLoaded', function () {
       return true;
     } catch (e) {
       localStorage.removeItem('JIMS_TOKEN');
-      window.location.href = LOGIN_URL;
+      alert(getNetworkFailureMessage());
       sessionHopLe = false;
       return false;
+    }
+    finally {
+      sessionDangXuLy = false;
     }
   }
 
   if (window.JIMS && window.JIMS.ready) {
     window.JIMS.ready.then(function (role) {
-      if (role) {
-        sessionHopLe = true;
-      }
+      if (role) sessionHopLe = true;
     });
-  } else {
-    kiemTraSessionOpe01();
   }
 
   function hienLoi(loiId, khungId, msg) {
@@ -222,6 +237,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var nutLuu = document.getElementById('nut-luu');
   var nutHuy = document.getElementById('nut-huy');
 
+  // Prevent submit spam before session check completes.
+  if (nutLuu) nutLuu.disabled = true;
+
   if (inputNgay) inputNgay.addEventListener('input', handleDateInput);
   if (inputGioBatDau) inputGioBatDau.addEventListener('input', handleTimeInput);
   if (inputGioKetThuc) inputGioKetThuc.addEventListener('input', handleTimeInput);
@@ -312,6 +330,10 @@ document.addEventListener('DOMContentLoaded', function () {
       hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Khung giờ học không hợp lệ!');
       hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
       hopLe = false;
+    } else if ((endMins - startMins) < 30) {
+      hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Thời lượng buổi học phải tối thiểu 30 phút.');
+      hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Thời lượng buổi học phải tối thiểu 30 phút.');
+      hopLe = false;
     }
 
     return hopLe;
@@ -383,11 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function initDropdowns() {
-    // Business rule: only 2 levels allowed
-    var levels = [
-      { levelId: 1, levelName: 'Cơ bản', pricePerSession: 130000 },
-      { levelId: 2, levelName: 'Nâng cao', pricePerSession: 150000 }
-    ];
+    var levels = await taiLevels();
     var teachers = await taiTeachers();
 
     if (selectCapDo) {
@@ -473,10 +491,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function submit() {
     if (dangGui) return;
-    if (!sessionHopLe) {
-      var ok = await kiemTraSessionOpe01();
-      if (!ok) return;
-    }
+    if (!sessionHopLe) return;
 
     var isValid = validateClient();
     if (!isValid) return;
@@ -517,13 +532,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (res.status === 401) {
         localStorage.removeItem('JIMS_TOKEN');
+        hienThongBaoDangNhapHetHan();
         window.location.href = LOGIN_URL;
         return;
       }
 
       if (!payload || !payload.success) {
         if (res.status >= 500) {
-          alert('Lỗi hệ thống. Vui lòng thử lại sau.');
+          alert(getNetworkFailureMessage());
         } else {
           apLoiServer(payload && payload.message ? payload.message : 'Dữ liệu không hợp lệ.');
         }
@@ -532,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       hienPopupLuuThanhCong('Lớp học đã được lưu thành công!');
     } catch (e) {
-      alert('Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
+      alert(getNetworkFailureMessage());
     } finally {
       if (nutLuu) {
         nutLuu.disabled = false;
@@ -549,6 +565,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var popupDX = document.getElementById('popup-dang-xuat');
     if (overlayDX) overlayDX.style.display = 'block';
     if (popupDX) popupDX.style.display = 'block';
+    document.body.classList.add('popup-open');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.remove('mobile-sidebar-open');
   }
 
   function anPopupDangXuat() {
@@ -556,6 +575,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var popupDX = document.getElementById('popup-dang-xuat');
     if (overlayDX) overlayDX.style.display = 'none';
     if (popupDX) popupDX.style.display = 'none';
+    document.body.classList.remove('popup-open');
+    document.body.style.overflow = '';
   }
 
   var logoutBtn = document.getElementById('sidebar-logout');
@@ -594,20 +615,38 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  var navDanhSach = document.getElementById('nav-danh-sach-lop');
+  if (navDanhSach) {
+    navDanhSach.addEventListener('click', function (e) {
+      try {
+        e.preventDefault();
+        window.location.href = '../OPE-02/ope02.html';
+      } catch (_) {
+        window.location.href = '../OPE-02/ope02.html';
+      }
+    });
+  }
+
   (async function init() {
     try {
-      if (!sessionHopLe) {
+      if (window.JIMS && window.JIMS.ready) {
+        var role = await window.JIMS.ready;
+        if (!role) return;
+        sessionHopLe = true;
+      } else if (!sessionHopLe) {
         var ok = await kiemTraSessionOpe01();
         if (!ok) return;
       }
+      if (nutLuu) nutLuu.disabled = false;
       await initDropdowns();
     } catch (e) {
       if (e && e.code === 401) {
         localStorage.removeItem('JIMS_TOKEN');
+        hienThongBaoDangNhapHetHan();
         window.location.href = LOGIN_URL;
         return;
       }
-      alert('Không thể tải dữ liệu. Hãy kiểm tra backend đang chạy.');
+      alert(getNetworkFailureMessage());
     }
   })();
 });

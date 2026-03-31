@@ -20,6 +20,11 @@
     --rong-sub-sidebar: 250px;
 }
 
+html, body {
+    height: auto;
+    overflow-y: auto;
+}
+
 body {
     font-family: var(--font-chinh);
     background-color: var(--mau-nen);
@@ -31,8 +36,9 @@ body {
 
 .trang-chinh {
     display: flex;
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    height: auto;
+    width: 100%;
 }
 
 
@@ -120,7 +126,7 @@ body {
 .noi-dung {
     flex: 1;
     display: flex;
-    overflow: hidden;
+    overflow: visible;
 }
 
 
@@ -450,12 +456,16 @@ body {
 /* Mobile: keep action buttons always visible */
 @media (max-width: 767px) {
     .nhom-nut {
-        position: sticky;
-        bottom: 0;
-        background: var(--mau-trang);
-        padding: 12px 0 4px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
         margin-top: 20px;
-        z-index: 5;
+    }
+
+    .nut-luu,
+    .nut-huy {
+        width: 100%;
+        min-height: 44px;
     }
 }
 
@@ -688,7 +698,8 @@ body {
 
     .vung-form {
         width: 100%;
-        padding: 20px 14px;
+        padding: 20px 14px 96px;
+        overflow-y: visible;
     }
 
     .form-tieu-de {
@@ -706,6 +717,11 @@ body {
     }
 
     .nhom-nut {
+        position: sticky;
+        bottom: 0;
+        background: var(--mau-trang);
+        padding: 12px 0 8px;
+        z-index: 50;
         flex-direction: column;
         align-items: stretch;
         gap: 10px;

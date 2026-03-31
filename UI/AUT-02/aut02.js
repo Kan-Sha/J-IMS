@@ -170,7 +170,10 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '../STU-03/stu03.html';
       }
     } catch (err) {
-      showThongBao('error', 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
+      var msg = !navigator.onLine
+        ? 'Mất kết nối internet. Vui lòng kiểm tra mạng.'
+        : 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+      showThongBao('error', msg);
     } finally {
       nutDangNhap.textContent = 'Đăng nhập';
       nutDangNhap.disabled = false;

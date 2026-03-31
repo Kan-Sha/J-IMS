@@ -45,9 +45,8 @@ CREATE TABLE levels (
 );
 
 INSERT INTO levels (level_name, price_per_session) VALUES
-('Khối nhỏ', 120000.00),
-('Khối trung', 150000.00),
-('Khối lớn', 180000.00);
+('Cơ bản', 130000.00),
+('Nâng cao', 150000.00);
 
 CREATE TABLE classes (
     class_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -168,7 +167,7 @@ INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, cur
 ('KID-1D', 1, 2, '2025-01-15', 18, 0, 120000.00),
 ('KID-2G', 1, 2, '2025-02-01', 18, 0, 120000.00),
 ('KID-3A', 2, 2, '2025-03-01', 18, 0, 150000.00),
-('5E1', 3, 2, '2025-09-01', 18, 0, 180000.00);
+('5E1', 1, 2, '2025-09-01', 18, 0, 130000.00);
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
 SELECT c.class_id, 'Monday', '08:00:00', '09:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;

@@ -7,6 +7,23 @@ body.jims-shell-ready .trang-chinh {
   visibility: visible;
 }
 
+/* Logout popup must overlay sidebar on mobile (AUT-04 style) */
+body.popup-open {
+  overflow: hidden !important;
+}
+
+#overlay-dang-xuat {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  z-index: 9999 !important;
+}
+
+#popup-dang-xuat {
+  position: fixed !important;
+  z-index: 10000 !important;
+}
+
 /* Bottom account + settings: fixed stack, same order on all screens */
 .sidebar-footer-jims {
   margin-top: auto;

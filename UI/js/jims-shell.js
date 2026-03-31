@@ -6,6 +6,15 @@
 (function () {
   var API_BASE = 'http://127.0.0.1:8080';
 
+  function hienThongBaoDangNhapHetHan() {
+    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+  }
+
+  function getNetworkFailureMessage() {
+    if (!navigator.onLine) return 'Mất kết nối internet. Vui lòng kiểm tra mạng.';
+    return 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+  }
+
   function authHeaders() {
     var token = localStorage.getItem('JIMS_TOKEN');
     var h = {};
@@ -22,43 +31,49 @@
         stu03: '../STU-03/stu03.html',
         aut01: 'aut01.html',
         aut03: '../AUT-03/aut03.html',
-        ope01: '../OPE-01/ope01.html'
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html'
       },
       stu01: {
         stu01: 'stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
-        ope01: '../OPE-01/ope01.html'
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html'
       },
       stu03: {
         stu01: '../STU-01/stu01.html',
         stu03: 'stu03.html',
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
-        ope01: '../OPE-01/ope01.html'
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html'
       },
       aut03: {
         stu01: '../STU-01/stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: '../AUT-01/aut01.html',
         aut03: 'aut03.html',
-        ope01: '../OPE-01/ope01.html'
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html'
       },
       ope01: {
         stu01: '../STU-01/stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
-        ope01: 'ope01.html'
+        ope01: 'ope01.html',
+        ope02: '../OPE-02/ope02.html'
       },
       ope02: {
         stu01: '../STU-01/stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
-        ope01: '../OPE-01/ope01.html'
-      }
+        ope01: '../OPE-01/ope01.html',
+        ope02: 'ope02.html'
+      },
     };
     return m[page] || m.stu01;
   }
@@ -73,17 +88,9 @@
       a.setAttribute('href', studentHref);
     });
 
-    // OPE-01: visible to all, but only Admin can access
+    // OPE screens: Admin -> OPE-01, Teacher/TA -> OPE-02 list
     document.querySelectorAll('a[title="Quản lý lớp học"]').forEach(function (a) {
-      if (isAdmin) {
-        a.setAttribute('href', u.ope01);
-        a.classList.remove('jims-blocked');
-        a.removeAttribute('data-jims-blocked');
-      } else {
-        a.setAttribute('href', '#');
-        a.setAttribute('data-jims-blocked', '1');
-        a.classList.add('jims-blocked');
-      }
+      a.setAttribute('href', isAdmin ? u.ope01 : u.ope02);
     });
 
     document.querySelectorAll('.jims-admin-only').forEach(function (el) {
@@ -95,16 +102,7 @@
       nv.style.display = isAdmin ? '' : 'none';
     }
 
-    // click handler for blocked OPE-01
-    document.querySelectorAll('a[title="Quản lý lớp học"][data-jims-blocked="1"]').forEach(function (a) {
-      if (a.__jimsBound) return;
-      a.__jimsBound = true;
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        alert('Bạn không có quyền truy cập!');
-        window.location.href = u.stu03;
-      });
-    });
+    // no click blocking: teachers are routed to OPE-02 list.
   }
 
   var readyResolve;
@@ -147,6 +145,7 @@
       .then(function (payload) {
         if (!payload || !payload.success) {
           localStorage.removeItem('JIMS_TOKEN');
+          hienThongBaoDangNhapHetHan();
           window.location.href = '../AUT-02/aut02.html';
           return;
         }
@@ -167,9 +166,9 @@
           window.location.href = u.stu03;
           return;
         }
-        if ((page === 'ope01' || page === 'ope02') && lower !== 'admin') {
+        if (page === 'ope01' && lower !== 'admin') {
           alert('Bạn không có quyền truy cập!');
-          window.location.href = u.stu03;
+          window.location.href = u.ope02 || '../OPE-02/ope02.html';
           return;
         }
 
@@ -180,6 +179,7 @@
       })
       .catch(function () {
         localStorage.removeItem('JIMS_TOKEN');
+        alert(getNetworkFailureMessage());
         window.location.href = '../AUT-02/aut02.html';
       });
   });

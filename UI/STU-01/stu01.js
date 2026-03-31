@@ -436,7 +436,10 @@ document.addEventListener('DOMContentLoaded', function () {
         hienPopup(studentId ? `Thêm học sinh thành công! Mã: ${studentId}` : 'Thêm học sinh thành công!');
       })
       .catch(() => {
-        hienPopup('Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
+        var msg = !navigator.onLine
+          ? 'Mất kết nối internet. Vui lòng kiểm tra mạng.'
+          : 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+        hienPopup(msg);
       })
       .finally(() => {
         nutLuu.textContent = 'Lưu';
@@ -456,6 +459,8 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
     document.body.classList.remove('mobile-sidebar-open');
     overlayDX.style.display = 'block';
     popupDX.style.display   = 'block';
+    document.body.classList.add('popup-open');
+    document.body.style.overflow = 'hidden';
     nutHocSinhSidebar.classList.remove('active');
     nutDangXuatSidebar.classList.add('active');
   }
@@ -463,6 +468,8 @@ const nutHocSinhSidebar = document.querySelector('[title="Hồ sơ học sinh"]'
   function anPopupDangXuat() {
     overlayDX.style.display = 'none';
     popupDX.style.display   = 'none';
+    document.body.classList.remove('popup-open');
+    document.body.style.overflow = '';
     nutDangXuatSidebar.classList.remove('active');
     nutHocSinhSidebar.classList.add('active');
   }

@@ -354,7 +354,10 @@ document.addEventListener('DOMContentLoaded', function () {
         nutLuu.textContent = 'Đang lưu...';
         hienPopupThanhCong();
       } catch (e) {
-        setThongBao('error', 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
+        var msg = !navigator.onLine
+          ? 'Mất kết nối internet. Vui lòng kiểm tra mạng.'
+          : 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+        setThongBao('error', msg);
       } finally {
         if (!seChuyenTrang) {
           nutLuu.disabled = false;
@@ -411,11 +414,16 @@ document.addEventListener('DOMContentLoaded', function () {
   function hienPopupDangXuat() {
     if (overlayDX) overlayDX.style.display = 'block';
     if (popupDX) popupDX.style.display = 'block';
+    document.body.classList.add('popup-open');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.remove('mobile-sidebar-open');
   }
 
   function anPopupDangXuat() {
     if (overlayDX) overlayDX.style.display = 'none';
     if (popupDX) popupDX.style.display = 'none';
+    document.body.classList.remove('popup-open');
+    document.body.style.overflow = '';
   }
 
   if (logoutBtn) {

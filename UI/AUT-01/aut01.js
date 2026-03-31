@@ -222,14 +222,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function hienPopupDangXuat() {
     if (!overlayDX || !popupDX) return;
+    document.body.classList.remove('mobile-sidebar-open');
     overlayDX.style.display = 'block';
     popupDX.style.display = 'block';
+    document.body.classList.add('popup-open');
+    document.body.style.overflow = 'hidden';
   }
 
   function anPopupDangXuat() {
     if (!overlayDX || !popupDX) return;
     overlayDX.style.display = 'none';
     popupDX.style.display = 'none';
+    document.body.classList.remove('popup-open');
+    document.body.style.overflow = '';
   }
 
   if (nutDangXuatSidebar) {
@@ -294,7 +299,10 @@ document.addEventListener('DOMContentLoaded', function () {
       iconTickEmail.classList.remove('hien');
       nutLuu.classList.remove('bi-vo-hieu');
     } catch (err) {
-      showThongBao('error', 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
+      var msg = !navigator.onLine
+        ? 'Mất kết nối internet. Vui lòng kiểm tra mạng.'
+        : 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+      showThongBao('error', msg);
     } finally {
       nutLuu.textContent = 'Lưu';
       nutLuu.disabled = false;

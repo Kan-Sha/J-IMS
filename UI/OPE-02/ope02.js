@@ -13,10 +13,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return h;
     }
 
-    function networkMessage(res) {
-        if (!navigator.onLine) return 'Không có kết nối internet. Vui lòng kiểm tra mạng.';
-        if (res && res.status === 504) return 'Kết nối đến server bị quá thời gian. Vui lòng thử lại.';
-        return 'Không thể kết nối server. Hãy kiểm tra backend đang chạy.';
+    function hienThongBaoDangNhapHetHan() {
+        alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+
+    function getNetworkFailureMessage() {
+        if (!navigator.onLine) {
+            return 'Mất kết nối internet. Vui lòng kiểm tra mạng.';
+        }
+        return 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
     }
 
     function dayToThu(day) {
@@ -149,6 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var payload = await res.json().catch(function () { return null; });
             if (res.status === 401) {
                 localStorage.removeItem('JIMS_TOKEN');
+                hienThongBaoDangNhapHetHan();
                 window.location.href = LOGIN_URL;
                 return;
             }
@@ -166,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // sort newest first (same as backend order)
             renderTable(danhSachLop);
         } catch (e) {
-            alert(networkMessage());
+            alert(getNetworkFailureMessage());
             renderTable([]);
         }
     }
@@ -227,11 +233,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function hienPopupDangXuat() {
         if (overlayDX) overlayDX.style.display = 'block';
         if (popupDX) popupDX.style.display = 'block';
+        document.body.classList.add('popup-open');
+        document.body.style.overflow = 'hidden';
+        document.body.classList.remove('mobile-sidebar-open');
     }
 
     function anPopupDangXuat() {
         if (overlayDX) overlayDX.style.display = 'none';
         if (popupDX) popupDX.style.display = 'none';
+        document.body.classList.remove('popup-open');
+        document.body.style.overflow = '';
     }
 
     if (logoutBtn) {

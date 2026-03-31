@@ -183,7 +183,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
       renderBang(danhSachHocSinh);
     } catch (e) {
-      hienPopup('Không thể kết nối server. Hãy kiểm tra backend đang chạy.');
+      var msg = !navigator.onLine
+        ? 'Mất kết nối internet. Vui lòng kiểm tra mạng.'
+        : 'Không thể kết nối hệ thống. Vui lòng thử lại sau.';
+      hienPopup(msg);
       renderBang([]);
     }
   }
@@ -226,12 +229,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!overlayDX || !popupDX) return;
     overlayDX.style.display = 'block';
     popupDX.style.display = 'block';
+    document.body.classList.add('popup-open');
+    document.body.style.overflow = 'hidden';
+    closeMobileSidebar();
   }
 
   function anPopupDangXuat() {
     if (!overlayDX || !popupDX) return;
     overlayDX.style.display = 'none';
     popupDX.style.display = 'none';
+    document.body.classList.remove('popup-open');
+    document.body.style.overflow = '';
   }
 
   async function xuLyDangXuat() {
