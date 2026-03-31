@@ -50,6 +50,11 @@ public class ClassController {
                         return;
                     }
                     if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                        SessionManager.SessionData sdSession = SessionManager.getSession(token);
+                        if (sdSession == null || sdSession.getRole() == null || !"admin".equalsIgnoreCase(sdSession.getRole().trim())) {
+                            ResponseUtil.sendJson(exchange, 403, false, Collections.emptyMap(), "Bạn không có quyền tạo lớp!");
+                            return;
+                        }
                         JsonObject body = JsonUtil.parseBody(exchange);
                         List<String> days = readDays(body);
                         Integer levelId = body.has("levelId") && !body.get("levelId").isJsonNull()
@@ -73,6 +78,33 @@ public class ClassController {
                         return;
                     }
                     ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                } catch (Exception e) {
+                    ResponseUtil.sendJson(exchange, 500, false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage());
+                }
+            }
+        };
+    }
+
+    public HttpHandler levelsHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.handleOptions(exchange);
+                    return;
+                }
+                if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+
+                String token = resolveToken(exchange);
+                if (SessionManager.getSession(token) == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                try {
+                    ResponseUtil.sendJson(exchange, 200, true, classRepository.listLevels(), "OK");
                 } catch (Exception e) {
                     ResponseUtil.sendJson(exchange, 500, false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage());
                 }

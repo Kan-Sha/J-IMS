@@ -21,25 +21,36 @@
         stu01: '../STU-01/stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: 'aut01.html',
-        aut03: '../AUT-03/aut03.html'
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html'
       },
       stu01: {
         stu01: 'stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: '../AUT-01/aut01.html',
-        aut03: '../AUT-03/aut03.html'
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html'
       },
       stu03: {
         stu01: '../STU-01/stu01.html',
         stu03: 'stu03.html',
         aut01: '../AUT-01/aut01.html',
-        aut03: '../AUT-03/aut03.html'
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html'
       },
       aut03: {
         stu01: '../STU-01/stu01.html',
         stu03: '../STU-03/stu03.html',
         aut01: '../AUT-01/aut01.html',
-        aut03: 'aut03.html'
+        aut03: 'aut03.html',
+        ope01: '../OPE-01/ope01.html'
+      },
+      ope01: {
+        stu01: '../STU-01/stu01.html',
+        stu03: '../STU-03/stu03.html',
+        aut01: '../AUT-01/aut01.html',
+        aut03: '../AUT-03/aut03.html',
+        ope01: 'ope01.html'
       }
     };
     return m[page] || m.stu01;
@@ -55,6 +66,19 @@
       a.setAttribute('href', studentHref);
     });
 
+    // OPE-01: visible to all, but only Admin can access
+    document.querySelectorAll('a[title="Quản lý lớp học"]').forEach(function (a) {
+      if (isAdmin) {
+        a.setAttribute('href', u.ope01);
+        a.classList.remove('jims-blocked');
+        a.removeAttribute('data-jims-blocked');
+      } else {
+        a.setAttribute('href', '#');
+        a.setAttribute('data-jims-blocked', '1');
+        a.classList.add('jims-blocked');
+      }
+    });
+
     document.querySelectorAll('.jims-admin-only').forEach(function (el) {
       el.style.display = isAdmin ? '' : 'none';
     });
@@ -63,6 +87,17 @@
     if (nv && !nv.classList.contains('jims-admin-only')) {
       nv.style.display = isAdmin ? '' : 'none';
     }
+
+    // click handler for blocked OPE-01
+    document.querySelectorAll('a[title="Quản lý lớp học"][data-jims-blocked="1"]').forEach(function (a) {
+      if (a.__jimsBound) return;
+      a.__jimsBound = true;
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        alert('Bạn không có quyền truy cập!');
+        window.location.href = u.stu03;
+      });
+    });
   }
 
   var readyResolve;
@@ -122,6 +157,11 @@
           return;
         }
         if (page === 'aut01' && lower !== 'admin') {
+          window.location.href = u.stu03;
+          return;
+        }
+        if (page === 'ope01' && lower !== 'admin') {
+          alert('Bạn không có quyền truy cập!');
           window.location.href = u.stu03;
           return;
         }

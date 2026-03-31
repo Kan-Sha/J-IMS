@@ -59,7 +59,8 @@ public class Application {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        server.createContext("/api/staff", staffController.createStaffHandler());
+        server.createContext("/api/staff", staffController.staffHandler());
+        server.createContext("/api/staff/teachers", staffController.staffHandler());
         server.createContext("/api/auth/login", authController.loginHandler());
         server.createContext("/api/auth/logout", authController.logoutHandler());
         server.createContext("/api/auth/session", authController.sessionHandler());
@@ -69,6 +70,7 @@ public class Application {
         server.createContext("/api/classes", classController.classesHandler());
         server.createContext("/api/classes/manage", classController.manageClassesHandler());
         server.createContext("/api/classes/enrollment", classController.enrollmentHandler());
+        server.createContext("/api/levels", classController.levelsHandler());
         server.createContext("/api/invoices", invoiceController.invoicesHandler());
         server.createContext("/api/learning-status", learningStatusController.listStatusesHandler());
 

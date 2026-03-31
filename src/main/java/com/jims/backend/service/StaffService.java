@@ -6,6 +6,8 @@ import com.jims.backend.repository.StaffRepository;
 import com.jims.backend.util.PasswordUtil;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
@@ -56,6 +58,18 @@ public class StaffService {
             }
 
             return new ApiResult(false, Collections.emptyMap(), "Tạo tài khoản thất bại!", 500);
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
+    public ApiResult listTeachers(String requesterRole) {
+        try {
+            if (!isAdminRole(requesterRole)) {
+                return new ApiResult(false, Collections.emptyMap(), "Bạn không có quyền truy cập!", 403);
+            }
+            List<Map<String, Object>> teachers = staffRepository.listTeachers();
+            return new ApiResult(true, teachers, "OK", 200);
         } catch (SQLException e) {
             return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
         }

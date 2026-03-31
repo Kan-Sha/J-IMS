@@ -385,6 +385,19 @@ body {
   cursor: not-allowed;
 }
 
+/* Edge/Chromium: prevent native password reveal icons (avoid double eye icons) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-clear-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+}
+
 
 @media (min-width: 641px) and (max-width: 1024px) {
   .vung-form {

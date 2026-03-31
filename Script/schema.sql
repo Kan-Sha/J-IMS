@@ -51,7 +51,7 @@ INSERT INTO levels (level_name, price_per_session) VALUES
 
 CREATE TABLE classes (
     class_id INT AUTO_INCREMENT PRIMARY KEY,
-    class_name VARCHAR(100) NOT NULL,
+    class_name VARCHAR(50) NOT NULL,
     level_id INT NOT NULL,
     teacher_id INT NOT NULL,
     start_date DATE NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE classes (
     current_size INT NOT NULL DEFAULT 0,
     tuition_per_session DECIMAL(12, 2) NOT NULL,
     CONSTRAINT uq_classes_class_name UNIQUE (class_name),
-    CONSTRAINT chk_classes_capacity CHECK (capacity > 0),
+    CONSTRAINT chk_classes_capacity CHECK (capacity >= 3 AND capacity <= 18),
     CONSTRAINT chk_classes_current_size CHECK (current_size >= 0),
     FOREIGN KEY (level_id) REFERENCES levels(level_id),
     FOREIGN KEY (teacher_id) REFERENCES staff(staff_id)
@@ -164,10 +164,10 @@ SELECT 'Trợ giảng Demo', 'ta@gmail.com',
 
 -- Seed classes (admin staff_id=1; first Giáo viên staff_id=2)
 INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, current_size, tuition_per_session) VALUES
-('KID-1D', 1, 2, '2025-01-15', 30, 0, 120000.00),
-('KID-2G', 1, 2, '2025-02-01', 30, 0, 120000.00),
-('KID-3A', 2, 2, '2025-03-01', 25, 0, 150000.00),
-('5E1', 3, 2, '2025-09-01', 35, 0, 180000.00);
+('KID-1D', 1, 2, '2025-01-15', 18, 0, 120000.00),
+('KID-2G', 1, 2, '2025-02-01', 18, 0, 120000.00),
+('KID-3A', 2, 2, '2025-03-01', 18, 0, 150000.00),
+('5E1', 3, 2, '2025-09-01', 18, 0, 180000.00);
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
 SELECT c.class_id, 'Monday', '08:00:00', '09:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;

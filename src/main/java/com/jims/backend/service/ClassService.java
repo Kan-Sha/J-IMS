@@ -47,8 +47,12 @@ public class ClassService {
                     || capacity == null || days == null || isBlank(startTimeStr) || isBlank(endTimeStr)) {
                 return new ApiResult(false, Collections.emptyMap(), "Thiếu thông tin bắt buộc!", 400);
             }
-            if (capacity.intValue() <= 0) {
-                return new ApiResult(false, Collections.emptyMap(), "Sức chứa phải lớn hơn 0!", 400);
+            String normalizedClassName = className.trim().toUpperCase();
+            if (normalizedClassName.length() < 3 || normalizedClassName.length() > 50) {
+                return new ApiResult(false, Collections.emptyMap(), "Tên lớp học không hợp lệ!", 400);
+            }
+            if (capacity.intValue() < 3 || capacity.intValue() > 18) {
+                return new ApiResult(false, Collections.emptyMap(), "Số lượng học sinh không phù hợp!", 400);
             }
             if (days.size() != 2) {
                 return new ApiResult(false, Collections.emptyMap(), "Mỗi lớp phải có đúng 2 buổi học trong tuần!", 400);
@@ -65,7 +69,7 @@ public class ClassService {
             }
 
             if (!staffRepository.isEligibleClassTeacher(teacherId.intValue())) {
-                return new ApiResult(false, Collections.emptyMap(), "Chỉ Giáo viên hoặc Trợ giảng mới được phân công lớp!", 400);
+                return new ApiResult(false, Collections.emptyMap(), "Giáo viên phụ trách không hợp lệ!", 400);
             }
 
             LocalDate sd;
@@ -99,19 +103,19 @@ public class ClassService {
                     return new ApiResult(false, Collections.emptyMap(), "Cấp độ (level) không tồn tại!", 400);
                 }
 
-                if (classRepository.classNameExists(conn, className)) {
+                if (classRepository.classNameExists(conn, normalizedClassName)) {
                     conn.rollback();
-                    return new ApiResult(false, Collections.emptyMap(), "Tên lớp đã tồn tại!", 409);
+                    return new ApiResult(false, Collections.emptyMap(), "Tên lớp học này đã tồn tại!", 400);
                 }
 
                 for (String day : days) {
                     if (classRepository.hasTeacherScheduleOverlap(conn, teacherId.intValue(), day, sqlStart, sqlEnd, null)) {
                         conn.rollback();
-                        return new ApiResult(false, Collections.emptyMap(), "Giáo viên đã có lịch trùng vào cùng ngày và khung giờ!", 409);
+                        return new ApiResult(false, Collections.emptyMap(), "Giáo viên đã có lịch trùng vào cùng ngày và khung giờ!", 400);
                     }
                 }
 
-                int classId = classRepository.insertClass(conn, className, levelId.intValue(), teacherId.intValue(),
+                int classId = classRepository.insertClass(conn, normalizedClassName, levelId.intValue(), teacherId.intValue(),
                         Date.valueOf(sd), capacity.intValue(), price);
 
                 for (String day : days) {
@@ -126,7 +130,7 @@ public class ClassService {
                 conn.rollback();
                 String msg = e.getMessage() != null ? e.getMessage() : "";
                 if (msg.contains("Duplicate") || msg.contains("duplicate")) {
-                    return new ApiResult(false, Collections.emptyMap(), "Tên lớp đã tồn tại!", 409);
+                    return new ApiResult(false, Collections.emptyMap(), "Tên lớp học này đã tồn tại!", 400);
                 }
                 return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
             } finally {

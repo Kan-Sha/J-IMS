@@ -365,3 +365,11 @@ input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
+
+/* Chromium/Edge: hide built-in password/credential icons to avoid double "eye" */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-clear-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+}

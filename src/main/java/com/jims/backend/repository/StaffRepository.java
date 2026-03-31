@@ -3,6 +3,10 @@ package com.jims.backend.repository;
 import com.jims.backend.model.Staff;
 import com.jims.backend.util.DBConnection;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -55,6 +59,26 @@ public class StaffRepository {
                 return rs.next();
             }
         }
+    }
+
+    public List<Map<String, Object>> listTeachers() throws SQLException {
+        String sql = "SELECT s.staff_id, s.full_name, r.role_name " +
+                "FROM staff s JOIN roles r ON s.role_id = r.role_id " +
+                "WHERE r.role_name IN ('Giáo viên', 'Trợ giảng', 'Teacher', 'Assistant', 'TA') " +
+                "ORDER BY s.full_name ASC, s.staff_id ASC";
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> row = new LinkedHashMap<String, Object>();
+                row.put("staffId", rs.getInt("staff_id"));
+                row.put("fullName", rs.getString("full_name"));
+                row.put("roleName", rs.getString("role_name"));
+                result.add(row);
+            }
+        }
+        return result;
     }
 
     public Staff findByEmail(String email) throws SQLException {

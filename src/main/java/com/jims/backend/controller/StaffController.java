@@ -10,6 +10,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.util.Collections;
 
 public class StaffController {
     private final StaffService staffService;
@@ -18,7 +19,7 @@ public class StaffController {
         this.staffService = staffService;
     }
 
-    public HttpHandler createStaffHandler() {
+    public HttpHandler staffHandler() {
         return new HttpHandler() {
             @Override
             public void handle(HttpExchange exchange) throws IOException {
@@ -26,34 +27,38 @@ public class StaffController {
                     ResponseUtil.handleOptions(exchange);
                     return;
                 }
-                if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                String method = exchange.getRequestMethod();
+                String token = resolveToken(exchange);
+                SessionManager.SessionData session = SessionManager.getSession(token);
+                if (session == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
                     return;
                 }
 
-                JsonObject body = JsonUtil.parseBody(exchange);
-                String requesterRole = resolveRequesterRole(exchange);
+                String path = exchange.getRequestURI() != null ? exchange.getRequestURI().getPath() : "";
+                boolean isTeachers = path != null && path.endsWith("/teachers");
 
-                ApiResult result = staffService.createStaff(
-                        requesterRole,
-                        getString(body, "fullName"),
-                        getString(body, "email"),
-                        getString(body, "role")
-                );
-                ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+                if ("GET".equalsIgnoreCase(method) && isTeachers) {
+                    ApiResult result = staffService.listTeachers(session.getRole());
+                    ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+                    return;
+                }
+
+                if ("POST".equalsIgnoreCase(method) && !isTeachers) {
+                    JsonObject body = JsonUtil.parseBody(exchange);
+                    ApiResult result = staffService.createStaff(
+                            session.getRole(),
+                            getString(body, "fullName"),
+                            getString(body, "email"),
+                            getString(body, "role")
+                    );
+                    ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+                    return;
+                }
+
+                ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
             }
         };
-    }
-
-    private String resolveRequesterRole(HttpExchange exchange) {
-        String fromHeader = exchange.getRequestHeaders().getFirst("X-Staff-Role");
-        if (fromHeader != null && !fromHeader.trim().isEmpty()) {
-            return fromHeader;
-        }
-
-        String token = resolveToken(exchange);
-        SessionManager.SessionData session = SessionManager.getSession(token);
-        return session == null ? null : session.getRole();
     }
 
     private String resolveToken(HttpExchange exchange) {

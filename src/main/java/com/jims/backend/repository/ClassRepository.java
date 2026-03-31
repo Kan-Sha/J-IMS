@@ -16,6 +16,23 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassRepository {
+    public List<Map<String, Object>> listLevels() throws SQLException {
+        String sql = "SELECT level_id, level_name, price_per_session FROM levels ORDER BY level_id ASC";
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> row = new LinkedHashMap<String, Object>();
+                row.put("levelId", rs.getInt("level_id"));
+                row.put("levelName", rs.getString("level_name"));
+                row.put("pricePerSession", rs.getBigDecimal("price_per_session"));
+                result.add(row);
+            }
+        }
+        return result;
+    }
+
     public boolean isClassAvailable(int classId) throws SQLException {
         String sql = "SELECT capacity, current_size FROM classes WHERE class_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -78,7 +95,7 @@ public class ClassRepository {
     }
 
     public boolean classNameExists(Connection conn, String className) throws SQLException {
-        String sql = "SELECT 1 FROM classes WHERE class_name = ?";
+        String sql = "SELECT 1 FROM classes WHERE LOWER(TRIM(class_name)) = LOWER(TRIM(?))";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, className.trim());
             try (ResultSet rs = stmt.executeQuery()) {
