@@ -52,14 +52,14 @@ public class ClassService {
             String classNameTrim = className.trim();
             if (classNameTrim.length() < 2) {
                 Map<String, String> fe = new LinkedHashMap<String, String>();
-                fe.put("className", "Tên lớp không phù hợp!");
+                fe.put("className", "Tên lớp học không hợp lệ!");
                 return new ApiResult(false, fe, "Validation failed", 400);
             }
             boolean hasLetter = classNameTrim.matches(".*[a-zA-Z].*");
             boolean hasNumber = classNameTrim.matches(".*[0-9].*");
             if (!hasLetter || !hasNumber) {
                 Map<String, String> fe = new LinkedHashMap<String, String>();
-                fe.put("className", "Tên lớp không phù hợp!");
+                fe.put("className", "Tên lớp học không hợp lệ!");
                 return new ApiResult(false, fe, "Validation failed", 400);
             }
             if (classNameTrim.matches(".*[^a-zA-Z0-9\\s-].*")) {

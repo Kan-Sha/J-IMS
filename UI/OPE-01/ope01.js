@@ -289,11 +289,11 @@ document.addEventListener('DOMContentLoaded', function () {
       return false;
     }
     if (classNameTrim.length < 2) {
-      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp không phù hợp!');
+      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
       return false;
     }
     if (!/[a-zA-Z]/.test(classNameTrim) || !/[0-9]/.test(classNameTrim)) {
-      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp không phù hợp!');
+      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
       return false;
     }
     if (/[^a-zA-Z0-9\s-]/.test(classNameTrim)) {
