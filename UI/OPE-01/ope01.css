@@ -252,7 +252,7 @@ body {
 }
 
 .khung-readonly .o-nhap {
-    color: #6c757d;
+    color: #6c7d6f;
     opacity: 1;
     font-weight: 400;
 }
@@ -274,7 +274,7 @@ body {
 }
 
 .o-nhap::placeholder {
-    color: #b0b8c4;
+    color: #707070;
 }
 
 
