@@ -44,13 +44,38 @@ public class ClassService {
                                  String startTimeStr,
                                  String endTimeStr) {
         try {
-            if (isBlank(className) || levelId == null || teacherId == null || isBlank(startDate)
+            if (isBlank(className)) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("className", "Mục này không được để trống!");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            String classNameTrim = className.trim();
+            if (classNameTrim.length() < 2) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("className", "Tên lớp không phù hợp!");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            boolean hasLetter = classNameTrim.matches(".*[a-zA-Z].*");
+            boolean hasNumber = classNameTrim.matches(".*[0-9].*");
+            if (!hasLetter || !hasNumber) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("className", "Tên lớp không phù hợp!");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            if (classNameTrim.matches(".*[^a-zA-Z0-9\\s-].*")) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("className", "Tên lớp học không hợp lệ!");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            String normalizedClassName = classNameTrim.toUpperCase();
+            if (normalizedClassName.length() > 10) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("className", "Tên lớp học cần ít hơn 10 ký tự");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            if (levelId == null || teacherId == null || isBlank(startDate)
                     || capacity == null || days == null || isBlank(startTimeStr) || isBlank(endTimeStr)) {
                 return new ApiResult(false, Collections.emptyMap(), "Thiếu thông tin bắt buộc!", 400);
-            }
-            String normalizedClassName = className.trim().toUpperCase();
-            if (normalizedClassName.length() < 1 || normalizedClassName.length() > 10) {
-                return new ApiResult(false, Collections.emptyMap(), "Tên lớp học cần ít hơn 10 ký tự", 400);
             }
             // Business rule: fixed max students = 15. Do not trust client input.
             int enforcedCapacity = OPE_FIXED_CAPACITY;
@@ -261,7 +286,7 @@ public class ClassService {
                     int n = unique.size();
                     if (cur + n > cap) {
                         conn.rollback();
-                        return new ApiResult(false, Collections.emptyMap(), "Vượt quá sức chứa lớp!", 400);
+                        return new ApiResult(false, Collections.emptyMap(), "Số lượng học sinh vượt quá giới hạn sĩ số của lớp!", 400);
                     }
                     for (String sid : unique) {
                         if (!studentRepository.studentExists(conn, sid)) {
@@ -278,7 +303,7 @@ public class ClassService {
                         }
                         if (!classRepository.incrementClassSize(conn, classId)) {
                             conn.rollback();
-                            return new ApiResult(false, Collections.emptyMap(), "Vượt quá sức chứa lớp!", 400);
+                            return new ApiResult(false, Collections.emptyMap(), "Số lượng học sinh vượt quá giới hạn sĩ số của lớp!", 400);
                         }
                     }
                 } else {
@@ -303,12 +328,41 @@ public class ClassService {
                 }
 
                 conn.commit();
-                return new ApiResult(true, Collections.emptyMap(), "Cập nhật xếp lớp thành công", 200);
+                if ("add".equals(act)) {
+                    return new ApiResult(true, Collections.emptyMap(), "Thêm học sinh thành công!", 200);
+                }
+                return new ApiResult(true, Collections.emptyMap(), "Đã xóa học sinh khỏi lớp!", 200);
             } catch (SQLException e) {
                 conn.rollback();
                 return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
             } finally {
                 conn.setAutoCommit(true);
+                conn.close();
+            }
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
+    public ApiResult getClassDetail(int classId) {
+        if (classId <= 0) {
+            return new ApiResult(false, Collections.emptyMap(), "classId không hợp lệ!", 400);
+        }
+        try {
+            Connection conn = studentRepository.getConnection();
+            try {
+                Map<String, Object> info = classRepository.getClassInfo(conn, classId);
+                if (info == null) {
+                    return new ApiResult(false, Collections.emptyMap(), "Lớp không tồn tại!", 404);
+                }
+                List<Map<String, Object>> schedules = classRepository.listSchedulesByClassId(conn, classId);
+                List<Map<String, Object>> students = classRepository.listStudentsInClass(conn, classId);
+                Map<String, Object> data = new LinkedHashMap<String, Object>();
+                data.putAll(info);
+                data.put("schedules", schedules);
+                data.put("students", students);
+                return new ApiResult(true, data, "OK", 200);
+            } finally {
                 conn.close();
             }
         } catch (SQLException e) {

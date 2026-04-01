@@ -174,4 +174,36 @@ public class StudentRepository {
         }
         return result;
     }
+
+    public List<Map<String, Object>> listUnassignedStudents(String search) throws SQLException {
+        String term = search == null ? "" : search.trim();
+        String sql = "SELECT student_id, first_name, last_name, date_of_birth, gender, phone " +
+                "FROM students " +
+                "WHERE class_id IS NULL " +
+                "AND (? = '' OR LOWER(student_id) LIKE LOWER(CONCAT('%', ?, '%')) " +
+                "OR LOWER(CONCAT(first_name, ' ', last_name)) LIKE LOWER(CONCAT('%', ?, '%'))) " +
+                "ORDER BY created_at DESC, student_id DESC " +
+                "LIMIT 200";
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, term);
+            stmt.setString(2, term);
+            stmt.setString(3, term);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new LinkedHashMap<String, Object>();
+                    row.put("studentId", rs.getString("student_id"));
+                    row.put("firstName", rs.getString("first_name"));
+                    row.put("lastName", rs.getString("last_name"));
+                    row.put("fullName", (rs.getString("first_name") + " " + rs.getString("last_name")).trim());
+                    row.put("dob", rs.getDate("date_of_birth") != null ? rs.getDate("date_of_birth").toString() : null);
+                    row.put("gender", rs.getString("gender"));
+                    row.put("phone", rs.getString("phone"));
+                    result.add(row);
+                }
+            }
+        }
+        return result;
+    }
 }

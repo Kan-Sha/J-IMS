@@ -282,13 +282,28 @@ document.addEventListener('DOMContentLoaded', function () {
     xoaLoiTatCa();
     var hopLe = true;
 
-    var className = normalizeClassName(inputTenLop ? inputTenLop.value : '');
-    if (!className) {
+    var classNameRaw = inputTenLop ? String(inputTenLop.value || '') : '';
+    var classNameTrim = classNameRaw.trim();
+    if (!classNameTrim) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Mục này không được để trống!');
-      hopLe = false;
-    } else if (className.length > 10) {
+      return false;
+    }
+    if (classNameTrim.length < 2) {
+      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp không phù hợp!');
+      return false;
+    }
+    if (!/[a-zA-Z]/.test(classNameTrim) || !/[0-9]/.test(classNameTrim)) {
+      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp không phù hợp!');
+      return false;
+    }
+    if (/[^a-zA-Z0-9\s-]/.test(classNameTrim)) {
+      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
+      return false;
+    }
+    var className = normalizeClassName(classNameTrim);
+    if (className.length > 10) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học cần ít hơn 10 ký tự');
-      hopLe = false;
+      return false;
     }
 
     if (!selectCapDo || !selectCapDo.value) {
@@ -450,8 +465,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function apLoiServer(message) {
-    var msg = message ? String(message) : '';
+  function apLoiServer(payload) {
+    var msg = '';
+    if (payload && typeof payload === 'object' && payload.message) {
+      msg = String(payload.message);
+    } else if (typeof payload === 'string') {
+      msg = payload;
+    }
+    if (payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object' && payload.data.className) {
+      hienLoi('loi-ten-lop', 'khung-ten-lop', String(payload.data.className).trim());
+      return;
+    }
     if (!msg) return;
     if (msg.indexOf('Tên lớp') !== -1) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', msg);
@@ -541,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (res.status >= 500) {
           alert(getNetworkFailureMessage());
         } else {
-          apLoiServer(payload && payload.message ? payload.message : 'Dữ liệu không hợp lệ.');
+          apLoiServer(payload || { message: 'Dữ liệu không hợp lệ.' });
         }
         return;
       }

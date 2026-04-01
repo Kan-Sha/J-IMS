@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var tbody = document.getElementById('bang-than');
 
     var danhSachLop = [];
+    var currentClassId = null;
 
     function renderTable(data) {
         if (!tbody) return;
@@ -106,6 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 var id = this.getAttribute('data-id');
                 var cls = danhSachLop.find(function (x) { return String(x.classId) === String(id); });
                 if (!cls) return;
+
+                currentClassId = cls.classId;
 
                 if (navClassNameSidebar) navClassNameSidebar.innerText = cls.className || '';
                 if (detailTenLop) detailTenLop.value = cls.className || '';
@@ -140,11 +143,25 @@ document.addEventListener('DOMContentLoaded', function () {
         return days.join(', ');
     }
 
+    function formatTimeAmPm(t) {
+        var s = t == null ? '' : String(t).trim();
+        if (!s) return '';
+        var m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        if (!m) return s;
+        var hh = parseInt(m[1], 10);
+        var mm = parseInt(m[2], 10);
+        if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return s;
+        var ampm = hh >= 12 ? 'PM' : 'AM';
+        var h12 = hh % 12;
+        if (h12 === 0) h12 = 12;
+        return String(h12) + ':' + String(mm).padStart(2, '0') + ' ' + ampm;
+    }
+
     function mergeTimeText(schedules) {
         var arr = Array.isArray(schedules) ? schedules.slice() : [];
         arr = arr.filter(function (s) { return s && s.startTime && s.endTime; });
         if (arr.length === 0) return '';
-        return String(arr[0].startTime) + ' đến ' + String(arr[0].endTime);
+        return formatTimeAmPm(arr[0].startTime) + ' đến ' + formatTimeAmPm(arr[0].endTime);
     }
 
     async function taiDanhSachLop(search) {
@@ -217,10 +234,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var contents = document.querySelectorAll('.tab-content-item');
     tabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
+            var tabId0 = this.getAttribute('data-tab');
+            if (tabId0 === 'tab-danh-sach' && currentClassId != null) {
+                window.location.href = '../OPE-03/ope03.html?classId=' + encodeURIComponent(String(currentClassId));
+                return;
+            }
             tabs.forEach(function (t) { t.classList.remove('active'); });
             contents.forEach(function (c) { c.style.display = 'none'; });
             this.classList.add('active');
-            var tabId = this.getAttribute('data-tab');
+            var tabId = tabId0;
             var target = document.getElementById(tabId);
             if (target) target.style.display = 'block';
         });

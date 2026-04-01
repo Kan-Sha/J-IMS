@@ -169,6 +169,15 @@ public class StudentService {
         }
     }
 
+    public ApiResult listUnassignedStudents(String search) {
+        try {
+            List<Map<String, Object>> students = studentRepository.listUnassignedStudents(search);
+            return new ApiResult(true, students, "OK", 200);
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
     public ApiResult nextStudentId() {
         try {
             String yearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));

@@ -67,9 +67,11 @@ public class Application {
         server.createContext("/api/auth/change-password", authController.changePasswordHandler());
         server.createContext("/api/students", studentController.createStudentHandler());
         server.createContext("/api/students/next-id", studentController.nextStudentIdHandler());
+        server.createContext("/api/students/unassigned", studentController.unassignedStudentsHandler());
         server.createContext("/api/classes", classController.classesHandler());
         server.createContext("/api/classes/manage", classController.manageClassesHandler());
         server.createContext("/api/classes/enrollment", classController.enrollmentHandler());
+        server.createContext("/api/classes/detail", classController.classDetailHandler());
         server.createContext("/api/levels", classController.levelsHandler());
         server.createContext("/api/invoices", invoiceController.invoicesHandler());
         server.createContext("/api/learning-status", learningStatusController.listStatusesHandler());

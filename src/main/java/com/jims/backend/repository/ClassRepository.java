@@ -239,4 +239,75 @@ public class ClassRepository {
             }
         }
     }
+
+    public Map<String, Object> getClassInfo(Connection conn, int classId) throws SQLException {
+        String sql = "SELECT c.class_id, c.class_name, c.start_date, c.capacity, c.current_size, " +
+                "s.full_name AS teacher_name, l.level_name, l.price_per_session, c.tuition_per_session " +
+                "FROM classes c " +
+                "JOIN staff s ON c.teacher_id = s.staff_id " +
+                "JOIN levels l ON c.level_id = l.level_id " +
+                "WHERE c.class_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Map<String, Object> m = new LinkedHashMap<String, Object>();
+                m.put("classId", rs.getInt("class_id"));
+                m.put("className", rs.getString("class_name"));
+                m.put("startDate", rs.getDate("start_date") != null ? rs.getDate("start_date").toString() : null);
+                m.put("capacity", rs.getInt("capacity"));
+                m.put("currentSize", rs.getInt("current_size"));
+                m.put("teacherName", rs.getString("teacher_name"));
+                m.put("levelName", rs.getString("level_name"));
+                m.put("pricePerSession", rs.getBigDecimal("price_per_session"));
+                m.put("tuitionPerSession", rs.getBigDecimal("tuition_per_session"));
+                return m;
+            }
+        }
+    }
+
+    public List<Map<String, Object>> listSchedulesByClassId(Connection conn, int classId) throws SQLException {
+        String sql = "SELECT day_of_week, start_time, end_time FROM class_schedule WHERE class_id = ? ORDER BY schedule_id ASC";
+        List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> slot = new LinkedHashMap<String, Object>();
+                    slot.put("dayOfWeek", rs.getString("day_of_week"));
+                    Time st = rs.getTime("start_time");
+                    Time et = rs.getTime("end_time");
+                    slot.put("startTime", st != null ? st.toString() : null);
+                    slot.put("endTime", et != null ? et.toString() : null);
+                    out.add(slot);
+                }
+            }
+        }
+        return out;
+    }
+
+    public List<Map<String, Object>> listStudentsInClass(Connection conn, int classId) throws SQLException {
+        String sql = "SELECT student_id, first_name, last_name, date_of_birth, gender, phone " +
+                "FROM students WHERE class_id = ? ORDER BY student_id ASC";
+        List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new LinkedHashMap<String, Object>();
+                    row.put("studentId", rs.getString("student_id"));
+                    row.put("firstName", rs.getString("first_name"));
+                    row.put("lastName", rs.getString("last_name"));
+                    row.put("fullName", (rs.getString("first_name") + " " + rs.getString("last_name")).trim());
+                    row.put("dob", rs.getDate("date_of_birth") != null ? rs.getDate("date_of_birth").toString() : null);
+                    row.put("gender", rs.getString("gender"));
+                    row.put("phone", rs.getString("phone"));
+                    out.add(row);
+                }
+            }
+        }
+        return out;
+    }
 }

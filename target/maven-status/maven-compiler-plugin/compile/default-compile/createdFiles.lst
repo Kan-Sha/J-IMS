@@ -1,4 +1,5 @@
 com/jims/backend/controller/AuthController$2.class
+com/jims/backend/controller/ClassController$5.class
 com/jims/backend/controller/ClassController.class
 com/jims/backend/util/JsonUtil.class
 com/jims/backend/model/Student.class
@@ -24,6 +25,7 @@ com/jims/backend/controller/LearningStatusController$1.class
 com/jims/backend/model/Staff.class
 com/jims/backend/util/StudentNameValidator.class
 com/jims/backend/repository/InvoiceRepository.class
+com/jims/backend/controller/StudentController$3.class
 com/jims/backend/repository/StudentRepository.class
 com/jims/backend/repository/ClassRepository.class
 com/jims/backend/util/UrlEncodingUtil.class

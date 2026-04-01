@@ -1,5 +1,19 @@
 @import url('../OPE-01/ope01.css');
 
+html, body {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-scroll .bang-danh-sach {
+    min-width: 720px;
+}
+
 .search-card {
     border: 1px solid #e2e8f0;
     border-radius: 4px;

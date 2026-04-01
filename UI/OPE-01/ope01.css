@@ -22,6 +22,7 @@
 
 html, body {
     height: auto;
+    overflow-x: auto;
     overflow-y: auto;
 }
 
@@ -29,7 +30,7 @@ body {
     font-family: var(--font-chinh);
     background-color: var(--mau-nen);
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
 }
 

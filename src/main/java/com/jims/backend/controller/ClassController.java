@@ -149,9 +149,13 @@ public class ClassController {
                     ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
                     return;
                 }
-                String token = resolveToken(exchange);
-                if (SessionManager.getSession(token) == null) {
+                SessionManager.SessionData sd = SessionManager.getSession(resolveToken(exchange));
+                if (sd == null) {
                     ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                if (sd.getRole() == null || !"admin".equalsIgnoreCase(sd.getRole().trim())) {
+                    ResponseUtil.sendJson(exchange, 403, false, Collections.emptyMap(), "Bạn không có quyền chỉnh sửa lớp!");
                     return;
                 }
                 try {
@@ -171,6 +175,38 @@ public class ClassController {
                 } catch (Exception e) {
                     ResponseUtil.sendJson(exchange, 500, false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage());
                 }
+            }
+        };
+    }
+
+    public HttpHandler classDetailHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.handleOptions(exchange);
+                    return;
+                }
+                if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+                String token = resolveToken(exchange);
+                if (SessionManager.getSession(token) == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                String raw = exchange.getRequestURI().getRawQuery();
+                String classIdStr = extractQueryParam(raw, "classId");
+                int classId;
+                try {
+                    classId = Integer.parseInt(classIdStr == null ? "" : classIdStr.trim());
+                } catch (NumberFormatException e) {
+                    ResponseUtil.sendJson(exchange, 400, false, Collections.emptyMap(), "classId không hợp lệ!");
+                    return;
+                }
+                ApiResult result = classService.getClassDetail(classId);
+                ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
             }
         };
     }

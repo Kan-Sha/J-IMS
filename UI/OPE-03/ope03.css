@@ -1,0 +1,240 @@
+@import url('../OPE-02/ope02.css');
+
+html, body {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.trang-chinh {
+    min-height: 100vh;
+}
+
+.danh-sach-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.tong-hoc-sinh {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--mau-chu);
+}
+
+.btn-chinh-sua {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 5px;
+    border: none;
+    background: var(--mau-xanh-dam);
+    color: #fff;
+    font-family: var(--font-chinh);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.edit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.edit-actions-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-them-moi,
+.btn-xoa-chon,
+.btn-thoat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 5px;
+    font-family: var(--font-chinh);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-them-moi {
+    background: #8bd2f0;
+    color: var(--mau-chu);
+}
+
+.btn-xoa-chon {
+    background: #ef4444;
+    color: #fff;
+}
+
+.btn-thoat {
+    background: transparent;
+    color: var(--mau-xanh-dam);
+    border: 1.5px solid var(--mau-xanh-dam);
+}
+
+.bang-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.bang-hoc-sinh {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+}
+
+.bang-hoc-sinh th {
+    background-color: var(--mau-xanh-dam);
+    color: var(--mau-trang);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 12px 10px;
+    text-align: center;
+}
+
+.bang-hoc-sinh td {
+    padding: 12px 10px;
+    font-size: 14px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.bang-hoc-sinh tbody tr:nth-child(even) {
+    background: #f7f9fc;
+}
+
+.checkbox-cell {
+    width: 40px;
+}
+
+.error-message {
+    color: var(--mau-loi);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-overlay.hien {
+    display: flex;
+}
+
+.modal-container {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #8e8edf;
+    max-width: 640px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--mau-xanh-dam);
+}
+
+.btn-close {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--mau-chu-phu);
+}
+
+.modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px solid var(--mau-vien);
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 44px;
+    margin-bottom: 12px;
+}
+
+.search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: var(--font-chinh);
+    font-size: 14px;
+}
+
+.modal-list-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--mau-chu-phu);
+    margin-bottom: 8px;
+}
+
+.modal-list-items {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.modal-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+}
+
+.modal-row:last-child {
+    border-bottom: none;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+}

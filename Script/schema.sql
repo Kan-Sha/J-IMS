@@ -151,7 +151,7 @@ SELECT 'Admin Demo',
        role_id
 FROM roles WHERE role_name = 'Admin' LIMIT 1;
 
--- Sample teachers (Giáo viên / Trợ giảng) — same default hash for dev
+-- Sample teachers (Giáo viên / Trợ giảng) — same password: 123456
 INSERT INTO staff (full_name, email, password_hash, role_id)
 SELECT 'Giáo viên Demo', 'teacher@gmail.com',
        '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
@@ -164,10 +164,9 @@ SELECT 'Trợ giảng Demo', 'ta@gmail.com',
 
 -- Seed classes (admin staff_id=1; first Giáo viên staff_id=2)
 INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, current_size, tuition_per_session) VALUES
-('KID-1D', 1, 2, '2025-01-15', 18, 0, 120000.00),
-('KID-2G', 1, 2, '2025-02-01', 18, 0, 120000.00),
-('KID-3A', 2, 2, '2025-03-01', 18, 0, 150000.00),
-('5E1', 1, 2, '2025-09-01', 18, 0, 130000.00);
+('KID-2E', 1, 2, '2025-01-15', 15, 0, 120000.00),
+('KID-3A', 2, 2, '2025-03-01', 15, 0, 150000.00);
+
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
 SELECT c.class_id, 'Monday', '08:00:00', '09:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;

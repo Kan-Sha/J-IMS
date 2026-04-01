@@ -1,6 +1,6 @@
 /**
  * J-IMS shared shell: session check, role-based sidebar links, hide Admin-only UI for Teacher/TA.
- * Requires: <body data-jims-page="aut01|stu01|stu03|aut03" class="jims-shell-loading">
+ * Requires: <body data-jims-page="aut01|stu01|stu03|aut03|ope01|ope02|ope03" class="jims-shell-loading">
  * Load before page-specific *.js
  */
 (function () {
@@ -32,7 +32,8 @@
         aut01: 'aut01.html',
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
-        ope02: '../OPE-02/ope02.html'
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html'
       },
       stu01: {
         stu01: 'stu01.html',
@@ -40,7 +41,8 @@
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
-        ope02: '../OPE-02/ope02.html'
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html'
       },
       stu03: {
         stu01: '../STU-01/stu01.html',
@@ -48,7 +50,8 @@
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
-        ope02: '../OPE-02/ope02.html'
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html'
       },
       aut03: {
         stu01: '../STU-01/stu01.html',
@@ -56,7 +59,8 @@
         aut01: '../AUT-01/aut01.html',
         aut03: 'aut03.html',
         ope01: '../OPE-01/ope01.html',
-        ope02: '../OPE-02/ope02.html'
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html'
       },
       ope01: {
         stu01: '../STU-01/stu01.html',
@@ -64,7 +68,8 @@
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
         ope01: 'ope01.html',
-        ope02: '../OPE-02/ope02.html'
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html'
       },
       ope02: {
         stu01: '../STU-01/stu01.html',
@@ -72,7 +77,17 @@
         aut01: '../AUT-01/aut01.html',
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
-        ope02: 'ope02.html'
+        ope02: 'ope02.html',
+        ope03: '../OPE-03/ope03.html'
+      },
+      ope03: {
+        stu01: '../STU-01/stu01.html',
+        stu03: '../STU-03/stu03.html',
+        aut01: '../AUT-01/aut01.html',
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html',
+        ope03: 'ope03.html'
       },
     };
     return m[page] || m.stu01;

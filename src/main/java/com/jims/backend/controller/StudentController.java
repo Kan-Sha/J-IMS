@@ -6,6 +6,7 @@ import com.jims.backend.service.StudentService;
 import com.jims.backend.util.JsonUtil;
 import com.jims.backend.util.ResponseUtil;
 import com.jims.backend.util.SessionManager;
+import com.jims.backend.util.UrlEncodingUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -90,6 +91,49 @@ public class StudentController {
                 ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
             }
         };
+    }
+
+    public HttpHandler unassignedStudentsHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.handleOptions(exchange);
+                    return;
+                }
+                if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+                String token = resolveToken(exchange);
+                if (SessionManager.getSession(token) == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                String raw = exchange.getRequestURI().getRawQuery();
+                String search = extractQueryParam(raw, "search");
+                ApiResult result = studentService.listUnassignedStudents(search);
+                ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+            }
+        };
+    }
+
+    private static String extractQueryParam(String rawQuery, String name) {
+        if (rawQuery == null || rawQuery.isEmpty()) {
+            return "";
+        }
+        for (String part : rawQuery.split("&")) {
+            int eq = part.indexOf('=');
+            if (eq > 0) {
+                String k = part.substring(0, eq);
+                if (name.equals(k)) {
+                    return UrlEncodingUtil.decodeUtf8(part.substring(eq + 1));
+                }
+            } else if (name.equals(part)) {
+                return "";
+            }
+        }
+        return "";
     }
 
     private String resolveToken(HttpExchange exchange) {
