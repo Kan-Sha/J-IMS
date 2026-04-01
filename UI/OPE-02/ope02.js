@@ -82,6 +82,71 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var danhSachLop = [];
     var currentClassId = null;
+    var pendingClassIdFromUrl = null;
+
+    function urlWithoutQuery() {
+        return window.location.pathname;
+    }
+
+    function setUrlForView(view, classId, mode) {
+        var url = urlWithoutQuery();
+        if (view === 'detail' && classId != null) {
+            url += '?classId=' + encodeURIComponent(String(classId));
+        }
+        var state = view === 'detail'
+            ? { view: 'detail', classId: classId != null ? String(classId) : null }
+            : { view: 'list' };
+
+        try {
+            if (mode === 'replace') window.history.replaceState(state, '', url);
+            else window.history.pushState(state, '', url);
+        } catch (e) {
+            // ignore (some environments may block history manipulation)
+        }
+    }
+
+    function showList(opts) {
+        if (viewDanhSach) viewDanhSach.style.display = 'block';
+        if (viewChiTiet) viewChiTiet.style.display = 'none';
+        if (navChiTietContainer) navChiTietContainer.style.display = 'none';
+        if (navDanhSach) navDanhSach.classList.add('active');
+        currentClassId = null;
+
+        if (opts && opts.history) {
+            setUrlForView('list', null, opts.history);
+        }
+    }
+
+    function showDetail(cls, opts) {
+        if (!cls) return;
+        currentClassId = cls.classId;
+
+        if (navClassNameSidebar) navClassNameSidebar.innerText = cls.className || '';
+        if (detailTenLop) detailTenLop.value = cls.className || '';
+        if (detailCapDo) detailCapDo.value = cls.levelName || '';
+        if (detailGiaoVien) detailGiaoVien.value = cls.teacherName || '';
+        if (detailHocPhi) detailHocPhi.value = formatVnd(cls.pricePerSession);
+        if (detailNgayKhaiGiang) detailNgayKhaiGiang.value = formatDateDdMmYyyy(cls.startDate);
+        if (detailSoLuong) detailSoLuong.value = cls.capacity != null ? String(cls.capacity) : '';
+        if (detailLichHoc) detailLichHoc.innerText = cls.scheduleText || '';
+        if (detailKhungGio) detailKhungGio.innerText = cls.timeText || '';
+
+        if (viewDanhSach) viewDanhSach.style.display = 'none';
+        if (viewChiTiet) viewChiTiet.style.display = 'block';
+        if (navChiTietContainer) navChiTietContainer.style.display = 'block';
+        if (navDanhSach) navDanhSach.classList.remove('active');
+
+        var tabs = document.querySelectorAll('.tab-item');
+        var contents = document.querySelectorAll('.tab-content-item');
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        contents.forEach(function (c) { c.style.display = 'none'; });
+        if (tabs.length > 0) tabs[0].classList.add('active');
+        if (contents.length > 0) contents[0].style.display = 'block';
+
+        if (opts && opts.history) {
+            setUrlForView('detail', cls.classId, opts.history);
+        }
+    }
 
     function renderTable(data) {
         if (!tbody) return;
@@ -108,29 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var cls = danhSachLop.find(function (x) { return String(x.classId) === String(id); });
                 if (!cls) return;
 
-                currentClassId = cls.classId;
-
-                if (navClassNameSidebar) navClassNameSidebar.innerText = cls.className || '';
-                if (detailTenLop) detailTenLop.value = cls.className || '';
-                if (detailCapDo) detailCapDo.value = cls.levelName || '';
-                if (detailGiaoVien) detailGiaoVien.value = cls.teacherName || '';
-                if (detailHocPhi) detailHocPhi.value = formatVnd(cls.pricePerSession);
-                if (detailNgayKhaiGiang) detailNgayKhaiGiang.value = formatDateDdMmYyyy(cls.startDate);
-                if (detailSoLuong) detailSoLuong.value = cls.capacity != null ? String(cls.capacity) : '';
-                if (detailLichHoc) detailLichHoc.innerText = cls.scheduleText || '';
-                if (detailKhungGio) detailKhungGio.innerText = cls.timeText || '';
-
-                if (viewDanhSach) viewDanhSach.style.display = 'none';
-                if (viewChiTiet) viewChiTiet.style.display = 'block';
-                if (navChiTietContainer) navChiTietContainer.style.display = 'block';
-                if (navDanhSach) navDanhSach.classList.remove('active');
-
-                var tabs = document.querySelectorAll('.tab-item');
-                var contents = document.querySelectorAll('.tab-content-item');
-                tabs.forEach(function (t) { t.classList.remove('active'); });
-                contents.forEach(function (c) { c.style.display = 'none'; });
-                if (tabs.length > 0) tabs[0].classList.add('active');
-                if (contents.length > 0) contents[0].style.display = 'block';
+                showDetail(cls, { history: 'push' });
             });
         });
     }
@@ -188,6 +231,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // sort newest first (same as backend order)
             renderTable(danhSachLop);
+
+            if (pendingClassIdFromUrl != null) {
+                var wanted = pendingClassIdFromUrl;
+                pendingClassIdFromUrl = null;
+                var cls = danhSachLop.find(function (x) { return String(x.classId) === String(wanted); });
+                if (cls) {
+                    showDetail(cls, { history: 'replace' });
+                } else {
+                    showList({ history: 'replace' });
+                }
+            }
         } catch (e) {
             alert(getNetworkFailureMessage());
             renderTable([]);
@@ -213,10 +267,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (navDanhSach) {
         navDanhSach.addEventListener('click', function (e) {
             e.preventDefault();
-            if (viewDanhSach) viewDanhSach.style.display = 'block';
-            if (viewChiTiet) viewChiTiet.style.display = 'none';
-            if (navChiTietContainer) navChiTietContainer.style.display = 'none';
-            navDanhSach.classList.add('active');
+            var wasDetail = viewChiTiet && viewChiTiet.style.display === 'block';
+            showList({ history: wasDetail ? 'push' : null });
         });
     }
 
@@ -229,6 +281,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    window.addEventListener('popstate', function (e) {
+        var state = e && e.state ? e.state : null;
+        if (!state || state.view === 'list') {
+            showList(null);
+            return;
+        }
+        if (state.view === 'detail' && state.classId != null) {
+            var cls = danhSachLop.find(function (x) { return String(x.classId) === String(state.classId); });
+            if (cls) {
+                showDetail(cls, null);
+            } else {
+                pendingClassIdFromUrl = String(state.classId);
+                taiDanhSachLop((inputTim && inputTim.value ? String(inputTim.value) : '').trim());
+            }
+        }
+    });
 
     var tabs = document.querySelectorAll('.tab-item');
     var contents = document.querySelectorAll('.tab-content-item');
@@ -305,6 +374,17 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.remove('mobile-sidebar-open');
         }
     });
+
+    (function initHistoryFromUrl() {
+        var params = new URLSearchParams(window.location.search || '');
+        var classId = params.get('classId');
+        if (classId) {
+            pendingClassIdFromUrl = classId;
+            setUrlForView('detail', classId, 'replace');
+        } else {
+            setUrlForView('list', null, 'replace');
+        }
+    })();
 
     taiDanhSachLop('');
 });
