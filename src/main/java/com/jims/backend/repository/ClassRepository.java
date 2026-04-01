@@ -220,6 +220,35 @@ public class ClassRepository {
         return rows;
     }
 
+    /**
+     * Reconcile classes.current_size with actual enrolled students (fixes drift vs students.class_id).
+     */
+    public void syncCurrentSizeFromStudents(Connection conn, int classId) throws SQLException {
+        String sql = "UPDATE classes SET current_size = (SELECT COUNT(*) FROM students WHERE class_id = ?) WHERE class_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            stmt.setInt(2, classId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public Map<String, Object> getClassNameCapacity(Connection conn, int classId) throws SQLException {
+        String sql = "SELECT class_id, class_name, capacity FROM classes WHERE class_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Map<String, Object> m = new LinkedHashMap<String, Object>();
+                m.put("classId", rs.getInt("class_id"));
+                m.put("className", rs.getString("class_name"));
+                m.put("capacity", rs.getInt("capacity"));
+                return m;
+            }
+        }
+    }
+
     public Map<String, Object> getClassSummary(Connection conn, int classId) throws SQLException {
         String sql = "SELECT c.class_id, c.capacity, c.current_size, c.level_id, l.price_per_session " +
                 "FROM classes c JOIN levels l ON c.level_id = l.level_id WHERE c.class_id = ?";

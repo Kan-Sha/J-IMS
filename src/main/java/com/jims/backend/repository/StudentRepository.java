@@ -119,6 +119,19 @@ public class StudentRepository {
         }
     }
 
+    public int countStudentsInClass(Connection conn, int classId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS c FROM students WHERE class_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("c");
+                }
+            }
+        }
+        return 0;
+    }
+
     public List<String> listStudentIdsInClass(Connection conn, int classId) throws SQLException {
         String sql = "SELECT student_id FROM students WHERE class_id = ? ORDER BY student_id";
         List<String> ids = new ArrayList<String>();

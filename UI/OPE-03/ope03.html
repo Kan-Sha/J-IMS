@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J-IMS - Chi tiết lớp học</title>
+    <title>J-IMS - Quản lý lớp học (Học sinh)</title>
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -22,12 +22,13 @@
     </button>
     <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop"></div>
     <div class="trang-chinh">
+
         <div class="sidebar">
             <div class="sidebar-logo">
                 <img src="/UI/assets/joyenglishlogo.jpg" alt="Logo" class="sidebar-logo-anh">
             </div>
             <nav class="sidebar-menu">
-                <a href="#" class="menu-icon" title="Trang chủ">
+                <a href="../OPE-02/ope02.html" class="menu-icon" title="Trang chủ">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -41,7 +42,7 @@
                         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                     </svg>
                 </a>
-                <a href="#" class="menu-icon active" title="Quản lý lớp học">
+                <a href="../OPE-01/ope01.html" class="menu-icon active" title="Quản lý lớp học">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -79,7 +80,7 @@
                         <path d="M4 18c0-2.5 2-4 5-4s5 1.5 5 4" />
                     </svg>
                 </a>
-                <a href="#" class="menu-icon" title="Đăng xuất" id="sidebar-logout">
+                <a href="#" class="menu-icon" title="Đăng xuất" id="btn-dang-xuat">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -88,35 +89,32 @@
                     </svg>
                 </a>
             </nav>
-            <div class="sidebar-footer-jims">
-                <a href="../AUT-03/aut03.html" class="menu-icon sidebar-avatar" title="Thông tin cá nhân">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                    </svg>
-                </a>
-                <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3" />
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                    </svg>
-                </a>
-            </div>
+            <a href="../AUT-03/aut03.html" class="menu-icon sidebar-avatar" title="Tài khoản cá nhân">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+            </a>
+            <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+            </a>
         </div>
 
         <div class="noi-dung">
+
             <div class="sub-sidebar">
                 <div class="sub-sidebar-tieu-de">
-                    <a href="../OPE-02/ope02.html" class="back-btn">
+                    <a href="../OPE-02/ope02.html" class="back-btn" id="back-to-ope02">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5">
                             <polyline points="15,18 9,12 15,6" />
                         </svg>
                     </a>
-                    <span id="nav-class-name">Chi tiết lớp</span>
+                    <span>Quản lý lớp học</span>
                 </div>
                 <nav class="sub-menu">
                     <a href="../OPE-01/ope01.html" class="sub-menu-item jims-admin-only" id="nav-them-lop">
@@ -127,7 +125,8 @@
                         </svg>
                         Thêm lớp mới
                     </a>
-                    <a href="../OPE-02/ope02.html" class="sub-menu-item" id="nav-danh-sach-lop">
+                    <a href="../OPE-02/ope02.html" class="sub-menu-item" id="nav-danh-sach-lop"
+                        style="font-weight: 500; color: var(--mau-chu);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -137,118 +136,92 @@
                         </svg>
                         Danh sách lớp
                     </a>
-                    <span class="sub-menu-item active" id="nav-chi-tiet-lop" style="cursor: default;">Chi tiết lớp</span>
+                    <div id="nav-chi-tiet-container">
+                        <div class="nav-chi-tiet-item">
+                            <div style="width: 16px; display: flex; justify-content: center;">
+                                <div class="nav-chi-tiet-line"></div>
+                            </div>
+                            <span>Chi tiết lớp: <span id="nav-class-name-sidebar">—</span></span>
+                        </div>
+                    </div>
                 </nav>
             </div>
+
 
             <div class="vung-form">
                 <h1 class="form-tieu-de">Chi tiết lớp học</h1>
 
-                <div class="hang-input">
-                    <div class="nhom-input" style="flex:1">
-                        <label class="nhan">Tên lớp:</label>
-                        <div class="khung-input khung-disabled">
-                            <input type="text" id="detail-ten-lop" class="o-nhap input-disabled" readonly>
+
+                <div class="tabs-container">
+                    <div class="tab-item" id="tab-thong-tin-chung" style="cursor: pointer;">Thông tin chung</div>
+                    <div class="tab-item active">Danh sách học sinh</div>
+                    <div class="tab-item">Điểm danh</div>
+                    <div class="tab-item">Báo cáo học</div>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-content-item" style="display: block;">
+
+
+                        <div class="danh-sach-header" id="header-view">
+                            <div class="tong-hoc-sinh" id="hien-thi-tong">Tổng: 0 học sinh</div>
+                            <button class="btn-chinh-sua jims-admin-only" id="btn-chinh-sua" type="button">Chỉnh sửa</button>
                         </div>
-                    </div>
-                    <div class="nhom-input" style="flex:1">
-                        <label class="nhan">Cấp độ:</label>
-                        <div class="khung-input khung-disabled">
-                            <input type="text" id="detail-cap-do" class="o-nhap input-disabled" readonly>
+
+                        <div class="edit-actions" id="header-edit" style="display: none;">
+                            <div class="edit-actions-left">
+                                <button class="btn-them-moi" id="btn-them-moi" type="button">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    Thêm học sinh mới
+                                </button>
+                                <button class="btn-xoa-chon" id="btn-xoa-chon" type="button">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                        </path>
+                                    </svg>
+                                    Xóa học sinh đã chọn
+                                </button>
+                            </div>
+                            <button class="btn-thoat" id="btn-thoat" type="button">Thoát</button>
                         </div>
-                    </div>
-                </div>
 
-                <div class="hang-input" style="margin-top:20px">
-                    <div class="nhom-input" style="flex:1">
-                        <label class="nhan">Giáo viên phụ trách:</label>
-                        <div class="khung-input khung-disabled">
-                            <input type="text" id="detail-giao-vien" class="o-nhap input-disabled" readonly>
+                        <div id="error-capacity" class="error-message" style="display: none;"></div>
+
+
+                        <div class="bang-container">
+                            <table class="bang-hoc-sinh">
+                                <thead>
+                                    <tr>
+                                        <th class="checkbox-cell" style="display: none;" id="th-checkbox">
+                                            <input type="checkbox" class="custom-checkbox" id="check-all" aria-label="Chọn tất cả">
+                                        </th>
+                                        <th style="width: 50px;">STT</th>
+                                        <th>MÃ HỌC SINH</th>
+                                        <th>HỌ VÀ TÊN</th>
+                                        <th>NGÀY SINH</th>
+                                        <th>GIỚI TÍNH</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bang-hoc-sinh-body">
+
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                    <div class="nhom-input" style="flex:1">
-                        <label class="nhan">Học phí (/buổi):</label>
-                        <div class="khung-input khung-disabled">
-                            <input type="text" id="detail-hoc-phi" class="o-nhap input-disabled" readonly>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="hang-input" style="margin-top:20px">
-                    <div class="nhom-input" style="flex:1">
-                        <label class="nhan">Ngày khai giảng:</label>
-                        <div class="khung-input khung-disabled">
-                            <input type="text" id="detail-ngay-khai-giang" class="o-nhap input-disabled" readonly>
-                        </div>
                     </div>
-                    <div class="nhom-input" style="flex:1">
-                        <label class="nhan">Sĩ số:</label>
-                        <div class="khung-input khung-disabled">
-                            <input type="text" id="detail-si-so" class="o-nhap input-disabled" readonly>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="nhom-hien-thi" style="margin-top:24px">
-                    <label class="nhan">Lịch học trong tuần:</label>
-                    <div class="hien-thi-gia-tri" id="detail-lich-hoc"></div>
-                </div>
-                <div class="nhom-hien-thi" style="margin-top:16px">
-                    <label class="nhan">Khung giờ học:</label>
-                    <div class="hien-thi-gia-tri" id="detail-khung-gio"></div>
-                </div>
-
-                <div class="danh-sach-header">
-                    <div class="tong-hoc-sinh" id="hien-thi-tong">Tổng: 0 học sinh</div>
-                    <div id="header-view" style="display: flex;">
-                        <button class="btn-chinh-sua jims-admin-only" id="btn-chinh-sua" type="button">Chỉnh sửa</button>
-                    </div>
-                </div>
-
-                <div class="edit-actions" id="header-edit" style="display: none;">
-                    <div class="edit-actions-left">
-                        <button class="btn-them-moi" id="btn-them-moi" type="button">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Thêm học sinh mới
-                        </button>
-                        <button class="btn-xoa-chon" id="btn-xoa-chon" type="button">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                </path>
-                            </svg>
-                            Xóa học sinh đã chọn
-                        </button>
-                    </div>
-                    <button class="btn-thoat" id="btn-thoat" type="button">Thoát</button>
-                </div>
-
-                <div id="error-capacity" class="error-message" style="display: none;"></div>
-
-                <div class="bang-container">
-                    <table class="bang-hoc-sinh">
-                        <thead>
-                            <tr>
-                                <th class="checkbox-cell" id="th-checkbox" style="display: none;"></th>
-                                <th style="width: 50px;">STT</th>
-                                <th>MÃ HỌC SINH</th>
-                                <th>HỌ VÀ TÊN</th>
-                                <th>NGÀY SINH</th>
-                                <th>GIỚI TÍNH</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bang-hoc-sinh-body"></tbody>
-                    </table>
                 </div>
             </div>
+
         </div>
     </div>
+
 
     <div class="modal-overlay" id="modal-them">
         <div class="modal-container">
@@ -262,6 +235,7 @@
                     </svg>
                 </button>
             </div>
+
             <div class="modal-body">
                 <div class="search-box">
                     <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -269,31 +243,23 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" id="input-tim-kiem" placeholder="Tìm học sinh">
+                    <input type="text" id="input-tim-kiem" placeholder="Tìm học sinh" autocomplete="off">
                 </div>
+
                 <div class="modal-list-header">
                     <div>HỌ VÀ TÊN</div>
                     <div>MÃ HỌC SINH</div>
                 </div>
-                <div class="modal-list-items" id="modal-list-items"></div>
+
+                <div class="modal-list-items" id="modal-list-items">
+
+                </div>
             </div>
+
             <div class="modal-footer">
                 <button class="nut-huy" id="btn-huy-them" type="button">Hủy</button>
                 <button class="nut-luu" id="btn-luu-them" type="button">Lưu</button>
             </div>
-        </div>
-    </div>
-
-    <div class="overlay" id="overlay-xoa-hs" style="display:none;"></div>
-    <div class="popup" id="popup-xoa-hs" style="display:none;">
-        <div class="popup-header">
-            <img src="/UI/assets/joyenglishlogo.jpg" alt="Logo" class="popup-logo">
-            <span class="popup-ten-app">J-IMS</span>
-        </div>
-        <div class="popup-noi-dung">Bạn có chắc chắn muốn xóa học sinh đã chọn khỏi lớp?</div>
-        <div class="popup-nut">
-            <button class="nut-huy" id="popup-xoa-hs-huy" type="button">Hủy</button>
-            <button class="nut-luu" id="popup-xoa-hs-dong-y" type="button">Đồng ý</button>
         </div>
     </div>
 

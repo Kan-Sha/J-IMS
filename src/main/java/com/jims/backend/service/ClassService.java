@@ -273,8 +273,10 @@ public class ClassService {
                     return new ApiResult(false, Collections.emptyMap(), "Lớp không tồn tại!", 404);
                 }
 
+                classRepository.syncCurrentSizeFromStudents(conn, classId);
+
                 int cap = ((Number) summary.get("capacity")).intValue();
-                int cur = ((Number) summary.get("currentSize")).intValue();
+                int cur = studentRepository.countStudentsInClass(conn, classId);
 
                 if ("add".equals(act)) {
                     Set<String> unique = new LinkedHashSet<String>();
@@ -306,6 +308,7 @@ public class ClassService {
                             return new ApiResult(false, Collections.emptyMap(), "Số lượng học sinh vượt quá giới hạn sĩ số của lớp!", 400);
                         }
                     }
+                    classRepository.syncCurrentSizeFromStudents(conn, classId);
                 } else {
                     for (String sid : studentIds) {
                         if (sid == null || sid.trim().isEmpty()) {
@@ -325,6 +328,7 @@ public class ClassService {
                             return new ApiResult(false, Collections.emptyMap(), "Không thể cập nhật sĩ số lớp!", 500);
                         }
                     }
+                    classRepository.syncCurrentSizeFromStudents(conn, classId);
                 }
 
                 conn.commit();
@@ -337,6 +341,38 @@ public class ClassService {
                 return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
             } finally {
                 conn.setAutoCommit(true);
+                conn.close();
+            }
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
+    /**
+     * OPE-03: minimal payload (class name, capacity, students only) for faster load.
+     */
+    public ApiResult getOpe03ClassPayload(int classId) {
+        if (classId <= 0) {
+            return new ApiResult(false, Collections.emptyMap(), "classId không hợp lệ!", 400);
+        }
+        try {
+            Connection conn = studentRepository.getConnection();
+            try {
+                Map<String, Object> basic = classRepository.getClassNameCapacity(conn, classId);
+                if (basic == null) {
+                    return new ApiResult(false, Collections.emptyMap(), "Lớp không tồn tại!", 404);
+                }
+                classRepository.syncCurrentSizeFromStudents(conn, classId);
+                List<Map<String, Object>> students = classRepository.listStudentsInClass(conn, classId);
+                int enrolled = students.size();
+                Map<String, Object> data = new LinkedHashMap<String, Object>();
+                data.put("classId", basic.get("classId"));
+                data.put("className", basic.get("className"));
+                data.put("capacity", basic.get("capacity"));
+                data.put("currentSize", Integer.valueOf(enrolled));
+                data.put("students", students);
+                return new ApiResult(true, data, "OK", 200);
+            } finally {
                 conn.close();
             }
         } catch (SQLException e) {

@@ -32,6 +32,7 @@ com/jims/backend/util/UrlEncodingUtil.class
 com/jims/backend/service/ApiResult.class
 com/jims/backend/service/AuthService.class
 com/jims/backend/util/SessionManager$SessionData.class
+com/jims/backend/controller/ClassController$6.class
 com/jims/backend/util/DBConnection.class
 com/jims/backend/Application.class
 com/jims/backend/controller/ClassController$3.class
