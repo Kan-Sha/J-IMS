@@ -15,7 +15,7 @@
     --mau-loi: #ff0000;
     --mau-xanh-la: #2f9e44;
     --mau-cam: #e55a2b;
-    --font-chinh: 'Be Vietnam Pro', sans-serif;
+    --font-chinh: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
     --rong-sidebar: 64px;
     --rong-sub-sidebar: 250px;
 }
@@ -248,12 +248,18 @@ body {
 }
 
 .khung-readonly {
-    background: #f3f4f6;
+    background-color: #f5f5f5;
 }
 
 .khung-readonly .o-nhap {
-    color: #000000;
+    color: #6c757d;
     opacity: 1;
+    font-weight: 400;
+}
+
+.khung-readonly,
+.khung-readonly .o-nhap {
+    cursor: not-allowed;
 }
 
 .o-nhap {

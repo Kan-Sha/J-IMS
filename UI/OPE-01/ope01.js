@@ -316,10 +316,30 @@ document.addEventListener('DOMContentLoaded', function () {
       hopLe = false;
     }
 
-    var startDateIso = parseDdMmYyyyToIso(inputNgay ? inputNgay.value : '');
-    if (!startDateIso) {
-      hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', 'Ngày khai giảng không hợp lệ!');
+    var ngayRaw = inputNgay ? String(inputNgay.value || '') : '';
+    var ngayTrim = ngayRaw.trim();
+    if (!ngayTrim) {
+      hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', 'Mục này không được để trống!');
       hopLe = false;
+    } else {
+      var startDateIso = parseDdMmYyyyToIso(ngayTrim);
+      if (!startDateIso) {
+        hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', 'Ngày khai giảng không hợp lệ!');
+        hopLe = false;
+      } else {
+        var partsIso = startDateIso.split('-');
+        var yyyy = parseInt(partsIso[0], 10);
+        var mm = parseInt(partsIso[1], 10);
+        var dd = parseInt(partsIso[2], 10);
+        var selected = new Date(yyyy, mm - 1, dd);
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        selected.setHours(0, 0, 0, 0);
+        if (selected < today) {
+          hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', 'Ngày khai giảng không hợp lệ!');
+          hopLe = false;
+        }
+      }
     }
 
     // Fixed business rule: 15
@@ -335,20 +355,30 @@ document.addEventListener('DOMContentLoaded', function () {
       hopLe = false;
     }
 
-    var startMins = timeToMinutes(inputGioBatDau ? inputGioBatDau.value : '');
-    var endMins = timeToMinutes(inputGioKetThuc ? inputGioKetThuc.value : '');
-    if (startMins == null || endMins == null) {
-      hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Khung giờ học không hợp lệ!');
-      hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
+    var gioBatDauRaw = inputGioBatDau ? String(inputGioBatDau.value || '') : '';
+    var gioKetThucRaw = inputGioKetThuc ? String(inputGioKetThuc.value || '') : '';
+    var gioBatDauTrim = gioBatDauRaw.trim();
+    var gioKetThucTrim = gioKetThucRaw.trim();
+    if (!gioBatDauTrim || !gioKetThucTrim) {
+      hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Mục này không được để trống!');
+      hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Mục này không được để trống!');
       hopLe = false;
-    } else if (endMins <= startMins) {
-      hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Khung giờ học không hợp lệ!');
-      hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
-      hopLe = false;
-    } else if ((endMins - startMins) < 30) {
-      hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Thời lượng buổi học phải tối thiểu 30 phút.');
-      hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Thời lượng buổi học phải tối thiểu 30 phút.');
-      hopLe = false;
+    } else {
+      var startMins = timeToMinutes(gioBatDauTrim);
+      var endMins = timeToMinutes(gioKetThucTrim);
+      if (startMins == null || endMins == null) {
+        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Khung giờ học không hợp lệ!');
+        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
+        hopLe = false;
+      } else if (endMins <= startMins) {
+        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Khung giờ học không hợp lệ!');
+        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
+        hopLe = false;
+      } else if ((endMins - startMins) < 30) {
+        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Thời lượng buổi học phải tối thiểu 30 phút.');
+        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Thời lượng buổi học phải tối thiểu 30 phút.');
+        hopLe = false;
+      }
     }
 
     return hopLe;
@@ -472,9 +502,20 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (typeof payload === 'string') {
       msg = payload;
     }
-    if (payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object' && payload.data.className) {
-      hienLoi('loi-ten-lop', 'khung-ten-lop', String(payload.data.className).trim());
-      return;
+    if (payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object') {
+      if (payload.data.className) {
+        hienLoi('loi-ten-lop', 'khung-ten-lop', String(payload.data.className).trim());
+        return;
+      }
+      if (payload.data.startDate) {
+        hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', String(payload.data.startDate).trim());
+        return;
+      }
+      if (payload.data.time) {
+        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', String(payload.data.time).trim());
+        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', String(payload.data.time).trim());
+        return;
+      }
     }
     if (!msg) return;
     if (msg.indexOf('Tên lớp') !== -1) {
@@ -523,11 +564,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var className = normalizeClassName(inputTenLop.value);
     var levelId = parseInt(selectCapDo.value, 10);
     var teacherId = parseInt(selectGiaoVien.value, 10);
-    var startDateIso = parseDdMmYyyyToIso(inputNgay.value);
+    var startDateIso = parseDdMmYyyyToIso(String(inputNgay.value || '').trim());
     var capacity = 15;
     var days = getLessonDays();
-    var startMins = timeToMinutes(inputGioBatDau.value);
-    var endMins = timeToMinutes(inputGioKetThuc.value);
+    var startMins = timeToMinutes(String(inputGioBatDau.value || '').trim());
+    var endMins = timeToMinutes(String(inputGioKetThuc.value || '').trim());
 
     dangGui = true;
     if (nutLuu) {
@@ -583,6 +624,18 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   if (nutLuu) nutLuu.addEventListener('click', submit);
+
+  // Ensure capacity field is non-editable (UI-only; still data-bound/displayed).
+  if (inputSoLuong) {
+    try {
+      inputSoLuong.readOnly = true;
+      inputSoLuong.addEventListener('keydown', function (e) { e.preventDefault(); });
+      inputSoLuong.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
+      inputSoLuong.addEventListener('input', function () { inputSoLuong.value = '15'; });
+    } catch (_) {
+      // no-op
+    }
+  }
 
   function hienPopupDangXuat() {
     var overlayDX = document.getElementById('overlay-dang-xuat');

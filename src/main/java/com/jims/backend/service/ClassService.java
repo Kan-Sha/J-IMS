@@ -73,9 +73,19 @@ public class ClassService {
                 fe.put("className", "Tên lớp học cần ít hơn 10 ký tự");
                 return new ApiResult(false, fe, "Validation failed", 400);
             }
-            if (levelId == null || teacherId == null || isBlank(startDate)
-                    || capacity == null || days == null || isBlank(startTimeStr) || isBlank(endTimeStr)) {
+            if (levelId == null || teacherId == null || capacity == null || days == null) {
                 return new ApiResult(false, Collections.emptyMap(), "Thiếu thông tin bắt buộc!", 400);
+            }
+
+            if (isBlank(startDate)) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("startDate", "Mục này không được để trống!");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            if (isBlank(startTimeStr) || isBlank(endTimeStr)) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("time", "Mục này không được để trống!");
+                return new ApiResult(false, fe, "Validation failed", 400);
             }
             // Business rule: fixed max students = 15. Do not trust client input.
             int enforcedCapacity = OPE_FIXED_CAPACITY;
@@ -107,7 +117,14 @@ public class ClassService {
             try {
                 sd = LocalDate.parse(startDate.trim());
             } catch (DateTimeParseException e) {
-                return new ApiResult(false, Collections.emptyMap(), "Ngày bắt đầu không hợp lệ!", 400);
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("startDate", "Ngày khai giảng không hợp lệ!");
+                return new ApiResult(false, fe, "Validation failed", 400);
+            }
+            if (sd.isBefore(LocalDate.now())) {
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("startDate", "Ngày khai giảng không hợp lệ!");
+                return new ApiResult(false, fe, "Validation failed", 400);
             }
 
             LocalTime st;
@@ -116,10 +133,14 @@ public class ClassService {
                 st = LocalTime.parse(normalizeTime(startTimeStr));
                 et = LocalTime.parse(normalizeTime(endTimeStr));
             } catch (DateTimeParseException e) {
-                return new ApiResult(false, Collections.emptyMap(), "Giờ học không hợp lệ!", 400);
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("time", "Khung giờ học không hợp lệ!");
+                return new ApiResult(false, fe, "Validation failed", 400);
             }
             if (!et.isAfter(st)) {
-                return new ApiResult(false, Collections.emptyMap(), "Giờ kết thúc phải sau giờ bắt đầu!", 400);
+                Map<String, String> fe = new LinkedHashMap<String, String>();
+                fe.put("time", "Khung giờ học không hợp lệ!");
+                return new ApiResult(false, fe, "Validation failed", 400);
             }
             int startMins = st.getHour() * 60 + st.getMinute();
             int endMins = et.getHour() * 60 + et.getMinute();
