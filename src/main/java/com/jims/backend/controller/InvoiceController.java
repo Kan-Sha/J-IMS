@@ -35,8 +35,14 @@ public class InvoiceController {
                 }
 
                 String token = resolveToken(exchange);
-                if (SessionManager.getSession(token) == null) {
+                SessionManager.SessionData sessionData = SessionManager.getSession(token);
+                if (sessionData == null) {
                     ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                String role = sessionData.getRole() == null ? "" : sessionData.getRole().trim();
+                if (!"admin".equalsIgnoreCase(role)) {
+                    ResponseUtil.sendJson(exchange, 403, false, Collections.emptyMap(), "Bạn không có quyền truy cập");
                     return;
                 }
 

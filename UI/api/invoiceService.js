@@ -15,21 +15,21 @@ function authHeaders(extra) {
 }
 
 function handleApiError(res, defaultMsg) {
-  if (res.status === 401) {
-    return res.json().catch(() => null).then(payload => {
+  return res.json().catch(() => null).then(payload => {
+    if (res.status === 401) {
       alert((payload && payload.message) ? payload.message : 'Chưa đăng nhập');
       window.location.href = LOGIN_URL;
       return Promise.reject(new Error('unauthorized'));
-    });
-  }
-  if (!navigator.onLine) {
-    alert('Mất kết nối internet');
-  } else if (res.status >= 500) {
-    alert('Không thể kết nối server');
-  } else {
-    alert(defaultMsg || 'Có lỗi xảy ra');
-  }
-  return res.json().catch(() => null).then(payload => Promise.reject(payload || {}));
+    }
+    if (!navigator.onLine) {
+      alert('Mất kết nối internet');
+    } else if (res.status >= 500) {
+      alert('Không thể kết nối server');
+    } else {
+      alert((payload && payload.message) ? payload.message : (defaultMsg || 'Có lỗi xảy ra'));
+    }
+    return Promise.reject(payload || {});
+  });
 }
 
 export async function fetchClasses(keyword) {

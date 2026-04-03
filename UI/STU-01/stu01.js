@@ -94,12 +94,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
     const prefix = `JS-${yearMonth}-`;
     if (!latestId || typeof latestId !== 'string' || !latestId.startsWith(prefix)) {
-      return `${prefix}0001`;
+      return `${prefix}001`;
     }
     const suffix = latestId.slice(prefix.length);
     const n = Number.parseInt(suffix, 10);
     const next = Number.isFinite(n) ? (n + 1) : 1;
-    return `${prefix}${String(next).padStart(4, '0')}`;
+    return `${prefix}${String(next).padStart(3, '0')}`;
   }
 
   async function taiMaHocVienMoi() {

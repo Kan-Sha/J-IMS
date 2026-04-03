@@ -18,6 +18,6 @@ public final class StudentIdGenerator {
             nextNumber = Integer.parseInt(suffix) + 1;
         }
 
-        return prefix + String.format("%04d", nextNumber);
+        return prefix + String.format("%03d", nextNumber);
     }
 }

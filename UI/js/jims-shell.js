@@ -1,6 +1,6 @@
 /**
  * J-IMS shared shell: session check, role-based sidebar links, hide Admin-only UI for Teacher/TA.
- * Requires: <body data-jims-page="aut01|stu01|stu03|aut03|ope01|ope02|ope03" class="jims-shell-loading">
+   * Requires: <body data-jims-page="aut01|stu01|stu03|aut03|ope01|ope02|ope03|fin01" class="jims-shell-loading">
  * Load before page-specific *.js
  */
 (function () {
@@ -33,7 +33,8 @@
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
         ope02: '../OPE-02/ope02.html',
-        ope03: '../OPE-03/ope03.html'
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
       stu01: {
         stu01: 'stu01.html',
@@ -42,7 +43,8 @@
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
         ope02: '../OPE-02/ope02.html',
-        ope03: '../OPE-03/ope03.html'
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
       stu03: {
         stu01: '../STU-01/stu01.html',
@@ -51,7 +53,8 @@
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
         ope02: '../OPE-02/ope02.html',
-        ope03: '../OPE-03/ope03.html'
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
       aut03: {
         stu01: '../STU-01/stu01.html',
@@ -60,7 +63,8 @@
         aut03: 'aut03.html',
         ope01: '../OPE-01/ope01.html',
         ope02: '../OPE-02/ope02.html',
-        ope03: '../OPE-03/ope03.html'
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
       ope01: {
         stu01: '../STU-01/stu01.html',
@@ -69,7 +73,8 @@
         aut03: '../AUT-03/aut03.html',
         ope01: 'ope01.html',
         ope02: '../OPE-02/ope02.html',
-        ope03: '../OPE-03/ope03.html'
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
       ope02: {
         stu01: '../STU-01/stu01.html',
@@ -78,7 +83,8 @@
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
         ope02: 'ope02.html',
-        ope03: '../OPE-03/ope03.html'
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
       ope03: {
         stu01: '../STU-01/stu01.html',
@@ -87,7 +93,18 @@
         aut03: '../AUT-03/aut03.html',
         ope01: '../OPE-01/ope01.html',
         ope02: '../OPE-02/ope02.html',
-        ope03: 'ope03.html'
+        ope03: 'ope03.html',
+        fin01: '../FIN-01/fin01.html'
+      },
+      fin01: {
+        stu01: '../STU-01/stu01.html',
+        stu03: '../STU-03/stu03.html',
+        aut01: '../AUT-01/aut01.html',
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html'
       },
     };
     return m[page] || m.stu01;
@@ -106,6 +123,10 @@
     // OPE screens: Admin -> OPE-01, Teacher/TA -> OPE-02 list
     document.querySelectorAll('a[title="Quản lý lớp học"]').forEach(function (a) {
       a.setAttribute('href', isAdmin ? u.ope01 : u.ope02);
+    });
+    document.querySelectorAll('a[title="Tài chính"]').forEach(function (a) {
+      a.setAttribute('href', u.fin01 || '../FIN-01/fin01.html');
+      a.style.display = isAdmin ? '' : 'none';
     });
 
     document.querySelectorAll('.jims-admin-only').forEach(function (el) {
@@ -183,6 +204,11 @@
         }
         if (page === 'ope01' && lower !== 'admin') {
           alert('Bạn không có quyền truy cập!');
+          window.location.href = u.ope02 || '../OPE-02/ope02.html';
+          return;
+        }
+        if (page === 'fin01' && lower !== 'admin') {
+          alert('Bạn không có quyền truy cập');
           window.location.href = u.ope02 || '../OPE-02/ope02.html';
           return;
         }

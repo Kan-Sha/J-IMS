@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var classStudents = [];
     var isEditMode = false;
     var selectedToRemove = [];
+    var lastCheckedIndex = null;
     var selectedToAdd = [];
     var unassignedCache = null;
 
@@ -146,14 +147,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (isEditMode) {
             var rowCheckboxes = document.querySelectorAll('.row-checkbox');
-            rowCheckboxes.forEach(function (cb) {
+            rowCheckboxes.forEach(function (cb, idx) {
                 cb.addEventListener('change', function (e) {
                     var val = e.target.value;
-                    if (e.target.checked) {
-                        if (selectedToRemove.indexOf(val) === -1) selectedToRemove.push(val);
+                    if (e.shiftKey && lastCheckedIndex != null) {
+                        var start = Math.min(lastCheckedIndex, idx);
+                        var end = Math.max(lastCheckedIndex, idx);
+                        for (var i = start; i <= end; i++) {
+                            var rowCb = rowCheckboxes[i];
+                            rowCb.checked = e.target.checked;
+                            var rowVal = rowCb.value;
+                            if (e.target.checked) {
+                                if (selectedToRemove.indexOf(rowVal) === -1) selectedToRemove.push(rowVal);
+                            } else {
+                                selectedToRemove = selectedToRemove.filter(function (id) { return id !== rowVal; });
+                            }
+                        }
                     } else {
-                        selectedToRemove = selectedToRemove.filter(function (id) { return id !== val; });
+                        if (e.target.checked) {
+                            if (selectedToRemove.indexOf(val) === -1) selectedToRemove.push(val);
+                        } else {
+                            selectedToRemove = selectedToRemove.filter(function (id) { return id !== val; });
+                        }
                     }
+                    lastCheckedIndex = idx;
                     updateCheckboxState();
                 });
             });

@@ -4,15 +4,52 @@ import { formatCurrency, parseCurrency, isFeeWithinLimit, MAX_FEE_DIGITS } from 
 document.addEventListener('DOMContentLoaded', function () {
   let allClasses = [];
   let currentClass = null;
-  let currentMonth = '';
-  let currentTotalSessions = 0;
+  let currentMonth = 'Tháng 3-4';
+  let currentTotalSessions = 16;
   let currentUnitPrice = 0;
+  let currentStudentsPayload = null;
 
   const tbodyDanhSach = document.getElementById('tbody-danh-sach-lop');
   const tbodyXemTruoc = document.getElementById('tbody-xem-truoc');
   const errKy = document.getElementById('err-cau-hinh-ky');
   const errBuoi = document.getElementById('err-cau-hinh-buoi');
   const errTongQuat = document.getElementById('err-luu-tong-quat');
+  const popupOverlay = document.getElementById('overlay-thanh-cong');
+  const popupBox = document.getElementById('popup-thanh-cong');
+  const popupText = document.getElementById('popup-txt-thanh-cong');
+
+  function showPopup(msg) {
+    if (popupText) popupText.textContent = msg;
+    if (popupOverlay) popupOverlay.style.display = 'block';
+    if (popupBox) popupBox.style.display = 'block';
+  }
+
+  function hidePopup() {
+    if (popupOverlay) popupOverlay.style.display = 'none';
+    if (popupBox) popupBox.style.display = 'none';
+  }
+
+  function parseStateFromUrl() {
+    var p = new URLSearchParams(window.location.search || '');
+    return {
+      view: p.get('view') || 'list',
+      classId: p.get('classId') ? parseInt(p.get('classId'), 10) : null,
+      billingPeriod: p.get('billingPeriod') || '',
+      totalSessions: p.get('totalSessions') ? parseInt(p.get('totalSessions'), 10) : null
+    };
+  }
+
+  function syncUrl(viewName, mode) {
+    var p = new URLSearchParams();
+    p.set('view', viewName);
+    if (currentClass && currentClass.id != null) p.set('classId', String(currentClass.id));
+    if (currentMonth) p.set('billingPeriod', currentMonth);
+    if (currentTotalSessions) p.set('totalSessions', String(currentTotalSessions));
+    var next = window.location.pathname + '?' + p.toString();
+    var state = { view: viewName, classId: currentClass ? currentClass.id : null, billingPeriod: currentMonth, totalSessions: currentTotalSessions };
+    if (mode === 'replace') window.history.replaceState(state, '', next);
+    else if (mode === 'push') window.history.pushState(state, '', next);
+  }
 
   function switchView(viewId) {
     ['view-danh-sach', 'view-cau-hinh', 'view-xem-truoc'].forEach(function (id) {
@@ -55,81 +92,33 @@ document.addEventListener('DOMContentLoaded', function () {
         '<td><button class="btn-xem btn-tao-hoa-don" data-id="' + cls.id + '">Tạo hóa đơn</button></td>';
       tbodyDanhSach.appendChild(tr);
     });
-    var btns = tbodyDanhSach.querySelectorAll('.btn-tao-hoa-don');
-    btns.forEach(function (btn) {
+    tbodyDanhSach.querySelectorAll('.btn-tao-hoa-don').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var id = parseInt(btn.getAttribute('data-id'), 10);
-        openCauHinhView(id);
+        openCauHinhView(id, 'push');
       });
     });
   }
 
-  async function openCauHinhView(classId) {
+  function applyConfigDefaults() {
+    document.getElementById('sel-ky-thanh-toan').value = currentMonth;
+    document.getElementById('hien-thi-ky-thanh-toan').innerText = currentMonth;
+    document.getElementById('ipt-tong-buoi').value = String(currentTotalSessions);
+  }
+
+  function openCauHinhView(classId, historyMode) {
     currentClass = allClasses.find(function (c) { return c.id === classId; }) || null;
     if (!currentClass) return;
     errKy.textContent = '';
     errBuoi.textContent = '';
-    document.getElementById('sel-ky-thanh-toan').value = '2025-03';
-    document.getElementById('hien-thi-ky-thanh-toan').innerText = 'Tháng 3-4';
-    document.getElementById('ipt-tong-buoi').value = '16';
+    applyConfigDefaults();
     document.getElementById('lbl-ten-lop-cau-hinh').innerText = currentClass.lop;
     switchView('view-cau-hinh');
+    if (historyMode) syncUrl('config', historyMode);
   }
 
-  var selKyThanhToan = document.getElementById('sel-ky-thanh-toan');
-  var lblKyThanhToan = document.getElementById('hien-thi-ky-thanh-toan');
-  if (selKyThanhToan && lblKyThanhToan) {
-    selKyThanhToan.addEventListener('change', function () {
-      lblKyThanhToan.innerText = this.options[this.selectedIndex].text;
-      errKy.textContent = '';
-    });
-  }
-
-  var iptTongBuoi = document.getElementById('ipt-tong-buoi');
-  if (iptTongBuoi) {
-    iptTongBuoi.addEventListener('input', function () {
-      errBuoi.textContent = '';
-    });
-  }
-
-  var btnHuyCauHinh = document.getElementById('btn-huy-cau-hinh');
-  if (btnHuyCauHinh) {
-    btnHuyCauHinh.addEventListener('click', function () {
-      switchView('view-danh-sach');
-    });
-  }
-
-  var btnTinhToan = document.getElementById('btn-tinh-toan');
-  if (btnTinhToan) {
-    btnTinhToan.addEventListener('click', async function () {
-      var month = selKyThanhToan ? selKyThanhToan.value : '';
-      var totalSessions = parseInt(iptTongBuoi ? iptTongBuoi.value : '0', 10);
-      var valid = true;
-
-      if (isNaN(totalSessions) || totalSessions < 1 || totalSessions > 30) {
-        errBuoi.textContent = 'Tổng số buổi không hợp lệ!';
-        valid = false;
-      }
-
-      if (!valid) return;
-
-      try {
-        var payload = await fetchClassStudentsForInvoice(currentClass.id);
-        if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
-          errKy.textContent = 'Lớp học chưa có học sinh.';
-          return;
-        }
-        currentMonth = month;
-        currentTotalSessions = totalSessions;
-        currentUnitPrice = Number(payload.pricePerSession || currentClass.tuitionPerSession || 0);
-        openXemTruocView(payload);
-      } catch (e) {
-        errKy.textContent = e && e.message ? e.message : 'Không tải được dữ liệu lớp.';
-      }
-    });
-  }
-
-  function openXemTruocView(payload) {
+  function openXemTruocView(payload, historyMode) {
+    currentStudentsPayload = payload;
     errTongQuat.textContent = '';
     document.getElementById('lbl-ten-lop-xem-truoc').innerText = payload.className || '';
     document.getElementById('lbl-ky-thanh-toan').value = currentMonth || '';
@@ -141,213 +130,179 @@ document.addEventListener('DOMContentLoaded', function () {
 
     (payload.students || []).forEach(function (s, idx) {
       var maHS = s.studentId;
-      var hoTen = (s.fullName || ((s.firstName || '') + ' ' + (s.lastName || ''))).trim();
-
+      var hoTen = (s.fullName || ((s.lastName || '') + ' ' + (s.firstName || ''))).trim();
       var tr = document.createElement('tr');
       tr.dataset.ten = hoTen;
       tr.dataset.studentId = maHS;
       tr.dataset.baseFee = String(baseFee);
-
       tr.innerHTML =
         '<td style="text-align: center; vertical-align: middle;">' + String(idx + 1).padStart(2, '0') + '</td>' +
         '<td style="text-align: center; white-space: nowrap; vertical-align: middle;">' + maHS + '</td>' +
         '<td style="text-align: center; vertical-align: middle;"><strong>' + hoTen + '</strong></td>' +
         '<td style="text-align: center; vertical-align: middle;">' + formatCurrency(baseFee) + '</td>' +
-        '<td style="text-align: center; vertical-align: middle;" class="phight">' +
-        '  <input type="text" class="input-phi-cuoi" value="' + formatCurrency(baseFee) + '">' +
-        '  <div class="text-error phi-error" style="margin-top:4px;"></div>' +
-        '</td>' +
-        '<td style="text-align: left;">' +
-        '  <input type="text" class="input-ly-do" placeholder="Ghi chú">' +
-        '</td>';
-
+        '<td style="text-align: center; vertical-align: middle;" class="phight"><input type="text" class="input-phi-cuoi" value="' + formatCurrency(baseFee) + '"><div class="text-error phi-error" style="margin-top:4px;"></div></td>' +
+        '<td style="text-align: left;"><input type="text" class="input-ly-do" placeholder="Ghi chú"></td>';
       tbodyXemTruoc.appendChild(tr);
 
       var phiInput = tr.querySelector('.input-phi-cuoi');
       var lyDoInput = tr.querySelector('.input-ly-do');
       var phiError = tr.querySelector('.phi-error');
 
-      phiInput.addEventListener('focus', function () {
-        this.value = parseCurrency(this.value) || '';
-      });
-
-      function validateFeeInput() {
-        var raw = phiInput.value;
-        if (raw === '') {
-          phiError.textContent = '';
-          return true;
-        }
-        if (!isFeeWithinLimit(raw)) {
-          phiError.textContent = 'Số tiền không được vượt quá ' + MAX_FEE_DIGITS + ' chữ số!';
-          return false;
-        }
-        phiError.textContent = '';
-        return true;
-      }
-
+      phiInput.addEventListener('focus', function () { this.value = parseCurrency(this.value) || ''; });
       phiInput.addEventListener('input', function () {
-        validateFeeInput();
+        if (!isFeeWithinLimit(phiInput.value)) phiError.textContent = 'Số tiền không được vượt quá ' + MAX_FEE_DIGITS + ' chữ số!';
+        else phiError.textContent = '';
       });
-
       phiInput.addEventListener('blur', function () {
-        if (!validateFeeInput()) {
-          var digits = String(parseCurrency(this.value)).slice(0, MAX_FEE_DIGITS);
-          var n = digits === '' ? 0 : parseInt(digits, 10);
-          this.value = formatCurrency(n);
+        var val = parseCurrency(this.value);
+        if (!isFeeWithinLimit(val)) {
+          phiError.textContent = 'Số tiền không được vượt quá ' + MAX_FEE_DIGITS + ' chữ số!';
+          val = parseInt(String(val).slice(0, MAX_FEE_DIGITS) || '0', 10);
         } else {
-          var val = parseCurrency(this.value);
-          this.value = formatCurrency(val);
+          phiError.textContent = '';
         }
+        this.value = formatCurrency(val);
         recalculateTotal();
-        var val2 = parseCurrency(this.value);
-        if (val2 === baseFee) {
-          lyDoInput.classList.remove('error');
-          errTongQuat.textContent = '';
-        }
+        if (val === baseFee) lyDoInput.classList.remove('error');
       });
-
-      lyDoInput.addEventListener('input', function () {
-        lyDoInput.classList.remove('error');
-        errTongQuat.textContent = '';
-      });
+      lyDoInput.addEventListener('input', function () { lyDoInput.classList.remove('error'); });
     });
 
     document.getElementById('lbl-tong-hoc-sinh').innerText = (payload.students || []).length;
     recalculateTotal();
     switchView('view-xem-truoc');
+    if (historyMode) syncUrl('preview', historyMode);
   }
 
   function recalculateTotal() {
     var sum = 0;
-    tbodyXemTruoc.querySelectorAll('.input-phi-cuoi').forEach(function (inp) {
-      sum += parseCurrency(inp.value);
-    });
+    tbodyXemTruoc.querySelectorAll('.input-phi-cuoi').forEach(function (inp) { sum += parseCurrency(inp.value); });
     document.getElementById('lbl-tong-tien').innerText = formatCurrency(sum);
   }
 
-  var btnHuyXemTruoc = document.getElementById('btn-huy-xem-truoc');
-  if (btnHuyXemTruoc) {
-    btnHuyXemTruoc.addEventListener('click', function () {
-      switchView('view-cau-hinh');
-    });
-  }
+  var selKyThanhToan = document.getElementById('sel-ky-thanh-toan');
+  var lblKyThanhToan = document.getElementById('hien-thi-ky-thanh-toan');
+  selKyThanhToan.addEventListener('change', function () {
+    currentMonth = this.value;
+    lblKyThanhToan.innerText = this.options[this.selectedIndex].text;
+    errKy.textContent = '';
+  });
 
-  var btnLuuHoaDon = document.getElementById('btn-luu-hoa-don');
-  if (btnLuuHoaDon) {
-    btnLuuHoaDon.addEventListener('click', async function () {
-      var rows = Array.prototype.slice.call(tbodyXemTruoc.querySelectorAll('tr'));
-      if (!rows.length) {
-        errTongQuat.textContent = 'Không thể tạo hóa đơn cho lớp rỗng!';
+  var iptTongBuoi = document.getElementById('ipt-tong-buoi');
+  iptTongBuoi.addEventListener('input', function () { errBuoi.textContent = ''; });
+
+  document.getElementById('btn-huy-cau-hinh').addEventListener('click', function () {
+    switchView('view-danh-sach');
+    syncUrl('list', 'push');
+  });
+
+  document.getElementById('btn-tinh-toan').addEventListener('click', async function () {
+    var totalSessions = parseInt(iptTongBuoi.value || '0', 10);
+    if (isNaN(totalSessions) || totalSessions < 1 || totalSessions > 30) {
+      errBuoi.textContent = 'Tổng số buổi không hợp lệ!';
+      return;
+    }
+    currentTotalSessions = totalSessions;
+    currentMonth = selKyThanhToan.value;
+    try {
+      var payload = await fetchClassStudentsForInvoice(currentClass.id);
+      if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
+        errKy.textContent = 'Lớp học chưa có học sinh.';
         return;
       }
+      currentUnitPrice = Number(payload.pricePerSession || currentClass.tuitionPerSession || 0);
+      openXemTruocView(payload, 'push');
+    } catch (e) {
+      errKy.textContent = (e && e.message) ? e.message : 'Không tải được dữ liệu lớp.';
+    }
+  });
 
-      var ok = true;
-      errTongQuat.textContent = '';
+  document.getElementById('btn-huy-xem-truoc').addEventListener('click', function () {
+    switchView('view-cau-hinh');
+    syncUrl('config', 'push');
+  });
 
-      var lines = rows.map(function (row) {
-        var hocSinhName = row.dataset.ten;
-        var baseFee = parseInt(row.dataset.baseFee, 10) || 0;
-        var studentId = row.dataset.studentId;
-        var phiInput = row.querySelector('.input-phi-cuoi');
-        var lyDoInput = row.querySelector('.input-ly-do');
-        var finalFee = parseCurrency(phiInput.value);
-
-        if (finalFee < 0) {
-          ok = false;
-          errTongQuat.textContent = 'Phí cuối cùng không được âm!';
-        }
-
-        if (!isFeeWithinLimit(finalFee)) {
-          ok = false;
-          errTongQuat.textContent = 'Số tiền không được vượt quá ' + MAX_FEE_DIGITS + ' chữ số!';
-        }
-
-        if (finalFee !== baseFee && !lyDoInput.value.trim()) {
-          ok = false;
-          lyDoInput.classList.add('error');
-          errTongQuat.textContent = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + hocSinhName + '!';
-        } else {
-          lyDoInput.classList.remove('error');
-        }
-
-        return {
-          studentId: studentId,
-          studentName: hocSinhName,
-          finalFee: finalFee,
-          adjustmentReason: lyDoInput.value.trim() || null
-        };
-      });
-
-      if (!ok) return;
-
-      try {
-        var billingPeriod = currentMonth;
-        await createInvoice({
-          classId: currentClass.id,
-          billingPeriod: billingPeriod,
-          totalSessions: currentTotalSessions,
-          lines: lines
-        });
-        document.getElementById('overlay-thanh-cong').style.display = 'block';
-        document.getElementById('popup-thanh-cong').style.display = 'block';
-      } catch (e) {
-        errTongQuat.textContent = (e && e.message) ? e.message : 'Không thể lưu hóa đơn.';
+  document.getElementById('btn-luu-hoa-don').addEventListener('click', async function () {
+    var rows = Array.prototype.slice.call(tbodyXemTruoc.querySelectorAll('tr'));
+    if (!rows.length) return;
+    var ok = true;
+    var lines = rows.map(function (row) {
+      var hocSinhName = row.dataset.ten;
+      var baseFee = parseInt(row.dataset.baseFee, 10) || 0;
+      var studentId = row.dataset.studentId;
+      var phiInput = row.querySelector('.input-phi-cuoi');
+      var lyDoInput = row.querySelector('.input-ly-do');
+      var finalFee = parseCurrency(phiInput.value);
+      if (!isFeeWithinLimit(finalFee)) { ok = false; }
+      if (finalFee !== baseFee && !lyDoInput.value.trim()) {
+        ok = false;
+        lyDoInput.classList.add('error');
+        errTongQuat.textContent = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + hocSinhName + '!';
       }
+      return { studentId: studentId, studentName: hocSinhName, finalFee: finalFee, adjustmentReason: lyDoInput.value.trim() || null };
     });
-  }
+    if (!ok) return;
+    try {
+      await createInvoice({ classId: currentClass.id, billingPeriod: currentMonth, totalSessions: currentTotalSessions, lines: lines });
+      showPopup('Hóa đơn đã được tạo thành công!');
+    } catch (e) {
+      showPopup((e && e.message) ? e.message : 'Không thể tạo hóa đơn');
+    }
+  });
 
-  var popupBtnDong = document.getElementById('popup-btn-dong');
-  if (popupBtnDong) {
-    popupBtnDong.addEventListener('click', function () {
-      document.getElementById('overlay-thanh-cong').style.display = 'none';
-      document.getElementById('popup-thanh-cong').style.display = 'none';
-      switchView('view-danh-sach');
-    });
-  }
+  document.getElementById('popup-btn-dong').addEventListener('click', function () {
+    hidePopup();
+    switchView('view-danh-sach');
+    syncUrl('list', 'push');
+  });
 
   var btnTimKiem = document.getElementById('btn-tim-kiem');
-  if (btnTimKiem) {
-    btnTimKiem.addEventListener('click', function () {
-      var keyword = document.getElementById('ipt-tim-kiem').value.trim();
-      loadClasses(keyword);
-    });
-  }
-
-  var btnDatLai = document.getElementById('btn-dat-lai');
-  if (btnDatLai) {
-    btnDatLai.addEventListener('click', function () {
-      document.getElementById('ipt-tim-kiem').value = '';
-      loadClasses('');
-    });
-  }
+  var iptTimKiem = document.getElementById('ipt-tim-kiem');
+  btnTimKiem.addEventListener('click', function () { loadClasses(iptTimKiem.value.trim()); });
+  iptTimKiem.addEventListener('keydown', function (e) { if (e.key === 'Enter') btnTimKiem.click(); });
+  document.getElementById('btn-dat-lai').addEventListener('click', function () { iptTimKiem.value = ''; loadClasses(''); });
 
   var btnDangXuat = document.getElementById('btn-dang-xuat');
   var overlayDX = document.getElementById('overlay-dang-xuat');
   var popupDX = document.getElementById('popup-dang-xuat');
-  if (btnDangXuat && overlayDX && popupDX) {
-    btnDangXuat.addEventListener('click', function (e) {
-      e.preventDefault();
-      overlayDX.style.display = 'block';
-      popupDX.style.display = 'block';
-      document.body.classList.add('popup-open');
-    });
-    var popupDXHuy = document.getElementById('popup-dx-huy');
-    if (popupDXHuy) {
-      popupDXHuy.addEventListener('click', function () {
-        overlayDX.style.display = 'none';
-        popupDX.style.display = 'none';
-        document.body.classList.remove('popup-open');
-      });
-    }
-    var popupDXXacNhan = document.getElementById('popup-dx-xac-nhan');
-    if (popupDXXacNhan) {
-      popupDXXacNhan.addEventListener('click', function () {
-        localStorage.removeItem('JIMS_TOKEN');
-        window.location.href = '../AUT-02/aut02.html';
-      });
-    }
-  }
+  btnDangXuat.addEventListener('click', function (e) { e.preventDefault(); overlayDX.style.display = 'block'; popupDX.style.display = 'block'; document.body.classList.add('popup-open'); });
+  document.getElementById('popup-dx-huy').addEventListener('click', function () { overlayDX.style.display = 'none'; popupDX.style.display = 'none'; document.body.classList.remove('popup-open'); });
+  document.getElementById('popup-dx-xac-nhan').addEventListener('click', function () { localStorage.removeItem('JIMS_TOKEN'); window.location.href = '../AUT-02/aut02.html'; });
 
-  loadClasses('');
+  window.addEventListener('popstate', async function () {
+    var st = parseStateFromUrl();
+    if (st.view === 'list') { switchView('view-danh-sach'); return; }
+    if (!st.classId) { switchView('view-danh-sach'); return; }
+    currentClass = allClasses.find(function (c) { return c.id === st.classId; }) || null;
+    if (!currentClass) return;
+    if (st.billingPeriod) currentMonth = st.billingPeriod;
+    if (st.totalSessions) currentTotalSessions = st.totalSessions;
+    if (st.view === 'config') {
+      openCauHinhView(st.classId, null);
+      return;
+    }
+    if (st.view === 'preview') {
+      try {
+        var payload = await fetchClassStudentsForInvoice(st.classId);
+        currentUnitPrice = Number(payload.pricePerSession || currentClass.tuitionPerSession || 0);
+        openXemTruocView(payload, null);
+      } catch (e) {
+        switchView('view-danh-sach');
+      }
+    }
+  });
+
+  loadClasses('').then(function () {
+    var st = parseStateFromUrl();
+    if (!st.view || st.view === 'list') {
+      switchView('view-danh-sach');
+      syncUrl('list', 'replace');
+      return;
+    }
+    if (st.classId) {
+      currentClass = allClasses.find(function (c) { return c.id === st.classId; }) || null;
+      if (currentClass && st.view === 'config') openCauHinhView(st.classId, null);
+    }
+  });
 });
 

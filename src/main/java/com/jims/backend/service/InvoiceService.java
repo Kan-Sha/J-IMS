@@ -11,8 +11,6 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,12 +37,7 @@ public class InvoiceService {
         if (isBlank(billingPeriod)) {
             return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán không được để trống!", 400);
         }
-        if (!billingPeriod.trim().matches("\\d{4}-\\d{2}")) {
-            return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán phải có dạng YYYY-MM!", 400);
-        }
-        try {
-            YearMonth.parse(billingPeriod.trim());
-        } catch (DateTimeParseException e) {
+        if (!isValidBillingPeriod(billingPeriod)) {
             return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán không hợp lệ!", 400);
         }
         if (totalSessions < 1 || totalSessions > 30) {
@@ -191,6 +184,19 @@ public class InvoiceService {
 
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    private boolean isValidBillingPeriod(String value) {
+        if (value == null) return false;
+        String s = value.trim();
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("^Tháng\\s(\\d{1,2})-(\\d{1,2})$")
+                .matcher(s);
+        if (!m.matches()) return false;
+        int a = Integer.parseInt(m.group(1));
+        int b = Integer.parseInt(m.group(2));
+        if (a < 1 || a > 11 || b < 2 || b > 12) return false;
+        return b == a + 1;
     }
 
     public static final class InvoiceLine {

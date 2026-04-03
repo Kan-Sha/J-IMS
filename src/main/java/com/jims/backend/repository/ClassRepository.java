@@ -329,7 +329,7 @@ public class ClassRepository {
                     row.put("studentId", rs.getString("student_id"));
                     row.put("firstName", rs.getString("first_name"));
                     row.put("lastName", rs.getString("last_name"));
-                    row.put("fullName", (rs.getString("first_name") + " " + rs.getString("last_name")).trim());
+                    row.put("fullName", (rs.getString("last_name") + " " + rs.getString("first_name")).trim());
                     row.put("dob", rs.getDate("date_of_birth") != null ? rs.getDate("date_of_birth").toString() : null);
                     row.put("gender", rs.getString("gender"));
                     row.put("phone", rs.getString("phone"));

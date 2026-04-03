@@ -135,7 +135,7 @@ public class InvoiceRepository {
                             ? rs.getTimestamp("created_at").toInstant().toString() : null);
                     row.put("detailId", rs.getInt("detail_id"));
                     row.put("studentId", rs.getString("student_id"));
-                    row.put("studentName", (rs.getString("first_name") + " " + rs.getString("last_name")).trim());
+                    row.put("studentName", (rs.getString("last_name") + " " + rs.getString("first_name")).trim());
                     row.put("baseFee", rs.getBigDecimal("base_fee"));
                     row.put("finalFee", rs.getBigDecimal("final_fee"));
                     row.put("adjustmentReason", rs.getString("adjustment_reason"));
