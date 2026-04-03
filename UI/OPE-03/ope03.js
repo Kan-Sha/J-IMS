@@ -289,33 +289,64 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnChinhSua) btnChinhSua.addEventListener('click', function () { setEditMode(true); });
     document.getElementById('btn-thoat').addEventListener('click', function () { setEditMode(false); });
 
+    var overlayXoaHs = document.getElementById('overlay-xoa-hs');
+    var popupXoaHs = document.getElementById('popup-xoa-hs');
+    var popupXoaHsHuy = document.getElementById('popup-xoa-hs-huy');
+    var popupXoaHsXacNhan = document.getElementById('popup-xoa-hs-xac-nhan');
+    var pendingDeleteAction = null;
+
+    function showDeleteConfirm(onConfirm) {
+        pendingDeleteAction = onConfirm;
+        if (overlayXoaHs) overlayXoaHs.style.display = 'block';
+        if (popupXoaHs) popupXoaHs.style.display = 'block';
+        document.body.classList.add('popup-open');
+    }
+
+    function hideDeleteConfirm() {
+        if (overlayXoaHs) overlayXoaHs.style.display = 'none';
+        if (popupXoaHs) popupXoaHs.style.display = 'none';
+        document.body.classList.remove('popup-open');
+        pendingDeleteAction = null;
+    }
+
+    if (popupXoaHsHuy) popupXoaHsHuy.addEventListener('click', hideDeleteConfirm);
+    if (overlayXoaHs) overlayXoaHs.addEventListener('click', hideDeleteConfirm);
+    if (popupXoaHsXacNhan) {
+        popupXoaHsXacNhan.addEventListener('click', function () {
+            if (typeof pendingDeleteAction === 'function') {
+                pendingDeleteAction();
+            }
+            hideDeleteConfirm();
+        });
+    }
+
     btnXoaChon.addEventListener('click', function () {
         if (selectedToRemove.length === 0) return;
-        if (!window.confirm('Bạn có chắc chắn muốn xóa học sinh đã chọn khỏi lớp?')) return;
-
-        var ids = selectedToRemove.filter(function (id, i, a) { return id && a.indexOf(id) === i; });
-        fetch(API_BASE + '/api/classes/enrollment', {
-            method: 'POST',
-            credentials: 'include',
-            headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ classId: classIdNumeric, action: 'remove', studentIds: ids })
-        }).then(function (res) {
-            if (res.status === 401) {
-                window.location.href = LOGIN_URL;
-                return null;
-            }
-            return res.json().catch(function () { return null; });
-        }).then(function (payload) {
-            if (payload && payload.success) {
-                selectedToRemove = [];
-                checkAll.checked = false;
-                updateCheckboxState();
-                hienThongBaoThanhCong('Đã xóa học sinh khỏi lớp!');
-                return taiDuLieuLop();
-            }
-            hienLoi('error-capacity', null, (payload && payload.message) ? String(payload.message) : 'Không thể xóa học sinh.');
-        }).catch(function () {
-            hienLoi('error-capacity', null, 'Không thể kết nối máy chủ.');
+        showDeleteConfirm(function () {
+            var ids = selectedToRemove.filter(function (id, i, a) { return id && a.indexOf(id) === i; });
+            fetch(API_BASE + '/api/classes/enrollment', {
+                method: 'POST',
+                credentials: 'include',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ classId: classIdNumeric, action: 'remove', studentIds: ids })
+            }).then(function (res) {
+                if (res.status === 401) {
+                    window.location.href = LOGIN_URL;
+                    return null;
+                }
+                return res.json().catch(function () { return null; });
+            }).then(function (payload) {
+                if (payload && payload.success) {
+                    selectedToRemove = [];
+                    checkAll.checked = false;
+                    updateCheckboxState();
+                    hienThongBaoThanhCong('Đã xóa học sinh khỏi lớp!');
+                    return taiDuLieuLop();
+                }
+                hienLoi('error-capacity', null, (payload && payload.message) ? String(payload.message) : 'Không thể xóa học sinh.');
+            }).catch(function () {
+                hienLoi('error-capacity', null, 'Không thể kết nối máy chủ.');
+            });
         });
     });
 

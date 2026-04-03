@@ -106,8 +106,10 @@ public class InvoiceController {
             }
             String reason = o.has("adjustmentReason") && !o.get("adjustmentReason").isJsonNull()
                     ? o.get("adjustmentReason").getAsString() : null;
+            String name = o.has("studentName") && !o.get("studentName").isJsonNull()
+                    ? o.get("studentName").getAsString() : null;
             if (sid != null) {
-                out.add(new InvoiceService.InvoiceLine(sid, finalFee, reason));
+                out.add(new InvoiceService.InvoiceLine(sid, finalFee, reason, name));
             }
         }
         return out;

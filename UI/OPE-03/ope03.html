@@ -51,7 +51,7 @@
                         <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
                 </a>
-                <a href="#" class="menu-icon" title="Tài chính">
+                <a href="../FIN-01/fin01.html" class="menu-icon" title="Tài chính">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10" />
@@ -97,9 +97,9 @@
                 </svg>
             </a>
             <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                 </svg>
             </a>
         </div>
@@ -281,6 +281,23 @@
                 xuất</button>
             <button id="popup-dx-huy" type="button"
                 style="width:140px;height:48px;background:#003366;color:#fff;border:none;border-radius:5px;font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Hủy</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay-xoa-hs" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:101;"></div>
+    <div id="popup-xoa-hs"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; border:1px solid #8e8edf; border-radius:12px; z-index:102; min-width:420px; max-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.2); overflow:hidden;">
+        <div class="popup-header">
+            <img src="/UI/assets/joyenglishlogo.jpg" alt="Logo" class="popup-logo">
+            <span class="popup-ten-app">J-IMS</span>
+        </div>
+        <div style="padding:24px 28px 28px; border-bottom:1px solid #8e8edf;">
+            <p style="font-size:18px; font-weight:700; color:#000; margin-bottom:10px;">Xác nhận</p>
+            <p style="font-size:14px; color:#000;">Bạn có chắc chắn muốn xóa học sinh đã chọn khỏi lớp?</p>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px;">
+            <button id="popup-xoa-hs-huy" class="nut-huy" type="button">Hủy</button>
+            <button id="popup-xoa-hs-xac-nhan" class="nut-luu" type="button">Xóa</button>
         </div>
     </div>
 

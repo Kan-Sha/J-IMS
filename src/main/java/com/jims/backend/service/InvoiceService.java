@@ -4,6 +4,8 @@ import com.jims.backend.repository.ClassRepository;
 import com.jims.backend.repository.InvoiceRepository;
 import com.jims.backend.repository.StudentRepository;
 
+import com.jims.backend.config.FeeConstants;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -45,8 +47,8 @@ public class InvoiceService {
         } catch (DateTimeParseException e) {
             return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán không hợp lệ!", 400);
         }
-        if (totalSessions <= 0) {
-            return new ApiResult(false, Collections.emptyMap(), "Số buổi học phải lớn hơn 0!", 400);
+        if (totalSessions < 1 || totalSessions > 30) {
+            return new ApiResult(false, Collections.emptyMap(), "Tổng số buổi không hợp lệ!", 400);
         }
 
         try {
@@ -61,7 +63,7 @@ public class InvoiceService {
 
                 if (invoiceRepository.existsInvoiceForClassAndPeriod(conn, classId, billingPeriod)) {
                     conn.rollback();
-                    return new ApiResult(false, Collections.emptyMap(), "Hóa đơn cho lớp và kỳ này đã tồn tại!", 409);
+                    return new ApiResult(false, Collections.emptyMap(), "Hóa đơn kỳ " + billingPeriod + " đã tồn tại!", 409);
                 }
 
                 BigDecimal pricePerSession = (BigDecimal) summary.get("pricePerSession");
@@ -108,14 +110,31 @@ public class InvoiceService {
                 for (String sid : targetStudents) {
                     BigDecimal baseFee = unitBase;
                     InvoiceLine line = lineByStudent.get(sid);
-                    BigDecimal finalFee = line != null && line.finalFee != null ? line.finalFee.setScale(2, RoundingMode.HALF_UP) : baseFee;
+                    BigDecimal finalFee = (line != null && line.finalFee != null)
+                            ? line.finalFee.setScale(2, RoundingMode.HALF_UP)
+                            : baseFee;
                     String adjReason = line == null ? null : line.adjustmentReason;
+                    String studentName = line == null ? null : line.studentName;
+
+                    if (finalFee.compareTo(BigDecimal.ZERO) < 0) {
+                        conn.rollback();
+                        return new ApiResult(false, Collections.emptyMap(),
+                                "Phí cuối cùng không được âm!", 400);
+                    }
+                    if (finalFee.compareTo(FeeConstants.MAX_FEE_VALUE) > 0) {
+                        conn.rollback();
+                        return new ApiResult(false, Collections.emptyMap(),
+                                "Số tiền vượt quá giới hạn cho phép!", 400);
+                    }
 
                     if (finalFee.compareTo(baseFee) != 0) {
                         if (adjReason == null || adjReason.trim().isEmpty()) {
                             conn.rollback();
+                            String nameText = (studentName == null || studentName.trim().isEmpty())
+                                    ? sid
+                                    : studentName.trim();
                             return new ApiResult(false, Collections.emptyMap(),
-                                    "Phải nhập lý điều chỉnh khi học phí cuối khác học phí cơ sở!", 400);
+                                    "Vui lòng nhập lý do điều chỉnh cho học sinh " + nameText + "!", 400);
                         }
                     }
 
@@ -178,11 +197,13 @@ public class InvoiceService {
         public final String studentId;
         public final BigDecimal finalFee;
         public final String adjustmentReason;
+        public final String studentName;
 
-        public InvoiceLine(String studentId, BigDecimal finalFee, String adjustmentReason) {
+        public InvoiceLine(String studentId, BigDecimal finalFee, String adjustmentReason, String studentName) {
             this.studentId = studentId;
             this.finalFee = finalFee;
             this.adjustmentReason = adjustmentReason;
+            this.studentName = studentName;
         }
     }
 }

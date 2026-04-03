@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-IMS - Quản lý học phí</title>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="fin01.css">
+    <link rel="stylesheet" href="../css/jims-shell.css">
+</head>
+
+<body class="jims-shell-loading" data-jims-page="fin01">
+    <div class="trang-chinh">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <img src="/UI/assets/joyenglishlogo.jpg" alt="Logo" class="sidebar-logo-anh">
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-icon" title="Trang chủ">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                </a>
+                <a href="#" class="menu-icon" title="Thông báo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                </a>
+                <a href="../OPE-01/ope01.html" class="menu-icon" title="Quản lý lớp học">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                </a>
+                <a href="fin01.html" class="menu-icon active" title="Tài chính">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v1.5" />
+                        <path d="M12 16.5V18" />
+                        <path
+                            d="M15 9.5C15 8.1 13.7 7 12 7s-3 1.1-3 2.5c0 1.4 1.3 2 3 2.5s3 1.1 3 2.5c0 1.4-1.3 2.5-3 2.5s-3-1.1-3-2.5" />
+                    </svg>
+                </a>
+                <a href="../STU-01/stu01.html" class="menu-icon" title="Hồ sơ học sinh">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                        <path d="M22 10v6" />
+                        <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+                    </svg>
+                </a>
+                <a href="../AUT-01/aut01.html" class="menu-icon" title="Nhân viên">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="18" rx="2" />
+                        <circle cx="9" cy="10" r="3" />
+                        <path d="M15 8h4" />
+                        <path d="M15 12h4" />
+                        <path d="M4 18c0-2.5 2-4 5-4s5 1.5 5 4" />
+                    </svg>
+                </a>
+                <a href="#" class="menu-icon" title="Đăng xuất" id="btn-dang-xuat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16,17 21,12 16,7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </a>
+            </nav>
+            <a href="../AUT-03/aut03.html" class="menu-icon sidebar-avatar" title="Tài khoản cá nhân">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+            </a>
+            <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="noi-dung">
+            <div class="sub-sidebar">
+                <div class="sub-sidebar-tieu-de">
+                    <a href="#" class="back-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="15,18 9,12 15,6" />
+                        </svg>
+                    </a>
+                    <span>Quản lý học phí</span>
+                </div>
+                <nav class="sub-menu">
+                    <a href="fin01.html" class="sub-menu-item active" id="nav-tao-hoa-don">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        Tạo hóa đơn
+                    </a>
+                    <a href="../FIN-02/fin02.html" class="sub-menu-item" id="nav-danh-sach-hoa-don">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Danh sách hóa đơn
+                    </a>
+                </nav>
+            </div>
+
+            <div id="vung-form-wrapper"
+                style="flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
+                <div class="vung-form" id="view-danh-sach">
+                    <h1 class="form-tieu-de">Tạo hóa đơn</h1>
+
+                    <div class="search-card">
+                        <label class="search-label">Tìm kiếm</label>
+                        <div class="khung-input">
+                            <input type="text" id="ipt-tim-kiem" class="o-nhap" placeholder="Nhập tên lớp">
+                        </div>
+                        <div class="search-buttons">
+                            <button class="btn-search" id="btn-tim-kiem">Tìm kiếm</button>
+                            <button class="btn-reset" id="btn-dat-lai">Đặt lại</button>
+                        </div>
+                    </div>
+
+                    <table class="bang-danh-sach">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th style="text-align: left;">LỚP</th>
+                                <th style="text-align: left;">TRÌNH ĐỘ</th>
+                                <th style="text-align: left;">SĨ SỐ</th>
+                                <th>HÀNH ĐỘNG</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-danh-sach-lop">
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="vung-form" id="view-cau-hinh" style="display: none;">
+                    <h1 class="form-tieu-de">Tạo hóa đơn - <span id="lbl-ten-lop-cau-hinh">KID-1D</span></h1>
+
+                    <div class="section-title">THIẾT LẬP KỲ THANH TOÁN</div>
+
+                    <div class="nhom-input" style="margin-bottom: 24px; max-width: 100%;">
+                        <label class="nhan">KỲ THANH TOÁN</label>
+                        <div class="khung-select" id="khung-ky-thanh-toan">
+                            <span class="select-hien-thi" id="hien-thi-ky-thanh-toan">Tháng 3-4</span>
+                            <select id="sel-ky-thanh-toan" class="o-select">
+                                <option value="Tháng 1-2">Tháng 1-2</option>
+                                <option value="Tháng 3-4" selected>Tháng 3-4</option>
+                                <option value="Tháng 5-6">Tháng 5-6</option>
+                                <option value="Tháng 7-8">Tháng 7-8</option>
+                                <option value="Tháng 9-10">Tháng 9-10</option>
+                                <option value="Tháng 11-12">Tháng 11-12</option>
+                            </select>
+                            <svg class="icon-select" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polyline points="6,9 12,15 18,9" />
+                            </svg>
+                        </div>
+                        <div class="text-error" id="err-cau-hinh-ky"></div>
+                    </div>
+
+                    <div class="nhom-input" style="margin-bottom: 24px; max-width: 100%;">
+                        <label class="nhan">TỔNG SỐ BUỔI HỌC</label>
+                        <div class="khung-input" id="khung-tong-buoi" style="height: 48px;">
+                            <input type="number" id="ipt-tong-buoi" class="o-nhap" placeholder="16" value="16" min="1"
+                                max="30">
+                        </div>
+                        <p class="help-text">Nhập tổng số buổi học dự kiến cho kỳ này để hệ thống tính toán học phí dự
+                            kiến</p>
+                        <div class="text-error" id="err-cau-hinh-buoi"></div>
+                    </div>
+
+                    <div class="nhom-nut">
+                        <button class="nut-huy" id="btn-huy-cau-hinh" type="button">Hủy</button>
+                        <button class="nut-luu" id="btn-tinh-toan" type="button">Tính toán</button>
+                    </div>
+                </div>
+
+
+                <div class="vung-form" id="view-xem-truoc" style="display: none;">
+                    <h1 class="form-tieu-de">Tạo hóa đơn - <span id="lbl-ten-lop-xem-truoc">KID-1D</span></h1>
+
+                    <div class="section-title">THÔNG TIN KỲ HỌC PHÍ</div>
+
+                    <div class="hang-input" style="margin-bottom: 30px;">
+                        <div class="nhom-input" style="flex:1">
+                            <label class="nhan">KỲ THANH TOÁN</label>
+                            <div class="khung-input"
+                                style="border:none; height: 44px; padding: 0; background: transparent; box-shadow: none;">
+                                <input type="text" id="lbl-ky-thanh-toan" class="o-nhap input-disabled"
+                                    value="Tháng 3-4" readonly
+                                    style="background:#cecfd3; padding:10px 14px; border-radius:4px; width:100%; border:none; box-shadow: none; margin: 0;">
+                            </div>
+                        </div>
+                        <div class="nhom-input" style="flex:1">
+                            <label class="nhan">TỔNG SỐ BUỔI HỌC</label>
+                            <div class="khung-input"
+                                style="border:none; height: 44px; padding: 0; background: transparent; box-shadow: none;">
+                                <input type="text" id="lbl-tong-buoi" class="o-nhap input-disabled" value="16" readonly
+                                    style="background:#cecfd3; padding:10px 14px; border-radius:4px; width:100%; border:none; box-shadow: none; margin: 0;">
+                            </div>
+                        </div>
+                        <div class="nhom-input" style="flex:1">
+                            <label class="nhan">ĐƠN GIÁ CHUẨN</label>
+                            <div class="khung-input"
+                                style="border:none; height: 44px; padding: 0; background: transparent; box-shadow: none;">
+                                <input type="text" id="lbl-don-gia" class="o-nhap input-disabled"
+                                    value="130,000 VND/buổi" readonly
+                                    style="background:#cecfd3; padding:10px 14px; border-radius:4px; width:100%; border:none; box-shadow: none; margin: 0;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="color: var(--mau-xanh-dam); text-transform:none;">Bảng xem trước
+                        hóa đơn</div>
+
+                    <table class="bang-danh-sach bang-preview">
+                        <thead style="border-radius:6px; overflow:hidden;">
+                            <tr>
+                                <th style="text-align: center; vertical-align: middle;">STT</th>
+                                <th style="text-align: center; white-space: nowrap; vertical-align: middle;">MÃ HỌC SINH
+                                </th>
+                                <th style="text-align: center; vertical-align: middle;">HỌ VÀ TÊN</th>
+                                <th style="text-align: center; white-space: nowrap; vertical-align: middle;">PHÍ CƠ BẢN
+                                </th>
+                                <th style="text-align: center; vertical-align: middle;">PHÍ CUỐI CÙNG</th>
+                                <th style="text-align: left;">LÝ DO ĐIỀU CHỈNH</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-xem-truoc">
+
+                        </tbody>
+                    </table>
+
+                    <div class="tong-ket-vung">
+                        <div class="tong-ket-item">
+                            <span class="tong-ket-nhan">TỔNG HỌC SINH</span>
+                            <span class="tong-ket-gia-tri" id="lbl-tong-hoc-sinh">4</span>
+                        </div>
+                        <div class="tong-ket-item">
+                            <span class="tong-ket-nhan">TỔNG TIỀN DỰ KIẾN</span>
+                            <span class="tong-ket-gia-tri" id="lbl-tong-tien">8.320.000</span>
+                        </div>
+                    </div>
+
+                    <div class="text-error" id="err-luu-tong-quat" style="text-align: right; margin-top: 12px;"></div>
+
+                    <div class="nhom-nut">
+                        <button class="nut-huy" id="btn-huy-xem-truoc" type="button">Hủy</button>
+                        <button class="nut-luu" id="btn-luu-hoa-don" type="button" style="width: 160px;">Lưu & Tạo hóa
+                            đơn</button>
+                    </div>
+                </div>
+
+                <div class="overlay" id="overlay-thanh-cong"
+                    style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.35); z-index:101;"></div>
+                <div id="popup-thanh-cong"
+                    style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; border:1px solid #8e8edf; border-radius:12px; z-index:102; min-width:420px; max-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.2); overflow:hidden;">
+                    <div class="popup-header">
+                        <img src="/UI/assets/joyenglishlogo.jpg" alt="Logo" class="popup-logo">
+                        <span class="popup-ten-app">J-IMS</span>
+                    </div>
+                    <p class="popup-noi-dung" id="popup-txt-thanh-cong"
+                        style="font-size: 18px;font-weight: 500;color: var(--mau-chu);text-align: center;padding: 36px 28px 28px;border-bottom: 1px solid #8e8edf;">
+                        Hóa đơn đã được tạo thành công!</p>
+                    <div class="popup-nut" style="display: flex;justify-content: flex-end;padding: 16px 24px;">
+                        <button class="nut-luu" id="popup-btn-dong" type="button"
+                            style="width: 140px;height: 48px;font-size: 15px;">Đóng</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="overlay" id="overlay-dang-xuat"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:101;"></div>
+    <div id="popup-dang-xuat"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; border:1px solid #8e8edf; border-radius:12px; z-index:102; min-width:420px; max-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.2); overflow:hidden;">
+        <div class="popup-header">
+            <img src="/UI/assets/joyenglishlogo.jpg" alt="Logo" class="popup-logo">
+            <span class="popup-ten-app">J-IMS</span>
+        </div>
+        <div style="padding:24px 28px 28px; border-bottom:1px solid #8e8edf;">
+            <p style="font-size:20px; font-weight:700; color:#000; margin-bottom:10px;">Đăng xuất</p>
+            <p style="font-size:14px; color:#000;">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống J-IMS không ?</p>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px;">
+            <button id="popup-dx-xac-nhan" type="button"
+                style="width:140px;height:48px;background:transparent;color:#003366;border:1.5px solid #003366;border-radius:5px;font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Đăng
+                xuất</button>
+            <button id="popup-dx-huy" type="button"
+                style="width:140px;height:48px;background:#003366;color:#fff;border:none;border-radius:5px;font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Hủy</button>
+        </div>
+    </div>
+
+    <script src="../js/jims-shell.js"></script>
+    <script type="module" src="../ui/fin01.js"></script>
+</body>
+
+</html>

@@ -138,6 +138,7 @@ CREATE TABLE invoice_details (
         base_fee = final_fee
         OR (adjustment_reason IS NOT NULL AND CHAR_LENGTH(TRIM(adjustment_reason)) > 0)
     ),
+    CONSTRAINT chk_invoice_detail_max_fee CHECK (final_fee >= 0 AND final_fee <= 9999999.00),
     FOREIGN KEY (invoice_id) REFERENCES invoices(invoice_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     UNIQUE KEY uq_invoice_student (invoice_id, student_id)
@@ -164,26 +165,175 @@ SELECT 'Trợ giảng Demo', 'ta@gmail.com',
 
 -- Seed classes (admin staff_id=1; first Giáo viên staff_id=2)
 INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, current_size, tuition_per_session) VALUES
-('KID-2E', 1, 2, '2025-01-15', 15, 0, 120000.00),
-('KID-3A', 2, 2, '2025-03-01', 15, 0, 150000.00);
+('KID-1D', 1, 2, '2025-03-01', 12, 0, 130000.00),
+('KID-2G', 1, 2, '2025-03-15', 12, 0, 130000.00),
+('ADV-1A', 2, 2, '2025-04-01', 12, 0, 150000.00);
 
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Monday', '08:00:00', '09:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+SELECT c.class_id, 'Monday', '18:00:00', '19:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Wednesday', '08:00:00', '09:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+SELECT c.class_id, 'Wednesday', '18:00:00', '19:30:00' FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Tuesday', '14:00:00', '15:30:00' FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+SELECT c.class_id, 'Tuesday', '18:00:00', '19:30:00' FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Thursday', '14:00:00', '15:30:00' FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+SELECT c.class_id, 'Thursday', '18:00:00', '19:30:00' FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Monday', '10:00:00', '11:30:00' FROM classes c WHERE c.class_name = 'KID-3A' LIMIT 1;
+SELECT c.class_id, 'Friday', '18:00:00', '19:30:00' FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Friday', '10:00:00', '11:30:00' FROM classes c WHERE c.class_name = 'KID-3A' LIMIT 1;
+SELECT c.class_id, 'Saturday', '08:30:00', '10:00:00' FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
 
-INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Saturday', '08:30:00', '10:00:00' FROM classes c WHERE c.class_name = '5E1' LIMIT 1;
-INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
-SELECT c.class_id, 'Friday', '08:30:00', '10:00:00' FROM classes c WHERE c.class_name = '5E1' LIMIT 1;
+-- Demo students with new ID format JS-YYYYMM-XXX
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-001', 'Minh Anh', 'Nguyễn', '2015-03-12', 'Nam', 'Nguyễn Văn A', '0901000001', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-002', 'Thu Trang', 'Trần', '2015-05-21', 'Nữ', 'Trần Văn B', '0901000002', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-003', 'Quang Huy', 'Lê', '2015-07-10', 'Nam', 'Lê Văn C', '0901000003', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-004', 'Bảo Ngọc', 'Phạm', '2015-09-05', 'Nữ', 'Phạm Văn D', '0901000004', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-005', 'Hoàng Nam', 'Đỗ', '2015-11-18', 'Nam', 'Đỗ Văn E', '0901000005', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-006', 'Khánh Linh', 'Ngô', '2015-02-09', 'Nữ', 'Ngô Văn F', '0901000006', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-007', 'Tuấn Kiệt', 'Vũ', '2015-06-03', 'Nam', 'Vũ Văn G', '0901000007', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-008', 'Mai Anh', 'Đinh', '2015-01-25', 'Nữ', 'Đinh Văn H', '0901000008', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-009', 'Anh Tuấn', 'Bùi', '2015-04-30', 'Nam', 'Bùi Văn K', '0901000009', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202503-010', 'Thu Hà', 'Hoàng', '2015-08-14', 'Nữ', 'Hoàng Văn L', '0901000010', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-1D' LIMIT 1;
+
+-- KID-2G: 10 students
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-001', 'Gia Huy', 'Nguyễn', '2014-03-02', 'Nam', 'Nguyễn Văn M', '0902000001', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-002', 'Lan Anh', 'Trần', '2014-05-15', 'Nữ', 'Trần Văn N', '0902000002', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-003', 'Đức Anh', 'Lê', '2014-07-19', 'Nam', 'Lê Văn P', '0902000003', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-004', 'Bích Ngọc', 'Phạm', '2014-09-23', 'Nữ', 'Phạm Văn Q', '0902000004', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-005', 'Minh Quân', 'Đỗ', '2014-11-07', 'Nam', 'Đỗ Văn R', '0902000005', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-006', 'Khánh An', 'Ngô', '2014-02-28', 'Nữ', 'Ngô Văn S', '0902000006', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-007', 'Anh Khoa', 'Vũ', '2014-04-11', 'Nam', 'Vũ Văn T', '0902000007', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-008', 'Diệu Linh', 'Đinh', '2014-06-05', 'Nữ', 'Đinh Văn U', '0902000008', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-009', 'Mạnh Dũng', 'Bùi', '2014-08-28', 'Nam', 'Bùi Văn V', '0902000009', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202504-010', 'Quỳnh Chi', 'Hoàng', '2014-10-16', 'Nữ', 'Hoàng Văn X', '0902000010', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'KID-2G' LIMIT 1;
+
+-- ADV-1A: 10 students
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-001', 'Hồng Sơn', 'Nguyễn', '2013-03-08', 'Nam', 'Nguyễn Văn Y', '0903000001', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-002', 'Thanh Thảo', 'Trần', '2013-05-19', 'Nữ', 'Trần Văn Z', '0903000002', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-003', 'Anh Dũng', 'Lê', '2013-07-22', 'Nam', 'Lê Văn A1', '0903000003', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-004', 'Bảo Châu', 'Phạm', '2013-09-30', 'Nữ', 'Phạm Văn B1', '0903000004', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-005', 'Quốc Huy', 'Đỗ', '2013-11-11', 'Nam', 'Đỗ Văn C1', '0903000005', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-006', 'Khánh Vy', 'Ngô', '2013-02-17', 'Nữ', 'Ngô Văn D1', '0903000006', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-007', 'Anh Khoa', 'Vũ', '2013-04-25', 'Nam', 'Vũ Văn E1', '0903000007', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-008', 'Diễm My', 'Đinh', '2013-06-09', 'Nữ', 'Đinh Văn F1', '0903000008', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-009', 'Đức Minh', 'Bùi', '2013-08-02', 'Nam', 'Bùi Văn G1', '0903000009', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, parent_name, phone, email, address, class_id, status_id)
+SELECT 'JS-202505-010', 'Thu Uyên', 'Hoàng', '2013-10-20', 'Nữ', 'Hoàng Văn H1', '0903000010', NULL, 'Hà Nội',
+       c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
+FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
