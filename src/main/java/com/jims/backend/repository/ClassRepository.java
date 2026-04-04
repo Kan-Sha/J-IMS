@@ -182,7 +182,7 @@ public class ClassRepository {
      * Rows for classes matching search (partial name), joined with staff & levels; one row per schedule row.
      */
     public List<Map<String, Object>> searchClassesFlatRows(String search) throws SQLException {
-        String sql = "SELECT c.class_id, c.class_name, c.start_date, c.capacity, c.current_size, " +
+        String sql = "SELECT c.class_id, c.class_name, c.start_date, c.capacity, c.current_size, c.tuition_per_session, " +
                 "s.full_name AS teacher_name, l.level_name, l.price_per_session, " +
                 "cs.day_of_week, cs.start_time, cs.end_time, cs.schedule_id " +
                 "FROM classes c " +
@@ -205,6 +205,7 @@ public class ClassRepository {
                     row.put("startDate", rs.getDate("start_date") != null ? rs.getDate("start_date").toString() : null);
                     row.put("capacity", rs.getInt("capacity"));
                     row.put("currentSize", rs.getInt("current_size"));
+                    row.put("tuitionPerSession", rs.getBigDecimal("tuition_per_session"));
                     row.put("teacherName", rs.getString("teacher_name"));
                     row.put("levelName", rs.getString("level_name"));
                     row.put("pricePerSession", rs.getBigDecimal("price_per_session"));
@@ -232,8 +233,18 @@ public class ClassRepository {
         }
     }
 
+    /**
+     * Recomputes {@code classes.current_size} from {@code students.class_id} for every class (fixes FIN-01 list without visiting OPE-03).
+     */
+    public void syncAllClassSizesFromStudents(Connection conn) throws SQLException {
+        String sql = "UPDATE classes c SET c.current_size = (SELECT COUNT(*) FROM students s WHERE s.class_id = c.class_id)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        }
+    }
+
     public Map<String, Object> getClassNameCapacity(Connection conn, int classId) throws SQLException {
-        String sql = "SELECT class_id, class_name, capacity FROM classes WHERE class_id = ?";
+        String sql = "SELECT class_id, class_name, capacity, tuition_per_session FROM classes WHERE class_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, classId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -244,6 +255,7 @@ public class ClassRepository {
                 m.put("classId", rs.getInt("class_id"));
                 m.put("className", rs.getString("class_name"));
                 m.put("capacity", rs.getInt("capacity"));
+                m.put("tuitionPerSession", rs.getBigDecimal("tuition_per_session"));
                 return m;
             }
         }

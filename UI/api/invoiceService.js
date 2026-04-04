@@ -14,21 +14,26 @@ function authHeaders(extra) {
   return h;
 }
 
-function handleApiError(res, defaultMsg) {
-  return res.json().catch(() => null).then(payload => {
+function handleApiError(res, defaultMsg, options) {
+  var suppressAlert = options && options.suppressAlert;
+  return res.json().catch(function () { return null; }).then(function (payload) {
+    var msg = (payload && payload.message) ? payload.message : (defaultMsg || 'Có lỗi xảy ra');
     if (res.status === 401) {
-      alert((payload && payload.message) ? payload.message : 'Chưa đăng nhập');
+      if (!suppressAlert) alert(msg || 'Chưa đăng nhập');
       window.location.href = LOGIN_URL;
       return Promise.reject(new Error('unauthorized'));
     }
-    if (!navigator.onLine) {
-      alert('Mất kết nối internet');
-    } else if (res.status >= 500) {
-      alert('Không thể kết nối server');
-    } else {
-      alert((payload && payload.message) ? payload.message : (defaultMsg || 'Có lỗi xảy ra'));
+    if (!suppressAlert) {
+      if (!navigator.onLine) {
+        alert('Mất kết nối internet');
+      } else if (res.status >= 500) {
+        alert('Không thể kết nối server');
+      } else {
+        alert(msg);
+      }
     }
-    return Promise.reject(payload || {});
+    var err = Object.assign({ message: msg }, payload || {});
+    return Promise.reject(err);
   });
 }
 
@@ -69,10 +74,22 @@ export async function createInvoice(options) {
     body: JSON.stringify(body)
   });
 
-  if (!res.ok) return handleApiError(res, 'Không thể tạo hóa đơn');
+  if (!res.ok) return handleApiError(res, 'Không thể tạo hóa đơn', { suppressAlert: true });
   const payload = await res.json();
   if (!payload || !payload.success) {
-    throw new Error((payload && payload.message) || 'Không thể tạo hóa đơn');
+    throw Object.assign(new Error((payload && payload.message) || 'Không thể tạo hóa đơn'), payload || {});
+  }
+  return payload.data;
+}
+
+/** GET /api/classes/student-count?classId= — synced currentSize / capacity (optional FIN-01 refresh). */
+export async function fetchClassStudentCount(classId) {
+  const url = API_BASE + '/api/classes/student-count?classId=' + encodeURIComponent(String(classId));
+  const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
+  if (!res.ok) return handleApiError(res, 'Không tải được sĩ số lớp', { suppressAlert: true });
+  const payload = await res.json();
+  if (!payload || !payload.success) {
+    throw new Error((payload && payload.message) || 'Không tải được sĩ số lớp');
   }
   return payload.data;
 }

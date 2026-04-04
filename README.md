@@ -40,8 +40,8 @@ Script/
 # create DB (run once)
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS jims;"
 
-# import schema + seed data (run once for a fresh DB)
-Get-Content Script/schema.sql | mysql -u root -p jims
+# import schema + seed data (run for a fresh DB)
+cmd /c "mysql -u root -p jims < Script/schema.sql"
 ```
 
 

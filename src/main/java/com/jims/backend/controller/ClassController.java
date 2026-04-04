@@ -211,6 +211,39 @@ public class ClassController {
         };
     }
 
+    /** GET /api/classes/student-count?classId= — synced enrollment vs capacity (FIN-01). */
+    public HttpHandler classStudentCountHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.handleOptions(exchange);
+                    return;
+                }
+                if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+                String token = resolveToken(exchange);
+                if (SessionManager.getSession(token) == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                String raw = exchange.getRequestURI().getRawQuery();
+                String classIdStr = extractQueryParam(raw, "classId");
+                int classId;
+                try {
+                    classId = Integer.parseInt(classIdStr == null ? "" : classIdStr.trim());
+                } catch (NumberFormatException e) {
+                    ResponseUtil.sendJson(exchange, 400, false, Collections.emptyMap(), "classId không hợp lệ!");
+                    return;
+                }
+                ApiResult result = classService.getClassStudentCount(classId);
+                ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+            }
+        };
+    }
+
     /** GET /api/classes/ope03?classId= — minimal data for OPE-03 (name, capacity, students). */
     public HttpHandler ope03ClassHandler() {
         return new HttpHandler() {

@@ -1,4 +1,4 @@
-import { fetchClasses, fetchClassStudentsForInvoice, createInvoice } from '../api/invoiceService.js';
+import { fetchClasses, fetchClassStudentsForInvoice, createInvoice, fetchClassStudentCount } from '../api/invoiceService.js';
 import { formatCurrency, parseCurrency, isFeeWithinLimit, MAX_FEE_DIGITS } from '../utils/validation.js';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -61,15 +61,21 @@ document.addEventListener('DOMContentLoaded', function () {
   async function loadClasses(keyword) {
     try {
       const rows = await fetchClasses(keyword || '');
-      allClasses = (rows || []).map(function (r) {
-        return {
+      allClasses = await Promise.all((rows || []).map(async function (r) {
+        var cls = {
           id: r.classId,
           lop: r.className,
           trinhDo: r.levelName,
           siSo: String(r.currentSize || 0) + '/' + String(r.capacity || 0),
           tuitionPerSession: (r.tuitionPerSession || r.pricePerSession || 0)
         };
-      });
+        try {
+          var cnt = await fetchClassStudentCount(r.classId);
+          cls.siSo = String(cnt.currentSize || 0) + '/' + String(cnt.capacity || 0);
+        } catch (ignore) {
+        }
+        return cls;
+      }));
       renderClasses(allClasses);
     } catch (e) {
       tbodyDanhSach.innerHTML = '<tr><td colspan="5">Không tải được danh sách lớp</td></tr>';

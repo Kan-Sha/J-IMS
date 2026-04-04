@@ -5,12 +5,14 @@ import com.jims.backend.repository.InvoiceRepository;
 import com.jims.backend.repository.StudentRepository;
 
 import com.jims.backend.config.FeeConstants;
+import com.jims.backend.util.BillingPeriodUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,8 +39,11 @@ public class InvoiceService {
         if (isBlank(billingPeriod)) {
             return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán không được để trống!", 400);
         }
-        if (!isValidBillingPeriod(billingPeriod)) {
-            return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán không hợp lệ!", 400);
+        int invoiceYear = Year.now().getValue();
+        String canonicalPeriod = BillingPeriodUtil.toCanonical(billingPeriod, invoiceYear);
+        if (canonicalPeriod == null) {
+            return new ApiResult(false, Collections.emptyMap(),
+                    "Kỳ thanh toán không hợp lệ! Dùng dạng \"Tháng 3-4\" hoặc YYYY-MM (ví dụ " + invoiceYear + "-03).", 400);
         }
         if (totalSessions < 1 || totalSessions > 30) {
             return new ApiResult(false, Collections.emptyMap(), "Tổng số buổi không hợp lệ!", 400);
@@ -54,9 +59,9 @@ public class InvoiceService {
                     return new ApiResult(false, Collections.emptyMap(), "Lớp không tồn tại!", 404);
                 }
 
-                if (invoiceRepository.existsInvoiceForClassAndPeriod(conn, classId, billingPeriod)) {
+                if (invoiceRepository.existsInvoiceForClassAndPeriod(conn, classId, canonicalPeriod)) {
                     conn.rollback();
-                    return new ApiResult(false, Collections.emptyMap(), "Hóa đơn kỳ " + billingPeriod + " đã tồn tại!", 409);
+                    return new ApiResult(false, Collections.emptyMap(), "Hóa đơn kỳ " + billingPeriod.trim() + " đã tồn tại!", 409);
                 }
 
                 BigDecimal pricePerSession = (BigDecimal) summary.get("pricePerSession");
@@ -98,7 +103,7 @@ public class InvoiceService {
 
                 String invoiceId = nextInvoiceId();
 
-                invoiceRepository.insertInvoice(conn, invoiceId, classId, billingPeriod.trim(), totalSessions);
+                invoiceRepository.insertInvoice(conn, invoiceId, classId, canonicalPeriod, totalSessions);
 
                 for (String sid : targetStudents) {
                     BigDecimal baseFee = unitBase;
@@ -137,6 +142,8 @@ public class InvoiceService {
                 conn.commit();
                 Map<String, Object> data = new LinkedHashMap<String, Object>();
                 data.put("invoiceId", invoiceId);
+                data.put("billingPeriod", canonicalPeriod);
+                data.put("billingPeriodDisplay", BillingPeriodUtil.toDisplayLabel(canonicalPeriod));
                 return new ApiResult(true, data, "Tạo hóa đơn thành công", 201);
             } catch (SQLException e) {
                 conn.rollback();
@@ -175,7 +182,20 @@ public class InvoiceService {
 
     public ApiResult searchInvoices(String q, Integer classId, String billingPeriod, String status) {
         try {
-            List<Map<String, Object>> rows = invoiceRepository.searchInvoices(q, classId, billingPeriod, status);
+            String periodFilter = null;
+            if (billingPeriod != null && !billingPeriod.trim().isEmpty()) {
+                periodFilter = BillingPeriodUtil.toCanonical(billingPeriod, Year.now().getValue());
+                if (periodFilter == null) {
+                    return new ApiResult(false, Collections.emptyMap(), "billingPeriod không hợp lệ (YYYY-MM hoặc Tháng X-Y).", 400);
+                }
+            }
+            List<Map<String, Object>> rows = invoiceRepository.searchInvoices(q, classId, periodFilter, status);
+            for (Map<String, Object> row : rows) {
+                Object bp = row.get("billingPeriod");
+                if (bp != null) {
+                    row.put("billingPeriodDisplay", BillingPeriodUtil.toDisplayLabel(bp.toString()));
+                }
+            }
             return new ApiResult(true, rows, "OK", 200);
         } catch (SQLException e) {
             return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
@@ -184,19 +204,6 @@ public class InvoiceService {
 
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
-    }
-
-    private boolean isValidBillingPeriod(String value) {
-        if (value == null) return false;
-        String s = value.trim();
-        java.util.regex.Matcher m = java.util.regex.Pattern
-                .compile("^Tháng\\s(\\d{1,2})-(\\d{1,2})$")
-                .matcher(s);
-        if (!m.matches()) return false;
-        int a = Integer.parseInt(m.group(1));
-        int b = Integer.parseInt(m.group(2));
-        if (a < 1 || a > 11 || b < 2 || b > 12) return false;
-        return b == a + 1;
     }
 
     public static final class InvoiceLine {

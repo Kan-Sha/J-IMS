@@ -237,6 +237,12 @@ public class ClassService {
 
     public ApiResult searchClassesForManage(String search) {
         try {
+            Connection conn = studentRepository.getConnection();
+            try {
+                classRepository.syncAllClassSizesFromStudents(conn);
+            } finally {
+                conn.close();
+            }
             List<Map<String, Object>> flat = classRepository.searchClassesFlatRows(search);
             List<Map<String, Object>> merged = mergeScheduleRows(flat);
             return new ApiResult(true, merged, "OK", 200);
@@ -257,6 +263,7 @@ public class ClassService {
                 m.put("startDate", r.get("startDate"));
                 m.put("capacity", r.get("capacity"));
                 m.put("currentSize", r.get("currentSize"));
+                m.put("tuitionPerSession", r.get("tuitionPerSession"));
                 m.put("teacherName", r.get("teacherName"));
                 m.put("levelName", r.get("levelName"));
                 m.put("pricePerSession", r.get("pricePerSession"));
@@ -391,6 +398,9 @@ public class ClassService {
                 data.put("className", basic.get("className"));
                 data.put("capacity", basic.get("capacity"));
                 data.put("currentSize", Integer.valueOf(enrolled));
+                BigDecimal tuition = (BigDecimal) basic.get("tuitionPerSession");
+                data.put("pricePerSession", tuition);
+                data.put("tuitionPerSession", tuition);
                 data.put("students", students);
                 return new ApiResult(true, data, "OK", 200);
             } finally {
@@ -429,5 +439,34 @@ public class ClassService {
 
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    /**
+     * FIN-01: current enrollment and capacity after syncing {@code current_size} from {@code students}.
+     */
+    public ApiResult getClassStudentCount(int classId) {
+        if (classId <= 0) {
+            return new ApiResult(false, Collections.emptyMap(), "classId không hợp lệ!", 400);
+        }
+        try {
+            Connection conn = studentRepository.getConnection();
+            try {
+                classRepository.syncCurrentSizeFromStudents(conn, classId);
+                Map<String, Object> basic = classRepository.getClassNameCapacity(conn, classId);
+                if (basic == null) {
+                    return new ApiResult(false, Collections.emptyMap(), "Lớp không tồn tại!", 404);
+                }
+                int enrolled = studentRepository.countStudentsInClass(conn, classId);
+                Map<String, Object> data = new LinkedHashMap<String, Object>();
+                data.put("classId", basic.get("classId"));
+                data.put("currentSize", Integer.valueOf(enrolled));
+                data.put("capacity", basic.get("capacity"));
+                return new ApiResult(true, data, "OK", 200);
+            } finally {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
     }
 }

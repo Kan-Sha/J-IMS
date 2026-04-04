@@ -72,6 +72,7 @@ public class Application {
         server.createContext("/api/classes/manage", classController.manageClassesHandler());
         server.createContext("/api/classes/enrollment", classController.enrollmentHandler());
         server.createContext("/api/classes/detail", classController.classDetailHandler());
+        server.createContext("/api/classes/student-count", classController.classStudentCountHandler());
         server.createContext("/api/classes/ope03", classController.ope03ClassHandler());
         server.createContext("/api/levels", classController.levelsHandler());
         server.createContext("/api/invoices", invoiceController.invoicesHandler());

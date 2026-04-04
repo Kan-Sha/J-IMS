@@ -118,7 +118,7 @@ CREATE TABLE students (
 CREATE TABLE invoices (
     invoice_id VARCHAR(32) NOT NULL PRIMARY KEY,
     class_id INT NOT NULL,
-    billing_period VARCHAR(7) NOT NULL,
+    billing_period VARCHAR(7) NOT NULL COMMENT 'Canonical YYYY-MM (first month of UI pair, e.g. Tháng 3-4 → 2026-03)',
     total_sessions INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_invoice_class_period UNIQUE (class_id, billing_period),
@@ -165,9 +165,9 @@ SELECT 'Trợ giảng Demo', 'ta@gmail.com',
 
 -- Seed classes (admin staff_id=1; first Giáo viên staff_id=2)
 INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, current_size, tuition_per_session) VALUES
-('KID-1D', 1, 2, '2025-03-01', 12, 0, 130000.00),
-('KID-2G', 1, 2, '2025-03-15', 12, 0, 130000.00),
-('ADV-1A', 2, 2, '2025-04-01', 12, 0, 150000.00);
+('KID-1D', 1, 2, '2025-03-01', 15, 0, 130000.00),
+('KID-2G', 1, 2, '2025-03-15', 15, 0, 130000.00),
+('ADV-1A', 2, 2, '2025-04-01', 15, 0, 150000.00);
 
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)
@@ -337,3 +337,6 @@ INSERT INTO students (student_id, first_name, last_name, date_of_birth, gender, 
 SELECT 'JS-202505-010', 'Thu Uyên', 'Hoàng', '2013-10-20', 'Nữ', 'Hoàng Văn H1', '0903000010', NULL, 'Hà Nội',
        c.class_id, (SELECT status_id FROM learning_status WHERE status_name = 'Đang học' LIMIT 1)
 FROM classes c WHERE c.class_name = 'ADV-1A' LIMIT 1;
+
+-- Keep classes.current_size aligned with enrolled students (FIN-01 sĩ số, OPE flows).
+UPDATE classes c SET c.current_size = (SELECT COUNT(*) FROM students s WHERE s.class_id = c.class_id);

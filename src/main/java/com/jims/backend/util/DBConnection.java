@@ -32,19 +32,24 @@ public final class DBConnection {
         if (u.isEmpty()) return u;
 
         String lower = u.toLowerCase();
-        boolean hasUseUnicode = lower.contains("useunicode=");
-        boolean hasCharEnc = lower.contains("characterencoding=");
-        boolean hasCharSetResults = lower.contains("charactersetresults=");
-
-        if (hasUseUnicode && hasCharEnc && hasCharSetResults) {
-            return u;
-        }
-
-        String sep = u.contains("?") ? "&" : "?";
         StringBuilder sb = new StringBuilder(u);
-        if (!hasUseUnicode) sb.append(sep).append("useUnicode=true"); else sep = "&";
-        if (!hasCharEnc) sb.append(sep).append("characterEncoding=utf8"); else sep = "&";
-        if (!hasCharSetResults) sb.append(sep).append("characterSetResults=utf8");
+        String sep = u.contains("?") ? "&" : "?";
+
+        if (!lower.contains("useunicode=")) {
+            sb.append(sep).append("useUnicode=true");
+            sep = "&";
+        }
+        if (!lower.contains("characterencoding=")) {
+            sb.append(sep).append("characterEncoding=UTF-8");
+            sep = "&";
+        }
+        if (!lower.contains("charactersetresults=")) {
+            sb.append(sep).append("characterSetResults=utf8mb4");
+            sep = "&";
+        }
+        if (!lower.contains("connectioncollation=")) {
+            sb.append(sep).append("connectionCollation=utf8mb4_unicode_ci");
+        }
         return sb.toString();
     }
 
