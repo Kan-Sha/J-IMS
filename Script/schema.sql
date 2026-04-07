@@ -46,7 +46,7 @@ CREATE TABLE levels (
 
 INSERT INTO levels (level_name, price_per_session) VALUES
 ('Cơ bản', 130000.00),
-('Nâng cao', 150000.00);
+('Nâng cao', 160000.00);
 
 CREATE TABLE classes (
     class_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -118,12 +118,22 @@ CREATE TABLE students (
 CREATE TABLE invoices (
     invoice_id VARCHAR(32) NOT NULL PRIMARY KEY,
     class_id INT NOT NULL,
+    student_id VARCHAR(20) NOT NULL,
     billing_period VARCHAR(7) NOT NULL COMMENT 'Canonical YYYY-MM (first month of UI pair, e.g. Tháng 3-4 → 2026-03)',
     total_sessions INT NOT NULL,
+    final_amount DECIMAL(12, 2) NOT NULL,
+    adjustment_reason VARCHAR(500) NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    payment_method VARCHAR(30) NULL,
+    paid_at DATETIME NULL,
+    payment_note VARCHAR(500) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_invoice_class_period UNIQUE (class_id, billing_period),
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT uq_invoice_student_class_period UNIQUE (student_id, class_id, billing_period),
     CONSTRAINT chk_invoice_sessions CHECK (total_sessions > 0),
-    FOREIGN KEY (class_id) REFERENCES classes(class_id)
+    CONSTRAINT chk_invoice_status CHECK (status IN ('pending','paid')),
+    FOREIGN KEY (class_id) REFERENCES classes(class_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id)
 );
 
 CREATE TABLE invoice_details (
@@ -167,7 +177,7 @@ SELECT 'Trợ giảng Demo', 'ta@gmail.com',
 INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, current_size, tuition_per_session) VALUES
 ('KID-1D', 1, 2, '2025-03-01', 15, 0, 130000.00),
 ('KID-2G', 1, 2, '2025-03-15', 15, 0, 130000.00),
-('ADV-1A', 2, 2, '2025-04-01', 15, 0, 150000.00);
+('ADV-1A', 2, 2, '2025-04-01', 15, 0, 160000.00);
 
 
 INSERT INTO class_schedule (class_id, day_of_week, start_time, end_time)

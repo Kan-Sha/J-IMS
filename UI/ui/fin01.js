@@ -1,10 +1,11 @@
 import { fetchClasses, fetchClassStudentsForInvoice, createInvoice, fetchClassStudentCount } from '../api/invoiceService.js';
-import { formatCurrency, parseCurrency, isFeeWithinLimit, MAX_FEE_DIGITS } from '../utils/validation.js';
+import { formatCurrency, parseCurrency, isFeeWithinLimit } from '../utils/validation.js';
+import { generateBillingCycles, billingPeriodToLabel } from '../utils/billing.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   let allClasses = [];
   let currentClass = null;
-  let currentMonth = 'Tháng 3-4';
+  let currentMonth = '';
   let currentTotalSessions = 16;
   let currentUnitPrice = 0;
   let currentStudentsPayload = null;
@@ -17,6 +18,35 @@ document.addEventListener('DOMContentLoaded', function () {
   const popupOverlay = document.getElementById('overlay-thanh-cong');
   const popupBox = document.getElementById('popup-thanh-cong');
   const popupText = document.getElementById('popup-txt-thanh-cong');
+  const selKyThanhToan = document.getElementById('sel-ky-thanh-toan');
+  const lblKyThanhToan = document.getElementById('hien-thi-ky-thanh-toan');
+
+  function defaultBillingPeriodForYear(year) {
+    var month = new Date().getMonth() + 1;
+    var startMonth = month % 2 === 0 ? month - 1 : month;
+    if (startMonth < 1) startMonth = 1;
+    if (startMonth > 11) startMonth = 11;
+    return String(year) + '-' + String(startMonth).padStart(2, '0');
+  }
+
+  function renderBillingCycles() {
+    var currentYear = new Date().getFullYear();
+    var cycles = generateBillingCycles(currentYear, 2);
+    selKyThanhToan.innerHTML = '';
+    cycles.forEach(function (item) {
+      var opt = document.createElement('option');
+      opt.value = item.value;
+      opt.textContent = item.label;
+      selKyThanhToan.appendChild(opt);
+    });
+    var selected = currentMonth && cycles.some(function (c) { return c.value === currentMonth; })
+      ? currentMonth
+      : defaultBillingPeriodForYear(currentYear);
+    currentMonth = selected;
+    selKyThanhToan.value = selected;
+    var selectedOption = selKyThanhToan.options[selKyThanhToan.selectedIndex];
+    lblKyThanhToan.innerText = selectedOption ? selectedOption.text : '';
+  }
 
   function showPopup(msg) {
     if (popupText) popupText.textContent = msg;
@@ -108,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function applyConfigDefaults() {
     document.getElementById('sel-ky-thanh-toan').value = currentMonth;
-    document.getElementById('hien-thi-ky-thanh-toan').innerText = currentMonth;
+    document.getElementById('hien-thi-ky-thanh-toan').innerText = billingPeriodToLabel(currentMonth);
     document.getElementById('ipt-tong-buoi').value = String(currentTotalSessions);
   }
 
@@ -127,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
     currentStudentsPayload = payload;
     errTongQuat.textContent = '';
     document.getElementById('lbl-ten-lop-xem-truoc').innerText = payload.className || '';
-    document.getElementById('lbl-ky-thanh-toan').value = currentMonth || '';
+    document.getElementById('lbl-ky-thanh-toan').value = billingPeriodToLabel(currentMonth) || '';
     document.getElementById('lbl-tong-buoi').value = String(currentTotalSessions || 0);
     document.getElementById('lbl-don-gia').value = formatCurrency(currentUnitPrice) + ' VND/buổi';
 
@@ -156,13 +186,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
       phiInput.addEventListener('focus', function () { this.value = parseCurrency(this.value) || ''; });
       phiInput.addEventListener('input', function () {
-        if (!isFeeWithinLimit(phiInput.value)) phiError.textContent = 'Số tiền không được vượt quá ' + MAX_FEE_DIGITS + ' chữ số!';
+        if (!isFeeWithinLimit(phiInput.value)) phiError.textContent = 'Không hợp lệ';
         else phiError.textContent = '';
       });
       phiInput.addEventListener('blur', function () {
         var val = parseCurrency(this.value);
         if (!isFeeWithinLimit(val)) {
-          phiError.textContent = 'Số tiền không được vượt quá ' + MAX_FEE_DIGITS + ' chữ số!';
+          phiError.textContent = 'Không hợp lệ';
           val = parseInt(String(val).slice(0, MAX_FEE_DIGITS) || '0', 10);
         } else {
           phiError.textContent = '';
@@ -186,8 +216,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('lbl-tong-tien').innerText = formatCurrency(sum);
   }
 
-  var selKyThanhToan = document.getElementById('sel-ky-thanh-toan');
-  var lblKyThanhToan = document.getElementById('hien-thi-ky-thanh-toan');
   selKyThanhToan.addEventListener('change', function () {
     currentMonth = this.value;
     lblKyThanhToan.innerText = this.options[this.selectedIndex].text;
@@ -205,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('btn-tinh-toan').addEventListener('click', async function () {
     var totalSessions = parseInt(iptTongBuoi.value || '0', 10);
     if (isNaN(totalSessions) || totalSessions < 1 || totalSessions > 30) {
-      errBuoi.textContent = 'Tổng số buổi không hợp lệ!';
+      errBuoi.textContent = 'Không hợp lệ';
       return;
     }
     currentTotalSessions = totalSessions;
@@ -213,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       var payload = await fetchClassStudentsForInvoice(currentClass.id);
       if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
-        errKy.textContent = 'Lớp học chưa có học sinh.';
+        errKy.textContent = 'Mục này không được để trống';
         return;
       }
       currentUnitPrice = Number(payload.pricePerSession || currentClass.tuitionPerSession || 0);
@@ -243,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (finalFee !== baseFee && !lyDoInput.value.trim()) {
         ok = false;
         lyDoInput.classList.add('error');
-        errTongQuat.textContent = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + hocSinhName + '!';
+        errTongQuat.textContent = 'Mục này không được để trống';
       }
       return { studentId: studentId, studentName: hocSinhName, finalFee: finalFee, adjustmentReason: lyDoInput.value.trim() || null };
     });
@@ -275,6 +303,19 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('popup-dx-huy').addEventListener('click', function () { overlayDX.style.display = 'none'; popupDX.style.display = 'none'; document.body.classList.remove('popup-open'); });
   document.getElementById('popup-dx-xac-nhan').addEventListener('click', function () { localStorage.removeItem('JIMS_TOKEN'); window.location.href = '../AUT-02/aut02.html'; });
 
+  var mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  var mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', function () {
+      document.body.classList.toggle('mobile-sidebar-open');
+    });
+  }
+  if (mobileSidebarBackdrop) {
+    mobileSidebarBackdrop.addEventListener('click', function () {
+      document.body.classList.remove('mobile-sidebar-open');
+    });
+  }
+
   window.addEventListener('popstate', async function () {
     var st = parseStateFromUrl();
     if (st.view === 'list') { switchView('view-danh-sach'); return; }
@@ -297,6 +338,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
+
+  renderBillingCycles();
 
   loadClasses('').then(function () {
     var st = parseStateFromUrl();

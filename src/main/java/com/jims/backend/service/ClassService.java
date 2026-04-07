@@ -161,7 +161,7 @@ public class ClassService {
                 }
                 // Only allow 2 levels by tuition snapshot rule (130k / 150k).
                 BigDecimal p130 = new BigDecimal("130000.00");
-                BigDecimal p150 = new BigDecimal("150000.00");
+                BigDecimal p150 = new BigDecimal("160000.00");
                 if (!(price.compareTo(p130) == 0 || price.compareTo(p150) == 0)) {
                     conn.rollback();
                     return new ApiResult(false, Collections.emptyMap(), "Cấp độ không hợp lệ!", 400);

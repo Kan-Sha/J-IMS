@@ -20,7 +20,7 @@ public class ClassRepository {
         // OPE-01 business rule: only 2 levels are valid.
         String sql = "SELECT level_id, level_name, price_per_session " +
                 "FROM levels " +
-                "WHERE price_per_session IN (130000, 150000) " +
+                "WHERE price_per_session IN (130000, 160000) " +
                 "ORDER BY level_id ASC";
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         try (Connection conn = DBConnection.getConnection();

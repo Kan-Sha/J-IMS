@@ -19,8 +19,12 @@ function handleApiError(res, defaultMsg, options) {
   return res.json().catch(function () { return null; }).then(function (payload) {
     var msg = (payload && payload.message) ? payload.message : (defaultMsg || 'Có lỗi xảy ra');
     if (res.status === 401) {
-      if (!suppressAlert) alert(msg || 'Chưa đăng nhập');
-      window.location.href = LOGIN_URL;
+      if (window.JIMS && typeof window.JIMS.handleSessionExpired === 'function') {
+        window.JIMS.handleSessionExpired(msg || 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      } else {
+        if (!suppressAlert) alert(msg || 'Chưa đăng nhập');
+        window.location.href = LOGIN_URL;
+      }
       return Promise.reject(new Error('unauthorized'));
     }
     if (!suppressAlert) {
@@ -79,6 +83,50 @@ export async function createInvoice(options) {
   if (!payload || !payload.success) {
     throw Object.assign(new Error((payload && payload.message) || 'Không thể tạo hóa đơn'), payload || {});
   }
+  return payload.data;
+}
+
+export async function fetchInvoices(params) {
+  var query = new URLSearchParams();
+  if (params) {
+    if (params.q) query.set('q', String(params.q));
+    if (params.classId) query.set('classId', String(params.classId));
+    if (params.billingPeriod) query.set('billingPeriod', String(params.billingPeriod));
+    if (params.status) query.set('status', String(params.status));
+    if (params.page) query.set('page', String(params.page));
+    if (params.pageSize) query.set('pageSize', String(params.pageSize));
+  }
+  var url = API_BASE + '/api/invoices' + (query.toString() ? ('?' + query.toString()) : '');
+  const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
+  if (!res.ok) return handleApiError(res, 'Không tải được danh sách hóa đơn');
+  const payload = await res.json();
+  if (!payload || !payload.success) throw new Error((payload && payload.message) || 'Không tải được danh sách hóa đơn');
+  return payload.data;
+}
+
+export async function fetchInvoiceDetail(invoiceId) {
+  var url = API_BASE + '/api/invoices/' + encodeURIComponent(String(invoiceId));
+  const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
+  if (!res.ok) return handleApiError(res, 'Không tải được chi tiết hóa đơn');
+  const payload = await res.json();
+  if (!payload || !payload.success) throw new Error((payload && payload.message) || 'Không tải được chi tiết hóa đơn');
+  return payload.data;
+}
+
+export async function markInvoicePaid(invoiceId, paymentMethod, note) {
+  var body = {
+    paymentMethod: paymentMethod,
+    note: note || null
+  };
+  const res = await fetch(API_BASE + '/api/invoices/' + encodeURIComponent(String(invoiceId)) + '/payment', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) return handleApiError(res, 'Không thể cập nhật thanh toán');
+  const payload = await res.json();
+  if (!payload || !payload.success) throw new Error((payload && payload.message) || 'Không thể cập nhật thanh toán');
   return payload.data;
 }
 

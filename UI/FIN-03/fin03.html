@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-IMS - Quản lý học phí - Chi tiết hóa đơn</title>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="fin03.css">
+    <link rel="stylesheet" href="../css/jims-shell.css">
+</head>
+
+<body class="jims-shell-loading" data-jims-page="fin03">
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Mở menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop"></div>
+    <div class="trang-chinh">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../assets/joyenglishlogo.jpg" alt="Logo" class="sidebar-logo-anh">
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-icon" title="Trang chủ">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                </a>
+                <a href="#" class="menu-icon" title="Thông báo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                </a>
+                <a href="../OPE-01/ope01.html" class="menu-icon" title="Quản lý lớp học">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                </a>
+                <a href="../FIN-01/fin01.html" class="menu-icon active" title="Tài chính">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v1.5" />
+                        <path d="M12 16.5V18" />
+                        <path
+                            d="M15 9.5C15 8.1 13.7 7 12 7s-3 1.1-3 2.5c0 1.4 1.3 2 3 2.5s3 1.1 3 2.5c0 1.4-1.3 2.5-3 2.5s-3-1.1-3-2.5" />
+                    </svg>
+                </a>
+                <a href="../STU-01/stu01.html" class="menu-icon" title="Hồ sơ học sinh">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                        <path d="M22 10v6" />
+                        <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+                    </svg>
+                </a>
+                <a href="../AUT-01/aut01.html" class="menu-icon" title="Nhân viên">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="18" rx="2" />
+                        <circle cx="9" cy="10" r="3" />
+                        <path d="M15 8h4" />
+                        <path d="M15 12h4" />
+                        <path d="M4 18c0-2.5 2-4 5-4s5 1.5 5 4" />
+                    </svg>
+                </a>
+                <a href="#" class="menu-icon" title="Đăng xuất" id="btn-dang-xuat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16,17 21,12 16,7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </a>
+            </nav>
+            <a href="../AUT-03/aut03.html" class="menu-icon sidebar-avatar" title="Tài khoản cá nhân">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+            </a>
+            <a href="#" class="menu-icon sidebar-settings" title="Cài đặt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="noi-dung">
+            <div class="sub-sidebar">
+                <div class="sub-sidebar-tieu-de">
+                    <a href="../FIN-02/fin02.html" class="back-btn" id="btn-back-sub-sidebar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="15,18 9,12 15,6" />
+                        </svg>
+                    </a>
+                    <span>Quản lý học phí</span>
+                </div>
+                <nav class="sub-menu">
+                    <a href="../FIN-01/fin01.html" class="sub-menu-item" id="nav-tao-hoa-don">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        Tạo hóa đơn
+                    </a>
+                    <a href="../FIN-02/fin02.html" class="sub-menu-item active" id="nav-danh-sach-hoa-don">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Danh sách hóa đơn
+                    </a>
+                </nav>
+            </div>
+
+            <div id="vung-form-wrapper"
+                style="flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: hidden;">
+                <div class="vung-form">
+                    <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
+                        <div class="header-container">
+                            <div class="header-left">
+                                <div class="header-title-row">
+                                    <a href="../FIN-02/fin02.html" class="back-icon-btn" id="btn-back-header">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="15,18 9,12 15,6" />
+                                        </svg>
+                                    </a>
+                                    <h1 class="page-title">Chi tiết hóa đơn</h1>
+                                </div>
+                                <div class="invoice-info-row">
+                                    <span class="invoice-id" id="hd-ma-hoa-don">INV-2023-1027</span>
+                                    <span class="status-badge cho-thanh-toan" id="trang-thai-hoa-don">CHỜ THANH
+                                        TOÁN</span>
+                                </div>
+                            </div>
+                            <div class="header-right">
+                                <button class="btn-mark-paid" id="btn-danh-dau-thanh-toan">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                    Đánh dấu đã thanh toán
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="cards-row-top">
+                            <div class="info-card student-card">
+                                <h3 class="card-subtitle">THÔNG TIN HỌC SINH</h3>
+                                <h2 class="student-name" id="hd-ten-hoc-sinh">Trần Minh Ngân</h2>
+                                <div class="student-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Mã học sinh:</span>
+                                        <span class="detail-value" id="hd-ma-hoc-sinh">JS-202603-001</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Lớp:</span>
+                                        <span class="detail-value strong" id="hd-lop">KID-1D</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-card invoice-meta-card">
+                                <div class="meta-section">
+                                    <h3 class="card-subtitle">KỲ HÓA ĐƠN</h3>
+                                    <div class="meta-title" id="hd-ky-hoa-don">Tháng 03-04/2026</div>
+                                    <div class="meta-desc">01/03/2026 - 30/04/2026</div>
+                                </div>
+                                <div class="meta-divider"></div>
+                                <div class="meta-section">
+                                    <h3 class="card-subtitle">ĐƠN GIÁ HỌC PHÍ</h3>
+                                    <div class="meta-title">130,000 VND</div>
+                                    <div class="meta-desc">mỗi buổi học</div>
+                                </div>
+                                <div class="meta-divider"></div>
+                                <div class="meta-section">
+                                    <h3 class="card-subtitle">SỐ BUỔI HỌC</h3>
+                                    <div class="meta-title">16 Buổi</div>
+                                    <div class="meta-desc">Lịch học: Thứ 3 & Thứ 5</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-card">
+                            <h2 class="card-title">Chi tiết hạng mục</h2>
+                            <table class="item-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40%">MÔ TẢ DỊCH VỤ</th>
+                                        <th style="width: 30%">LÝ DO</th>
+                                        <th style="width: 30%; text-align: right;">THÀNH TIỀN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="item-name">Học phí cơ bản</td>
+                                        <td class="item-reason">Học phí định kỳ</td>
+                                        <td class="item-amount" id="hd-so-tien-co-ban">2,080,000 VND</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="item-name">Giảm giá/Điều chỉnh</td>
+                                        <td class="item-reason"><span class="badge-none">Không</span></td>
+                                        <td class="item-amount">-0 VND</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="summary-section">
+                                <div class="summary-row">
+                                    <span class="summary-label">Tổng cộng chưa giảm:</span>
+                                    <span class="summary-value" id="hd-tong-chua-giam">2,080,000 VND</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Chiết khấu:</span>
+                                    <span class="summary-value">-0 VND</span>
+                                </div>
+                                <div class="summary-total-row">
+                                    <span class="summary-total-label">Tổng số tiền:</span>
+                                    <span class="summary-total-value" id="hd-tong-so-tien">2,080,000 VND</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cards-row-bottom">
+                            <div class="bottom-card">
+                                <h3 class="card-subtitle">PHƯƠNG THỨC</h3>
+                                <div class="method-value" id="hien-thi-phuong-thuc">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="3" x2="21" y1="22" y2="22"></line>
+                                        <line x1="6" x2="6" y1="18" y2="11"></line>
+                                        <line x1="10" x2="10" y1="18" y2="11"></line>
+                                        <line x1="14" x2="14" y1="18" y2="11"></line>
+                                        <line x1="18" x2="18" y1="18" y2="11"></line>
+                                        <polygon points="12 2 20 7 4 7"></polygon>
+                                    </svg>
+                                    <span>Tiền mặt/Chuyển khoản</span>
+                                </div>
+                            </div>
+                            <div class="bottom-card">
+                                <h3 class="card-subtitle">NGÀY THANH TOÁN</h3>
+                                <div class="date-value" id="hien-thi-ngay-thanh-toan">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="overlay" id="modal-overlay-thanh-toan"
+            style="display:none; background:rgba(0,0,0,0.35); z-index:101;"></div>
+        <div class="modal-thanh-toan" id="modal-thanh-toan" style="display:none;">
+            <div class="modal-header">
+                <h3>Xác nhận thanh toán</h3>
+                <button class="btn-close-modal" id="btn-dong-modal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="payment-info-box">
+                    <div class="info-row">
+                        <div class="info-group">
+                            <div class="info-label">MÃ HÓA ĐƠN</div>
+                            <div class="info-value">INV-2023-1027</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">HỌC SINH</div>
+                            <div class="info-value">Nguyễn Minh Anh</div>
+                        </div>
+                    </div>
+                    <div class="info-total">
+                        <div class="info-label">TỔNG SỐ TIỀN</div>
+                        <div class="info-value-large">2,080,000 VND</div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label class="form-label">PHƯƠNG THỨC THANH TOÁN</label>
+                    <div class="khung-select" id="khung-phuong-thuc">
+                        <span class="select-hien-thi" id="hien-thi-pt">Tiền mặt</span>
+                        <select id="sel-phuong-thuc" class="o-select">
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
+                        </select>
+                        <svg class="icon-select" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="6,9 12,15 18,9" />
+                        </svg>
+                    </div>
+                    <div class="loi-text" id="loi-phuong-thuc">Vui lòng chọn phương thức thanh toán.</div>
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label class="form-label">GHI CHÚ</label>
+                    <textarea id="ipt-ghi-chu" class="o-textarea"
+                        placeholder="Nhập ghi chú thanh toán (nếu có)..."></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="nut-huy" id="btn-huy-thanh-toan" style="height: auto;">Hủy</button>
+                <button class="nut-luu" id="btn-xac-nhan-thanh-toan"
+                    style="height: auto; padding: 6px 16px; line-height: 1.35; text-align: center;">Xác nhận<br>thanh
+                    toán</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+    
+    <div class="overlay" id="overlay-dang-xuat"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:101;"></div>
+    <div id="popup-dang-xuat"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; border:1px solid #8e8edf; border-radius:12px; z-index:102; min-width:420px; max-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.2); overflow:hidden;">
+        <div class="popup-header"
+            style="display: flex; align-items: center; gap: 12px; padding: 20px 28px; border-bottom: 1px solid #8e8edf;">
+            <img src="../assets/joyenglishlogo.jpg" alt="Logo" class="popup-logo"
+                style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid #0000bb;">
+            <span class="popup-ten-app" style="font-size: 20px; font-weight: 800; color: #003366;">J-IMS</span>
+        </div>
+        <div style="padding:24px 28px 28px; border-bottom:1px solid #8e8edf;">
+            <p style="font-size:20px; font-weight:700; color:#000; margin-bottom:10px;">Đăng xuất</p>
+            <p style="font-size:14px; color:#000;">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống J-IMS không ?</p>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px;">
+            <button id="popup-dx-xac-nhan"
+                style="width:140px;height:48px;background:transparent;color:#003366;border:1.5px solid #003366;border-radius:5px;font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Đăng
+                xuất</button>
+            <button id="popup-dx-huy"
+                style="width:140px;height:48px;background:#003366;color:#fff;border:none;border-radius:5px;font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Hủy</button>
+        </div>
+    </div>
+
+    <script src="../js/jims-shell.js"></script>
+    <script type="module" src="fin03.js"></script>
+</body>
+
+</html>

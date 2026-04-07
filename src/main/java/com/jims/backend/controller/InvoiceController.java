@@ -47,6 +47,15 @@ public class InvoiceController {
                 }
 
                 try {
+                    String path = exchange.getRequestURI().getPath();
+                    String base = "/api/invoices";
+                    String suffix = path.length() > base.length() ? path.substring(base.length()) : "";
+
+                    if (suffix != null && !suffix.isEmpty() && !"/".equals(suffix)) {
+                        handleItemRoute(exchange, suffix);
+                        return;
+                    }
+
                     if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                         String raw = exchange.getRequestURI().getRawQuery();
                         String q = extractQueryParam(raw, "q");
@@ -62,11 +71,15 @@ public class InvoiceController {
                         }
                         String billingPeriod = extractQueryParam(raw, "billingPeriod");
                         String status = extractQueryParam(raw, "status");
+                        int page = parsePositiveInt(extractQueryParam(raw, "page"), 1);
+                        int pageSize = parsePositiveInt(extractQueryParam(raw, "pageSize"), 8);
                         ApiResult result = invoiceService.searchInvoices(
                                 q.isEmpty() ? null : q,
                                 classId,
                                 billingPeriod.isEmpty() ? null : billingPeriod,
-                                status.isEmpty() ? null : status
+                                status.isEmpty() ? null : status,
+                                page,
+                                pageSize
                         );
                         ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
                         return;
@@ -95,6 +108,26 @@ public class InvoiceController {
                 }
             }
         };
+    }
+
+    private void handleItemRoute(HttpExchange exchange, String suffix) throws IOException {
+        String normalized = suffix.startsWith("/") ? suffix.substring(1) : suffix;
+        String method = exchange.getRequestMethod();
+        if ("GET".equalsIgnoreCase(method) && normalized.length() > 0 && normalized.indexOf('/') < 0) {
+            ApiResult result = invoiceService.getInvoiceDetail(normalized);
+            ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+            return;
+        }
+        if ("PATCH".equalsIgnoreCase(method) && normalized.endsWith("/payment")) {
+            String invoiceId = normalized.substring(0, normalized.length() - "/payment".length());
+            JsonObject body = JsonUtil.parseBody(exchange);
+            String paymentMethod = getString(body, "paymentMethod");
+            String note = getString(body, "note");
+            ApiResult result = invoiceService.markInvoicePaid(invoiceId, paymentMethod, note);
+            ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+            return;
+        }
+        ResponseUtil.sendJson(exchange, 405, false, Collections.emptyMap(), "Method not allowed");
     }
 
     private static List<InvoiceService.InvoiceLine> readLines(JsonObject body) {
@@ -160,5 +193,15 @@ public class InvoiceController {
             return null;
         }
         return object.get(key).getAsString();
+    }
+
+    private int parsePositiveInt(String raw, int fallback) {
+        if (raw == null || raw.trim().isEmpty()) return fallback;
+        try {
+            int value = Integer.parseInt(raw.trim());
+            return value > 0 ? value : fallback;
+        } catch (NumberFormatException ex) {
+            return fallback;
+        }
     }
 }

@@ -1,13 +1,17 @@
 /**
  * J-IMS shared shell: session check, role-based sidebar links, hide Admin-only UI for Teacher/TA.
-   * Requires: <body data-jims-page="aut01|stu01|stu03|aut03|ope01|ope02|ope03|fin01" class="jims-shell-loading">
+  * Requires: <body data-jims-page="aut01|stu01|stu03|aut03|ope01|ope02|ope03|fin01|fin02|fin03" class="jims-shell-loading">
  * Load before page-specific *.js
  */
 (function () {
   var API_BASE = 'http://127.0.0.1:8080';
+  var isSessionExpiredHandled = false;
 
-  function hienThongBaoDangNhapHetHan() {
-    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+  function handleSessionExpired(message) {
+    if (isSessionExpiredHandled) return;
+    isSessionExpiredHandled = true;
+    alert(message || 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    window.location.href = '../AUT-02/aut02.html';
   }
 
   function getNetworkFailureMessage() {
@@ -104,7 +108,33 @@
         ope01: '../OPE-01/ope01.html',
         ope02: '../OPE-02/ope02.html',
         ope03: '../OPE-03/ope03.html',
-        fin01: '../FIN-01/fin01.html'
+        fin01: '../FIN-01/fin01.html',
+        fin02: '../FIN-02/fin02.html',
+        fin03: '../FIN-03/fin03.html'
+      },
+      fin02: {
+        stu01: '../STU-01/stu01.html',
+        stu03: '../STU-03/stu03.html',
+        aut01: '../AUT-01/aut01.html',
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html',
+        fin02: 'fin02.html',
+        fin03: '../FIN-03/fin03.html'
+      },
+      fin03: {
+        stu01: '../STU-01/stu01.html',
+        stu03: '../STU-03/stu03.html',
+        aut01: '../AUT-01/aut01.html',
+        aut03: '../AUT-03/aut03.html',
+        ope01: '../OPE-01/ope01.html',
+        ope02: '../OPE-02/ope02.html',
+        ope03: '../OPE-03/ope03.html',
+        fin01: '../FIN-01/fin01.html',
+        fin02: '../FIN-02/fin02.html',
+        fin03: 'fin03.html'
       },
     };
     return m[page] || m.stu01;
@@ -125,8 +155,17 @@
       a.setAttribute('href', isAdmin ? u.ope01 : u.ope02);
     });
     document.querySelectorAll('a[title="Tài chính"]').forEach(function (a) {
-      a.setAttribute('href', u.fin01 || '../FIN-01/fin01.html');
+      a.setAttribute('href', u.fin02 || u.fin01 || '../FIN-02/fin02.html');
       a.style.display = isAdmin ? '' : 'none';
+    });
+    document.querySelectorAll('a[title="Trang chủ"]').forEach(function (a) {
+      a.setAttribute('href', studentHref);
+    });
+    document.querySelectorAll('a[title="Thông báo"]').forEach(function (a) {
+      a.setAttribute('href', u.aut03 || '../AUT-03/aut03.html');
+    });
+    document.querySelectorAll('a[title="Cài đặt"]').forEach(function (a) {
+      a.setAttribute('href', u.aut03 || '../AUT-03/aut03.html');
     });
 
     document.querySelectorAll('.jims-admin-only').forEach(function (el) {
@@ -153,6 +192,7 @@
   window.JIMS.ready = new Promise(function (resolve) {
     readyResolve = resolve;
   });
+  window.JIMS.handleSessionExpired = handleSessionExpired;
 
   document.addEventListener('DOMContentLoaded', function () {
     var page = (document.body && document.body.getAttribute('data-jims-page')) || '';
@@ -181,8 +221,7 @@
       .then(function (payload) {
         if (!payload || !payload.success) {
           localStorage.removeItem('JIMS_TOKEN');
-          hienThongBaoDangNhapHetHan();
-          window.location.href = '../AUT-02/aut02.html';
+          handleSessionExpired((payload && payload.message) || 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
           return;
         }
 
@@ -207,7 +246,7 @@
           window.location.href = u.ope02 || '../OPE-02/ope02.html';
           return;
         }
-        if (page === 'fin01' && lower !== 'admin') {
+        if ((page === 'fin01' || page === 'fin02' || page === 'fin03') && lower !== 'admin') {
           alert('Bạn không có quyền truy cập');
           window.location.href = u.ope02 || '../OPE-02/ope02.html';
           return;
@@ -220,8 +259,7 @@
       })
       .catch(function () {
         localStorage.removeItem('JIMS_TOKEN');
-        alert(getNetworkFailureMessage());
-        window.location.href = '../AUT-02/aut02.html';
+        handleSessionExpired(getNetworkFailureMessage());
       });
   });
 })();

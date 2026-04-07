@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  */
 public final class BillingPeriodUtil {
 
-    private static final Pattern DISPLAY = Pattern.compile("^Tháng\\s(\\d{1,2})-(\\d{1,2})$");
+    private static final Pattern DISPLAY = Pattern.compile("^Tháng\\s(\\d{1,2})-(\\d{1,2})(?:/(\\d{4}))?$");
     private static final Pattern CANONICAL = Pattern.compile("^(\\d{4})-(\\d{2})$");
 
     private BillingPeriodUtil() {
@@ -48,7 +48,11 @@ public final class BillingPeriodUtil {
         if (a < 1 || a > 11 || b < 2 || b > 12 || b != a + 1) {
             return null;
         }
-        return String.format("%d-%02d", year, a);
+        int y = year;
+        if (dm.group(3) != null) {
+            y = Integer.parseInt(dm.group(3), 10);
+        }
+        return String.format("%d-%02d", y, a);
     }
 
     /**
@@ -65,8 +69,20 @@ public final class BillingPeriodUtil {
         }
         int mo = Integer.parseInt(cm.group(2), 10);
         if (mo >= 1 && mo <= 11 && mo % 2 == 1) {
-            return "Tháng " + mo + "-" + (mo + 1);
+            return "Tháng " + mo + "-" + (mo + 1) + "/" + cm.group(1);
         }
         return s;
+    }
+
+    public static String toShortDisplay(String canonical) {
+        if (canonical == null) return null;
+        Matcher cm = CANONICAL.matcher(canonical.trim());
+        if (!cm.matches()) return canonical;
+        int mo = Integer.parseInt(cm.group(2), 10);
+        int year = Integer.parseInt(cm.group(1), 10);
+        if (mo >= 1 && mo <= 11 && mo % 2 == 1) {
+            return mo + "-" + (mo + 1) + "/" + year;
+        }
+        return canonical;
     }
 }

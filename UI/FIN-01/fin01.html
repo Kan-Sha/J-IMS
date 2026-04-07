@@ -17,6 +17,10 @@
 </head>
 
 <body class="jims-shell-loading" data-jims-page="fin01">
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-label="Mở menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop"></div>
     <div class="trang-chinh">
         <div class="sidebar">
             <div class="sidebar-logo">
@@ -175,15 +179,8 @@
                     <div class="nhom-input" style="margin-bottom: 24px; max-width: 100%;">
                         <label class="nhan">KỲ THANH TOÁN</label>
                         <div class="khung-select" id="khung-ky-thanh-toan">
-                            <span class="select-hien-thi" id="hien-thi-ky-thanh-toan">Tháng 3-4</span>
-                            <select id="sel-ky-thanh-toan" class="o-select">
-                                <option value="Tháng 1-2">Tháng 1-2</option>
-                                <option value="Tháng 3-4" selected>Tháng 3-4</option>
-                                <option value="Tháng 5-6">Tháng 5-6</option>
-                                <option value="Tháng 7-8">Tháng 7-8</option>
-                                <option value="Tháng 9-10">Tháng 9-10</option>
-                                <option value="Tháng 11-12">Tháng 11-12</option>
-                            </select>
+                            <span class="select-hien-thi" id="hien-thi-ky-thanh-toan"></span>
+                            <select id="sel-ky-thanh-toan" class="o-select"></select>
                             <svg class="icon-select" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
                                 <polyline points="6,9 12,15 18,9" />

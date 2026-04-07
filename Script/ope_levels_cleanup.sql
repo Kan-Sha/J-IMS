@@ -11,7 +11,7 @@ WHERE level_id = 1;
 
 UPDATE levels
 SET level_name = 'Nâng cao',
-    price_per_session = 150000.00
+    price_per_session = 160000.00
 WHERE level_id = 2;
 
 -- Re-map classes that point to removed levels to level_id=1
