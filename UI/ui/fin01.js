@@ -59,6 +59,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (popupBox) popupBox.style.display = 'none';
   }
 
+  function backFin01() {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    window.location.href = '../FIN-02/fin02.html';
+  }
+  var btnBack = document.getElementById('btn-back-fin01');
+  if (btnBack) {
+    btnBack.addEventListener('click', function (e) {
+      e.preventDefault();
+      backFin01();
+    });
+  }
+
   function parseStateFromUrl() {
     var p = new URLSearchParams(window.location.search || '');
     return {
@@ -245,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       var payload = await fetchClassStudentsForInvoice(currentClass.id);
       if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
-        errKy.textContent = 'Mục này không được để trống';
+        showPopup('Lớp hiện tại chưa có học sinh!');
         return;
       }
       currentUnitPrice = Number(payload.pricePerSession || currentClass.tuitionPerSession || 0);
@@ -304,8 +319,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     if (!ok) return;
     try {
-      await createInvoice({ classId: currentClass.id, billingPeriod: currentMonth, totalSessions: currentTotalSessions, lines: lines });
-      showPopup('Hóa đơn đã được tạo thành công!');
+      var created = await createInvoice({ classId: currentClass.id, billingPeriod: currentMonth, totalSessions: currentTotalSessions, lines: lines });
+      var count = created && created.createdInvoices != null ? Number(created.createdInvoices) : rows.length;
+      if (!isFinite(count) || count < 0) count = rows.length;
+      showPopup('Đã tạo ' + count + ' hóa đơn thành công!');
     } catch (e) {
       showPopup((e && e.message) ? e.message : 'Không thể tạo hóa đơn');
     }

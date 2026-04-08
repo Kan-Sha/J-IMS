@@ -144,8 +144,8 @@ public class ClassService {
             }
             int startMins = st.getHour() * 60 + st.getMinute();
             int endMins = et.getHour() * 60 + et.getMinute();
-            if ((endMins - startMins) < 30) {
-                return new ApiResult(false, Collections.emptyMap(), "Thời lượng buổi học phải tối thiểu 30 phút.", 400);
+            if ((endMins - startMins) < 60) {
+                return new ApiResult(false, Collections.emptyMap(), "Thời lượng buổi học phải tối thiểu 60 phút!", 400);
             }
 
             Time sqlStart = Time.valueOf(st);
