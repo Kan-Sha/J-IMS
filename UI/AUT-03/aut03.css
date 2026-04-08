@@ -263,6 +263,8 @@ body {
   color: var(--mau-chu-phu);
   margin-top: 6px;
   font-style: italic;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .nut-mat-khau {
@@ -292,6 +294,8 @@ body {
   margin-top: 6px;
   display: none;
   font-style: italic;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .loi-text.hien {
@@ -312,6 +316,8 @@ body {
   display: none;
   align-items: center;
   gap: 8px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .thong-bao.thanh-cong {

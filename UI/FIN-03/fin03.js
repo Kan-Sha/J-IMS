@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const btnDanhDauThanhToan = document.getElementById('btn-danh-dau-thanh-toan');
   const trangThaiHoaDon = document.getElementById('trang-thai-hoa-don');
-  const hienThiPhuongThuc = document.getElementById('hien-thi-phuong-thuc');
-  const hienThiNgayThanhToan = document.getElementById('hien-thi-ngay-thanh-toan');
+  const txtPhuongThuc = document.getElementById('txt-phuong-thuc');
+  const txtNgayThanhToan = document.getElementById('txt-ngay-thanh-toan');
   const modalOverlay = document.getElementById('modal-overlay-thanh-toan');
   const modalThanhToan = document.getElementById('modal-thanh-toan');
   const btnDongModal = document.getElementById('btn-dong-modal');
@@ -93,8 +93,8 @@ document.addEventListener('DOMContentLoaded', function () {
         reasonCell.innerHTML = data.adjustmentReason ? data.adjustmentReason : '<span class="badge-none">Không</span>';
       }
       updateStatusUi(data.status);
-      hienThiNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
-      hienThiPhuongThuc.innerHTML = '<span>' + (data.paymentMethod || '---') + '</span>';
+      if (txtNgayThanhToan) txtNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
+      if (txtPhuongThuc) txtPhuongThuc.textContent = data.paymentMethod || '---';
     }).catch(function () {
       backToList();
     });
@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', function () {
     markInvoicePaid(invoiceId, selPhuongThuc.value, document.getElementById('ipt-ghi-chu').value.trim()).then(function (data) {
       currentInvoice = Object.assign({}, currentInvoice || {}, data || {});
       updateStatusUi('paid');
-      hienThiPhuongThuc.innerHTML = '<span>' + (data.paymentMethod || selPhuongThuc.value) + '</span>';
-      hienThiNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
+      if (txtPhuongThuc) txtPhuongThuc.textContent = data.paymentMethod || selPhuongThuc.value;
+      if (txtNgayThanhToan) txtNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
       dongModal();
     }).catch(function (e) {
       alert((e && e.message) ? e.message : 'Không thể xác nhận thanh toán');
