@@ -19,6 +19,28 @@ document.addEventListener('DOMContentLoaded', function () {
   const hienThiPt = document.getElementById('hien-thi-pt');
   const selPhuongThuc = document.getElementById('sel-phuong-thuc');
   const loiPhuongThuc = document.getElementById('loi-phuong-thuc');
+  const modalMaHoaDon = document.getElementById('modal-ma-hoa-don');
+  const modalTenHocSinh = document.getElementById('modal-ten-hoc-sinh');
+  const modalTongSoTien = document.getElementById('modal-tong-so-tien');
+
+  function formatDate(isoOrYmd) {
+    if (!isoOrYmd) return '---';
+    var d = new Date(isoOrYmd);
+    if (isNaN(d.getTime())) {
+      var m = String(isoOrYmd).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return String(isoOrYmd);
+      return m[3] + '/' + m[2] + '/' + m[1];
+    }
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+  }
+
+  function parseVndDisplay(raw) {
+    return Number(String(raw || '0').replace(/[^\d]/g, '')) || 0;
+  }
+
+  function toVnd(n) {
+    return (Number(n) || 0).toLocaleString('vi-VN') + ' VND';
+  }
 
   function backToList() {
     if (window.history.length > 1) {
@@ -55,16 +77,23 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('hd-ma-hoc-sinh').textContent = data.studentId || '---';
       document.getElementById('hd-lop').textContent = data.className || '---';
       document.getElementById('hd-ky-hoa-don').textContent = billingPeriodToLabel(data.billingPeriod);
-      document.querySelector('.meta-desc').textContent = (data.startDate || '---') + ' - ' + (data.endDate || '---');
+      document.getElementById('hd-ky-khoang-ngay').textContent = formatDate(data.startDate) + ' - ' + formatDate(data.endDate);
       document.getElementById('hd-so-tien-co-ban').textContent = (data.baseAmountDisplay || '0') + ' VND';
       document.getElementById('hd-tong-chua-giam').textContent = (data.baseAmountDisplay || '0') + ' VND';
       document.getElementById('hd-tong-so-tien').textContent = (data.totalAmountDisplay || '0') + ' VND';
+
+      var baseAmount = parseVndDisplay(data.baseAmountDisplay);
+      var finalAmount = parseVndDisplay(data.totalAmountDisplay);
+      var discount = Math.max(0, baseAmount - finalAmount);
+      document.getElementById('hd-giam-gia').textContent = '-' + toVnd(discount);
+      document.getElementById('hd-chiet-khau').textContent = '-' + toVnd(discount);
+
       var reasonCell = document.querySelector('.item-table tbody tr:nth-child(2) .item-reason');
       if (reasonCell) {
         reasonCell.innerHTML = data.adjustmentReason ? data.adjustmentReason : '<span class="badge-none">Không</span>';
       }
       updateStatusUi(data.status);
-      hienThiNgayThanhToan.textContent = data.paidAtDisplay || '---';
+      hienThiNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
       hienThiPhuongThuc.innerHTML = '<span>' + (data.paymentMethod || '---') + '</span>';
     }).catch(function () {
       backToList();
@@ -82,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loiPhuongThuc.classList.remove('hien');
   });
   btnDanhDauThanhToan.addEventListener('click', function () {
+    if (!currentInvoice) return;
     modalOverlay.style.display = 'block';
     modalThanhToan.style.display = 'block';
     khungPhuongThuc.classList.remove('loi-input');
@@ -89,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ipt-ghi-chu').value = '';
     selPhuongThuc.value = 'Tiền mặt';
     hienThiPt.textContent = 'Tiền mặt';
+    modalMaHoaDon.textContent = currentInvoice.invoiceId || '---';
+    modalTenHocSinh.textContent = currentInvoice.studentName || '---';
+    modalTongSoTien.textContent = (currentInvoice.totalAmountDisplay || '0') + ' VND';
   });
   btnDongModal.addEventListener('click', dongModal);
   btnHuyThanhToan.addEventListener('click', dongModal);
@@ -102,14 +135,18 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     btnXacNhanThanhToan.disabled = true;
+    btnXacNhanThanhToan.textContent = 'Đang xử lý...';
     markInvoicePaid(invoiceId, selPhuongThuc.value, document.getElementById('ipt-ghi-chu').value.trim()).then(function (data) {
       currentInvoice = Object.assign({}, currentInvoice || {}, data || {});
       updateStatusUi('paid');
       hienThiPhuongThuc.innerHTML = '<span>' + (data.paymentMethod || selPhuongThuc.value) + '</span>';
-      hienThiNgayThanhToan.textContent = data.paidAtDisplay || hienThiNgayThanhToan.textContent;
+      hienThiNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
       dongModal();
+    }).catch(function (e) {
+      alert((e && e.message) ? e.message : 'Không thể xác nhận thanh toán');
     }).finally(function () {
       btnXacNhanThanhToan.disabled = false;
+      btnXacNhanThanhToan.innerHTML = 'Xác nhận<br>thanh toán';
     });
   });
 

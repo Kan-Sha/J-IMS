@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
         '<td style="text-align: center; vertical-align: middle;"><strong>' + hoTen + '</strong></td>' +
         '<td style="text-align: center; vertical-align: middle;">' + formatCurrency(baseFee) + '</td>' +
         '<td style="text-align: center; vertical-align: middle;" class="phight"><input type="text" class="input-phi-cuoi" value="' + formatCurrency(baseFee) + '"><div class="text-error phi-error" style="margin-top:4px;"></div></td>' +
-        '<td style="text-align: left;"><input type="text" class="input-ly-do" placeholder="Ghi chú"></td>';
+        '<td style="text-align: left;"><input type="text" class="input-ly-do" placeholder="Ghi chú"><div class="text-error ly-do-error" style="margin-top:4px;"></div></td>';
       tbodyXemTruoc.appendChild(tr);
 
       var phiInput = tr.querySelector('.input-phi-cuoi');
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var val = parseCurrency(this.value);
         if (!isFeeWithinLimit(val)) {
           phiError.textContent = 'Không hợp lệ';
-          val = parseInt(String(val).slice(0, MAX_FEE_DIGITS) || '0', 10);
+          val = 0;
         } else {
           phiError.textContent = '';
         }
@@ -201,7 +201,11 @@ document.addEventListener('DOMContentLoaded', function () {
         recalculateTotal();
         if (val === baseFee) lyDoInput.classList.remove('error');
       });
-      lyDoInput.addEventListener('input', function () { lyDoInput.classList.remove('error'); });
+      lyDoInput.addEventListener('input', function () {
+        lyDoInput.classList.remove('error');
+        var lyDoError = tr.querySelector('.ly-do-error');
+        if (lyDoError) lyDoError.textContent = '';
+      });
     });
 
     document.getElementById('lbl-tong-hoc-sinh').innerText = (payload.students || []).length;
@@ -251,27 +255,50 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  function resetPreviewGrid() {
+    Array.prototype.slice.call(tbodyXemTruoc.querySelectorAll('tr')).forEach(function (row) {
+      var baseFee = parseInt(row.dataset.baseFee, 10) || 0;
+      var feeInput = row.querySelector('.input-phi-cuoi');
+      var reasonInput = row.querySelector('.input-ly-do');
+      var feeError = row.querySelector('.phi-error');
+      var reasonError = row.querySelector('.ly-do-error');
+      if (feeInput) feeInput.value = formatCurrency(baseFee);
+      if (reasonInput) {
+        reasonInput.value = '';
+        reasonInput.classList.remove('error');
+      }
+      if (feeError) feeError.textContent = '';
+      if (reasonError) reasonError.textContent = '';
+    });
+    errTongQuat.textContent = '';
+    recalculateTotal();
+  }
+
   document.getElementById('btn-huy-xem-truoc').addEventListener('click', function () {
-    switchView('view-cau-hinh');
-    syncUrl('config', 'push');
+    resetPreviewGrid();
   });
 
   document.getElementById('btn-luu-hoa-don').addEventListener('click', async function () {
     var rows = Array.prototype.slice.call(tbodyXemTruoc.querySelectorAll('tr'));
     if (!rows.length) return;
     var ok = true;
+    errTongQuat.textContent = '';
     var lines = rows.map(function (row) {
       var hocSinhName = row.dataset.ten;
       var baseFee = parseInt(row.dataset.baseFee, 10) || 0;
       var studentId = row.dataset.studentId;
       var phiInput = row.querySelector('.input-phi-cuoi');
       var lyDoInput = row.querySelector('.input-ly-do');
+      var lyDoError = row.querySelector('.ly-do-error');
       var finalFee = parseCurrency(phiInput.value);
       if (!isFeeWithinLimit(finalFee)) { ok = false; }
+      if (lyDoError) lyDoError.textContent = '';
       if (finalFee !== baseFee && !lyDoInput.value.trim()) {
         ok = false;
         lyDoInput.classList.add('error');
-        errTongQuat.textContent = 'Mục này không được để trống';
+        if (lyDoError) {
+          lyDoError.textContent = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + hocSinhName + '!';
+        }
       }
       return { studentId: studentId, studentName: hocSinhName, finalFee: finalFee, adjustmentReason: lyDoInput.value.trim() || null };
     });

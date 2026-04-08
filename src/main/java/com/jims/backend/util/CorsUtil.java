@@ -18,7 +18,7 @@ public final class CorsUtil {
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", allowedOrigin);
             exchange.getResponseHeaders().set("Vary", "Origin");
         }
-        exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
         exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Staff-Role");
         exchange.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
     }

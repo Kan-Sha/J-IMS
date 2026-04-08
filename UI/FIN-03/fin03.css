@@ -489,6 +489,11 @@
   .sub-sidebar { position:fixed; top:0; left:var(--rong-sidebar); bottom:0; transform:translateX(-120%); transition:transform .25s ease; z-index:205; }
   body.mobile-sidebar-open .sidebar, body.mobile-sidebar-open .sub-sidebar { transform:translateX(0); }
   body.mobile-sidebar-open .mobile-sidebar-backdrop { display:block; }
+  #vung-form-wrapper, .vung-form { overflow-x: auto; }
+  .cards-row-top, .cards-row-bottom { flex-direction: column; }
+  .invoice-meta-card { flex-wrap: wrap; }
+  .details-card { overflow-x: auto; }
+  .modal-thanh-toan { left: 50% !important; width: 90% !important; max-width: 400px !important; }
 }
 
 
