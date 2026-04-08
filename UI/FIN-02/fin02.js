@@ -105,15 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function loadBillingPeriods() {
-    const years = [new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1];
+    const currentYear = new Date().getFullYear();
     selFilterKy.innerHTML = '<option value="" selected>Chọn kỳ</option>';
-    years.forEach(function (year) {
-      generateBillingCycles(year, 2).forEach(function (c) {
-        const opt = document.createElement('option');
-        opt.value = c.value;
-        opt.textContent = c.label;
-        selFilterKy.appendChild(opt);
-      });
+    generateBillingCycles(currentYear, 2).forEach(function (c) {
+      const opt = document.createElement('option');
+      opt.value = c.value;
+      opt.textContent = c.label;
+      selFilterKy.appendChild(opt);
     });
   }
 
