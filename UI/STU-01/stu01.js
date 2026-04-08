@@ -385,8 +385,8 @@ document.addEventListener('DOMContentLoaded', function () {
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       credentials: 'include',
       body: JSON.stringify({
-        firstName: ho,
-        lastName: ten,
+        firstName: ten,
+        lastName: ho,
         dob: dobIso,
         gender: gioiTinh,
         parentName: hoTenPH,

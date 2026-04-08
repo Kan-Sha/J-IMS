@@ -76,6 +76,30 @@ document.addEventListener('DOMContentLoaded', function () {
     return '';
   }
 
+  function normalizeForSearch(str) {
+    return String(str || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd');
+  }
+
+  function tokenize(str) {
+    return normalizeForSearch(str).split(/\s+/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+
+  function matchAgainstFields(search, fields) {
+    var searchTokens = tokenize(search);
+    if (!searchTokens.length) return true;
+    var allTokens = [];
+    (fields || []).forEach(function (f) {
+      allTokens = allTokens.concat(tokenize(f));
+    });
+    return searchTokens.every(function (token) {
+      return allTokens.some(function (t) { return t === token; });
+    });
+  }
+
   function renderBang(ds) {
     bangThan.innerHTML = '';
     ds.forEach(function (hs) {
@@ -191,12 +215,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   nutTimKiem.addEventListener('click', function () {
-    const tuKhoa     = inputTimKiem.value.trim().toLowerCase();
+    const tuKhoa     = inputTimKiem.value.trim();
     const lopChon    = selectLop.value;
     const trangThai  = selectTrangThai.value;
 
     const ketQua = danhSachHocSinh.filter(function (hs) {
-      const hopTuKhoa   = !tuKhoa || (hs.hoTen || '').toLowerCase().includes(tuKhoa) || (hs.ma || '').toLowerCase().includes(tuKhoa);
+      const hopTuKhoa   = matchAgainstFields(tuKhoa, [hs.hoTen, hs.ma]);
       const hopLop      = !lopChon || String(hs.lopId || '') === String(lopChon);
       const hopTrangThai = !trangThai || String(hs.trangThaiId || '') === String(trangThai);
       return hopTuKhoa && hopLop && hopTrangThai;

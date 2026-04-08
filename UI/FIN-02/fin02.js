@@ -1,5 +1,6 @@
 import { fetchInvoices, fetchClasses } from '../api/invoiceService.js';
 import { generateBillingCycles, billingPeriodToLabel } from '../utils/billing.js';
+import { matchAgainstFields } from '../utils/search.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   const iptTimKiem = document.getElementById('ipt-tim-kiem');
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
         '<td style="white-space:nowrap;color:var(--mau-xanh-dam);font-weight:700;">' + item.totalAmountDisplay + '</td>' +
         '<td style="white-space:nowrap;">' + billingPeriodToLabel(item.billingPeriod) + '</td>' +
         '<td><span class="trang-thai-chip ' + statusClass + '">' + status + '</span></td>' +
-        '<td style="text-align:center;"><a class="h-dong-icon" href="../FIN-03/fin03.html?invoiceId=' + encodeURIComponent(item.invoiceId) + '" title="Xem chi tiết">Xem</a></td>';
+        '<td style="text-align:center;"><a class="h-dong-icon" href="../FIN-03/fin03.html?invoiceId=' + encodeURIComponent(item.invoiceId) + '" title="Xem chi tiết"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a></td>';
       tbodyHoaDon.appendChild(tr);
     });
     renderPagination();
@@ -119,16 +120,28 @@ document.addEventListener('DOMContentLoaded', function () {
     var selectedStatus = selFilterTt.value || null;
     if (selectedStatus === 'ĐÃ THANH TOÁN') selectedStatus = 'paid';
     if (selectedStatus === 'CHỜ THANH TOÁN') selectedStatus = 'pending';
+    const keyword = iptTimKiem.value.trim();
+    const serverPage = keyword ? 1 : currentPage;
+    const serverPageSize = keyword ? 5000 : pageSize;
     const data = await fetchInvoices({
-      q: iptTimKiem.value.trim(),
+      q: null,
       classId: selFilterLop.value || null,
       billingPeriod: selFilterKy.value || null,
       status: selectedStatus,
-      page: currentPage,
-      pageSize: pageSize
+      page: serverPage,
+      pageSize: serverPageSize
     });
-    rows = data.items || [];
-    totalItems = Number(data.totalItems || 0);
+    const allItems = (data.items || []).filter(function (item) {
+      return matchAgainstFields(keyword, [item.studentName, item.studentId, item.invoiceId]);
+    });
+    if (keyword) {
+      totalItems = allItems.length;
+      const start = (currentPage - 1) * pageSize;
+      rows = allItems.slice(start, start + pageSize);
+    } else {
+      rows = allItems;
+      totalItems = Number(data.totalItems || 0);
+    }
     renderTable();
   }
 

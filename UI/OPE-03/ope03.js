@@ -65,6 +65,30 @@ document.addEventListener('DOMContentLoaded', function () {
         return s;
     }
 
+    function normalizeForSearch(str) {
+        return String(str || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd');
+    }
+
+    function tokenize(str) {
+        return normalizeForSearch(str).split(/\s+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    }
+
+    function matchAgainstFields(search, fields) {
+        var searchTokens = tokenize(search);
+        if (!searchTokens.length) return true;
+        var allTokens = [];
+        (fields || []).forEach(function (f) {
+            allTokens = allTokens.concat(tokenize(f));
+        });
+        return searchTokens.every(function (token) {
+            return allTokens.some(function (t) { return t === token; });
+        });
+    }
+
     function layClassIdTuUrl() {
         var p = new URLSearchParams(window.location.search);
         var raw = p.get('classId');
@@ -207,13 +231,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!rows || !rows.length) {
             return;
         }
-        var needle = q.toLowerCase();
+        var needle = q;
         var currentClassIds = classStudents.map(function (s) { return String(s.studentId); });
         rows.forEach(function (student) {
             var sid = student.studentId != null ? String(student.studentId) : '';
             if (currentClassIds.indexOf(sid) !== -1) return;
             var name = student.fullName || '';
-            if (needle && name.toLowerCase().indexOf(needle) === -1 && sid.toLowerCase().indexOf(needle) === -1) {
+            if (!matchAgainstFields(needle, [name, sid])) {
                 return;
             }
             var isChecked = selectedToAdd.some(function (s) { return String(s.studentId) === sid; });

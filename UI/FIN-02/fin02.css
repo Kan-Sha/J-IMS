@@ -37,6 +37,9 @@
     border: none;
     cursor: pointer;
     color: var(--mau-chu-phu);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: color 0.15s;
 }
 

@@ -25,13 +25,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function formatDate(isoOrYmd) {
     if (!isoOrYmd) return '---';
+    var m = String(isoOrYmd).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return m[3] + '/' + m[2] + '/' + m[1];
     var d = new Date(isoOrYmd);
-    if (isNaN(d.getTime())) {
-      var m = String(isoOrYmd).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if (!m) return String(isoOrYmd);
-      return m[3] + '/' + m[2] + '/' + m[1];
-    }
-    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+    if (isNaN(d.getTime())) return String(isoOrYmd);
+    return new Intl.DateTimeFormat('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(d);
+  }
+
+  function nowVietnamDateString() {
+    var now = new Date();
+    var vnNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+    return String(vnNow.getDate()).padStart(2, '0') + '/' + String(vnNow.getMonth() + 1).padStart(2, '0') + '/' + vnNow.getFullYear();
   }
 
   function parseVndDisplay(raw) {
@@ -94,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       updateStatusUi(data.status);
       if (txtNgayThanhToan) txtNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
-      if (txtPhuongThuc) txtPhuongThuc.textContent = data.paymentMethod || '---';
+      if (txtPhuongThuc) txtPhuongThuc.textContent = data.paymentMethod || 'Tiền mặt/Chuyển khoản';
     }).catch(function () {
       backToList();
     });
@@ -140,7 +149,10 @@ document.addEventListener('DOMContentLoaded', function () {
       currentInvoice = Object.assign({}, currentInvoice || {}, data || {});
       updateStatusUi('paid');
       if (txtPhuongThuc) txtPhuongThuc.textContent = data.paymentMethod || selPhuongThuc.value;
-      if (txtNgayThanhToan) txtNgayThanhToan.textContent = formatDate(data.paidAt || data.paidAtDisplay);
+      if (txtNgayThanhToan) {
+        // Always reflect confirmation date in Vietnam timezone to avoid off-by-one day.
+        txtNgayThanhToan.textContent = nowVietnamDateString();
+      }
       dongModal();
     }).catch(function (e) {
       alert((e && e.message) ? e.message : 'Không thể xác nhận thanh toán');
