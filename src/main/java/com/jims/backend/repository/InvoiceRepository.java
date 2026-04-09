@@ -153,8 +153,8 @@ public class InvoiceRepository {
                         row.put("totalAmount", rs.getBigDecimal("final_amount"));
                         row.put("adjustmentReason", rs.getString("adjustment_reason"));
                         row.put("paymentMethod", rs.getString("payment_method"));
-                        Timestamp paidAt = rs.getTimestamp("paid_at");
-                        row.put("paidAt", paidAt != null ? paidAt.toInstant().toString() : null);
+                        java.sql.Date paidDate = rs.getDate("paid_at");
+                        row.put("paidAt", paidDate != null ? paidDate.toString() : null);
                         items.add(row);
                     }
                 }
@@ -192,8 +192,8 @@ public class InvoiceRepository {
                 result.put("status", rs.getString("status"));
                 result.put("unitPrice", rs.getBigDecimal("tuition_per_session"));
                 result.put("paymentMethod", rs.getString("payment_method"));
-                Timestamp paidAt = rs.getTimestamp("paid_at");
-                result.put("paidAt", paidAt != null ? paidAt.toInstant().toString() : null);
+                java.sql.Date paidDate = rs.getDate("paid_at");
+                result.put("paidAt", paidDate != null ? paidDate.toString() : null);
                 BigDecimal unit = rs.getBigDecimal("tuition_per_session");
                 int sessions = rs.getInt("total_sessions");
                 BigDecimal base = (unit == null ? BigDecimal.ZERO : unit.multiply(BigDecimal.valueOf(sessions)));

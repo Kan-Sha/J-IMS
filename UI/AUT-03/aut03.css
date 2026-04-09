@@ -209,7 +209,7 @@ body {
 
 .form-noi-dung {
   width: 100%;
-  max-width: 850px;
+  max-width: none;
 }
 
 .nhom-input {
@@ -339,7 +339,14 @@ body {
   justify-content: flex-end;
   gap: 12px;
   margin-top: 32px;
-  max-width: 850px;
+  max-width: none;
+}
+
+/* Wide screens: expand form to fill space (like OPE-01) */
+@media (min-width: 1200px) {
+  .vung-form {
+    padding: 44px 64px;
+  }
 }
 
 .nut-huy {

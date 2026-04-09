@@ -375,8 +375,8 @@ document.addEventListener('DOMContentLoaded', function () {
         hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
         hopLe = false;
       } else if ((endMins - startMins) < 60) {
-        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Thời lượng buổi học phải tối thiểu 60 phút!');
-        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Thời lượng buổi học phải tối thiểu 60 phút!');
+        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', 'Khung giờ học không hợp lệ!');
+        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', 'Khung giờ học không hợp lệ!');
         hopLe = false;
       }
     }

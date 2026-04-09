@@ -242,7 +242,25 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   var iptTongBuoi = document.getElementById('ipt-tong-buoi');
-  iptTongBuoi.addEventListener('input', function () { errBuoi.textContent = ''; });
+  function clampTotalSessionsInput() {
+    var raw = String(iptTongBuoi.value || '').trim();
+    if (!raw) return;
+    var n = parseInt(raw, 10);
+    if (isNaN(n)) return;
+    if (n > 19) iptTongBuoi.value = '19';
+    else if (n < 1) iptTongBuoi.value = '1';
+  }
+  iptTongBuoi.addEventListener('input', function () {
+    errBuoi.textContent = '';
+    clampTotalSessionsInput();
+  });
+
+  function isValidAdjustmentReason(val) {
+    var s = val == null ? '' : String(val);
+    if (!s.trim()) return false;
+    // Must contain at least one letter or number (allow free text otherwise).
+    return /[\p{L}\p{N}]/u.test(s);
+  }
 
   document.getElementById('btn-huy-cau-hinh').addEventListener('click', function () {
     switchView('view-danh-sach');
@@ -251,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('btn-tinh-toan').addEventListener('click', async function () {
     var totalSessions = parseInt(iptTongBuoi.value || '0', 10);
-    if (isNaN(totalSessions) || totalSessions < 1 || totalSessions > 30) {
+    if (isNaN(totalSessions) || totalSessions < 1 || totalSessions > 19) {
       errBuoi.textContent = 'Không hợp lệ';
       return;
     }
@@ -313,6 +331,12 @@ document.addEventListener('DOMContentLoaded', function () {
         lyDoInput.classList.add('error');
         if (lyDoError) {
           lyDoError.textContent = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + hocSinhName + '!';
+        }
+      } else if (finalFee !== baseFee && !isValidAdjustmentReason(lyDoInput.value)) {
+        ok = false;
+        lyDoInput.classList.add('error');
+        if (lyDoError) {
+          lyDoError.textContent = 'Lý do không hợp lệ!';
         }
       }
       return { studentId: studentId, studentName: hocSinhName, finalFee: finalFee, adjustmentReason: lyDoInput.value.trim() || null };

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.Year;
+import java.util.regex.Pattern;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ public class InvoiceService {
     private final ClassRepository classRepository;
     private final StudentRepository studentRepository;
     private static final DecimalFormat MONEY_FMT = new DecimalFormat("#,##0");
+    private static final Pattern HAS_LETTER_OR_DIGIT = Pattern.compile("[\\p{L}\\p{N}]");
 
     public InvoiceService(InvoiceRepository invoiceRepository,
                           ClassRepository classRepository,
@@ -48,7 +50,7 @@ public class InvoiceService {
             return new ApiResult(false, Collections.emptyMap(),
                     "Kỳ thanh toán không hợp lệ! Dùng dạng \"Tháng 3-4\" hoặc YYYY-MM (ví dụ " + invoiceYear + "-03).", 400);
         }
-        if (totalSessions < 1 || totalSessions > 30) {
+        if (totalSessions < 1 || totalSessions > 19) {
             return new ApiResult(false, Collections.emptyMap(), "Tổng số buổi không hợp lệ!", 400);
         }
 
@@ -136,6 +138,10 @@ public class InvoiceService {
                                     : studentName.trim();
                             return new ApiResult(false, Collections.emptyMap(),
                                     "Vui lòng nhập lý do điều chỉnh cho học sinh " + nameText + "!", 400);
+                        }
+                        if (!containsLetterOrDigit(adjReason)) {
+                            conn.rollback();
+                            return new ApiResult(false, Collections.emptyMap(), "Lý do không hợp lệ!", 400);
                         }
                     }
 
@@ -232,7 +238,7 @@ public class InvoiceService {
                 invoice.put("endDate", end.toString());
             }
             Object paidAt = invoice.get("paidAt");
-            if (paidAt != null) invoice.put("paidAtDisplay", String.valueOf(paidAt).replace("T", " ").replace("Z", ""));
+            if (paidAt != null) invoice.put("paidAtDisplay", String.valueOf(paidAt));
             return new ApiResult(true, invoice, "OK", 200);
         } catch (SQLException e) {
             return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
@@ -253,7 +259,7 @@ public class InvoiceService {
             Map<String, Object> invoice = invoiceRepository.findInvoiceDetail(invoiceId.trim());
             if (invoice == null) return new ApiResult(false, Collections.emptyMap(), "Không tìm thấy hóa đơn", 404);
             Object paidAt = invoice.get("paidAt");
-            invoice.put("paidAtDisplay", paidAt == null ? null : String.valueOf(paidAt).replace("T", " ").replace("Z", ""));
+            invoice.put("paidAtDisplay", paidAt == null ? null : String.valueOf(paidAt));
             return new ApiResult(true, invoice, "Cập nhật thanh toán thành công", 200);
         } catch (SQLException e) {
             return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
@@ -262,6 +268,11 @@ public class InvoiceService {
 
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    private boolean containsLetterOrDigit(String s) {
+        if (s == null) return false;
+        return HAS_LETTER_OR_DIGIT.matcher(s).find();
     }
 
     private String formatMoney(BigDecimal amount) {
