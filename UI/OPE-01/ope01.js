@@ -278,9 +278,13 @@ document.addEventListener('DOMContentLoaded', function () {
     return days;
   }
 
-  function validateClient() {
-    xoaLoiTatCa();
+  /**
+   * Validates all OPE-01 fields and shows every error at once (caller should xoaLoiTatCa first).
+   * @returns {{ hopLe: boolean, nameFormatOk: boolean }} nameFormatOk enables server duplicate-name check.
+   */
+  function validateClientForm() {
     var hopLe = true;
+    var nameFormatOk = false;
 
     var classNameRaw = inputTenLop ? String(inputTenLop.value || '') : '';
     var classNameTrim = classNameRaw.trim();
@@ -301,6 +305,8 @@ document.addEventListener('DOMContentLoaded', function () {
       if (className.length > 10) {
         hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học cần ít hơn 10 ký tự');
         hopLe = false;
+      } else {
+        nameFormatOk = true;
       }
     }
 
@@ -379,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    return hopLe;
+    return { hopLe: hopLe, nameFormatOk: nameFormatOk };
   }
 
   function hienPopupLuuThanhCong(msg) {
@@ -501,17 +507,22 @@ document.addEventListener('DOMContentLoaded', function () {
       msg = payload;
     }
     if (payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object') {
-      if (payload.data.className) {
-        hienLoi('loi-ten-lop', 'khung-ten-lop', String(payload.data.className).trim());
-        return;
+      var d = payload.data;
+      var applied = false;
+      if (d.className) {
+        hienLoi('loi-ten-lop', 'khung-ten-lop', String(d.className).trim());
+        applied = true;
       }
-      if (payload.data.startDate) {
-        hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', String(payload.data.startDate).trim());
-        return;
+      if (d.startDate) {
+        hienLoi('loi-ngay-khai-giang', 'khung-ngay-khai-giang', String(d.startDate).trim());
+        applied = true;
       }
-      if (payload.data.time) {
-        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', String(payload.data.time).trim());
-        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', String(payload.data.time).trim());
+      if (d.time) {
+        hienLoi('loi-gio-hoc', 'khung-gio-bat-dau', String(d.time).trim());
+        hienLoi('loi-gio-hoc', 'khung-gio-ket-thuc', String(d.time).trim());
+        applied = true;
+      }
+      if (applied) {
         return;
       }
     }
@@ -556,8 +567,44 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dangGui) return;
     if (!sessionHopLe) return;
 
-    var isValid = validateClient();
-    if (!isValid) return;
+    xoaLoiTatCa();
+    var v = validateClientForm();
+
+    if (v.nameFormatOk) {
+      try {
+        var normalizedForCheck = normalizeClassName(inputTenLop.value);
+        var resTaken = await fetch(API_BASE + '/api/classes/name-taken?className=' + encodeURIComponent(normalizedForCheck), {
+          credentials: 'include',
+          headers: authHeaders()
+        });
+        if (resTaken.status === 401) {
+          localStorage.removeItem('JIMS_TOKEN');
+          hienThongBaoDangNhapHetHan();
+          window.location.href = LOGIN_URL;
+          return;
+        }
+        var takenPayload = await resTaken.json().catch(function () { return null; });
+        if (!resTaken.ok || !takenPayload || !takenPayload.success) {
+          if (resTaken.status >= 500) {
+            alert(getNetworkFailureMessage());
+          } else if (resTaken.status === 403) {
+            alert('Bạn không có quyền thực hiện thao tác này.');
+          } else {
+            alert((takenPayload && takenPayload.message) ? String(takenPayload.message) : getNetworkFailureMessage());
+          }
+          return;
+        }
+        if (takenPayload.data && takenPayload.data.taken) {
+          hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học này đã tồn tại!');
+          v.hopLe = false;
+        }
+      } catch (eTaken) {
+        alert(getNetworkFailureMessage());
+        return;
+      }
+    }
+
+    if (!v.hopLe) return;
 
     var className = normalizeClassName(inputTenLop.value);
     var levelId = parseInt(selectCapDo.value, 10);

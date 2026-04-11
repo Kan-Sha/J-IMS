@@ -8,6 +8,7 @@ com/jims/backend/service/StaffService.class
 com/jims/backend/model/Role.class
 com/jims/backend/util/StudentDobValidator.class
 com/jims/backend/controller/StudentController$1.class
+com/jims/backend/controller/ClassController$8.class
 com/jims/backend/util/PasswordUtil.class
 com/jims/backend/controller/StaffController$1.class
 com/jims/backend/controller/ClassController$4.class

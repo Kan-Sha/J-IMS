@@ -244,6 +244,37 @@ public class ClassController {
         };
     }
 
+    /** GET /api/classes/name-taken?className= — duplicate check for OPE-01 (admin). */
+    public HttpHandler classNameTakenHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.handleOptions(exchange);
+                    return;
+                }
+                if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    ResponseUtil.sendJson(exchange, 405, false, null, "Method not allowed");
+                    return;
+                }
+                String token = resolveToken(exchange);
+                if (SessionManager.getSession(token) == null) {
+                    ResponseUtil.sendJson(exchange, 401, false, Collections.emptyMap(), "Bạn chưa đăng nhập!");
+                    return;
+                }
+                SessionManager.SessionData sdSession = SessionManager.getSession(token);
+                if (sdSession == null || sdSession.getRole() == null || !"admin".equalsIgnoreCase(sdSession.getRole().trim())) {
+                    ResponseUtil.sendJson(exchange, 403, false, Collections.emptyMap(), "Bạn không có quyền!");
+                    return;
+                }
+                String raw = exchange.getRequestURI().getRawQuery();
+                String nameParam = extractQueryParam(raw, "className");
+                ApiResult result = classService.checkClassNameTaken(nameParam);
+                ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+            }
+        };
+    }
+
     /** GET /api/classes/ope03?classId= — minimal data for OPE-03 (name, capacity, students). */
     public HttpHandler ope03ClassHandler() {
         return new HttpHandler() {

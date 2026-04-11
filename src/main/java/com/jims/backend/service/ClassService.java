@@ -35,6 +35,31 @@ public class ClassService {
         this.studentRepository = studentRepository;
     }
 
+    /**
+     * OPE-01: check duplicate class name (normalized uppercase) without creating a class.
+     */
+    public ApiResult checkClassNameTaken(String className) {
+        if (isBlank(className)) {
+            Map<String, Object> data = new LinkedHashMap<String, Object>();
+            data.put("taken", Boolean.FALSE);
+            return new ApiResult(true, data, "OK", 200);
+        }
+        String normalized = className.trim().toUpperCase();
+        try {
+            Connection conn = studentRepository.getConnection();
+            try {
+                boolean exists = classRepository.classNameExists(conn, normalized);
+                Map<String, Object> data = new LinkedHashMap<String, Object>();
+                data.put("taken", Boolean.valueOf(exists));
+                return new ApiResult(true, data, "OK", 200);
+            } finally {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
     public ApiResult createClass(String className,
                                  Integer levelId,
                                  Integer teacherId,
