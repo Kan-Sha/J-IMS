@@ -1,6 +1,7 @@
 import { fetchClasses, fetchClassStudentsForInvoice, createInvoice, fetchClassStudentCount } from '../api/invoiceService.js';
 import { formatCurrency, parseCurrency, isFeeWithinLimit } from '../utils/validation.js';
 import { generateBillingCycles, billingPeriodToLabel } from '../utils/billing.js';
+import { renderPaginationBar } from '../utils/pagination.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   let allClasses = [];
@@ -10,8 +11,21 @@ document.addEventListener('DOMContentLoaded', function () {
   let currentUnitPrice = 0;
   let currentStudentsPayload = null;
 
+  let classListPage = 1;
+  const CLASS_LIST_PAGE_SIZE = 8;
+  let previewPage = 1;
+  const PREVIEW_PAGE_SIZE = 6;
+  let previewLineById = {};
+  let previewOrder = [];
+
   const tbodyDanhSach = document.getElementById('tbody-danh-sach-lop');
   const tbodyXemTruoc = document.getElementById('tbody-xem-truoc');
+  const phanTrangDanhSach = document.getElementById('phan-trang-fin01-danh-sach');
+  const phanTrangDanhSachInfo = document.getElementById('phan-trang-fin01-danh-sach-info');
+  const phanTrangDanhSachNav = document.getElementById('phan-trang-fin01-danh-sach-nav');
+  const phanTrangXemTruoc = document.getElementById('phan-trang-fin01-xem-truoc');
+  const phanTrangXemTruocInfo = document.getElementById('phan-trang-fin01-xem-truoc-info');
+  const phanTrangXemTruocNav = document.getElementById('phan-trang-fin01-xem-truoc-nav');
   const errKy = document.getElementById('err-cau-hinh-ky');
   const errBuoi = document.getElementById('err-cau-hinh-buoi');
   const errTongQuat = document.getElementById('err-luu-tong-quat');
@@ -121,22 +135,45 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return cls;
       }));
+      classListPage = 1;
       renderClasses(allClasses);
     } catch (e) {
       tbodyDanhSach.innerHTML = '<tr><td colspan="5">Không tải được danh sách lớp</td></tr>';
     }
   }
 
+  function renderClassListPagination(totalItems) {
+    if (!phanTrangDanhSach || !phanTrangDanhSachInfo || !phanTrangDanhSachNav) return;
+    renderPaginationBar({
+      containerEl: phanTrangDanhSach,
+      infoEl: phanTrangDanhSachInfo,
+      navEl: phanTrangDanhSachNav,
+      currentPage: classListPage,
+      pageSize: CLASS_LIST_PAGE_SIZE,
+      totalItems: totalItems,
+      entityLabel: 'lớp',
+      onPageChange: function (p) {
+        classListPage = p;
+        renderClasses(allClasses);
+      }
+    });
+  }
+
   function renderClasses(data) {
     tbodyDanhSach.innerHTML = '';
     if (!data || data.length === 0) {
       tbodyDanhSach.innerHTML = '<tr><td colspan="5">Không tìm thấy lớp học</td></tr>';
+      renderClassListPagination(0);
       return;
     }
-    data.forEach(function (cls, idx) {
+    var totalPages = Math.max(1, Math.ceil(data.length / CLASS_LIST_PAGE_SIZE));
+    if (classListPage > totalPages) classListPage = totalPages;
+    var start = (classListPage - 1) * CLASS_LIST_PAGE_SIZE;
+    var slice = data.slice(start, start + CLASS_LIST_PAGE_SIZE);
+    slice.forEach(function (cls, idx) {
       var tr = document.createElement('tr');
       tr.innerHTML =
-        '<td>' + (idx + 1) + '</td>' +
+        '<td>' + (start + idx + 1) + '</td>' +
         '<td style="text-align: left;">' + cls.lop + '</td>' +
         '<td style="text-align: left;">' + (cls.trinhDo || '') + '</td>' +
         '<td style="text-align: left;">' + cls.siSo + '</td>' +
@@ -149,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
         openCauHinhView(id, 'push');
       });
     });
+    renderClassListPagination(data.length);
   }
 
   function applyConfigDefaults() {
@@ -168,6 +206,95 @@ document.addEventListener('DOMContentLoaded', function () {
     if (historyMode) syncUrl('config', historyMode);
   }
 
+  function renderPreviewPagination() {
+    if (!phanTrangXemTruoc || !phanTrangXemTruocInfo || !phanTrangXemTruocNav) return;
+    renderPaginationBar({
+      containerEl: phanTrangXemTruoc,
+      infoEl: phanTrangXemTruocInfo,
+      navEl: phanTrangXemTruocNav,
+      currentPage: previewPage,
+      pageSize: PREVIEW_PAGE_SIZE,
+      totalItems: previewOrder.length,
+      entityLabel: 'học sinh',
+      onPageChange: function (p) {
+        previewPage = p;
+        renderPreviewPage();
+      }
+    });
+  }
+
+  function renderPreviewPage() {
+    tbodyXemTruoc.innerHTML = '';
+    var total = previewOrder.length;
+    var totalPages = Math.max(1, Math.ceil(total / PREVIEW_PAGE_SIZE));
+    if (previewPage > totalPages) previewPage = totalPages;
+    var start = (previewPage - 1) * PREVIEW_PAGE_SIZE;
+    var slice = previewOrder.slice(start, start + PREVIEW_PAGE_SIZE);
+
+    slice.forEach(function (sid, idx) {
+      var line = previewLineById[sid];
+      if (!line) return;
+      var stt = start + idx + 1;
+      var maHS = line.studentId;
+      var hoTen = line.ten;
+      var baseFee = line.baseFee;
+      var tr = document.createElement('tr');
+      tr.dataset.ten = hoTen;
+      tr.dataset.studentId = maHS;
+      tr.dataset.baseFee = String(baseFee);
+      tr.innerHTML =
+        '<td style="text-align: center; vertical-align: middle;">' + String(stt).padStart(2, '0') + '</td>' +
+        '<td style="text-align: center; white-space: nowrap; vertical-align: middle;">' + maHS + '</td>' +
+        '<td style="text-align: center; vertical-align: middle;"><strong>' + hoTen + '</strong></td>' +
+        '<td style="text-align: center; vertical-align: middle;">' + formatCurrency(baseFee) + '</td>' +
+        '<td style="text-align: center; vertical-align: middle;" class="phight"><input type="text" class="input-phi-cuoi" value="' + formatCurrency(line.finalFee) + '"><div class="text-error phi-error" style="margin-top:4px;"></div></td>' +
+        '<td style="text-align: left;"><input type="text" class="input-ly-do" placeholder="Ghi chú"><div class="text-error ly-do-error" style="margin-top:4px;"></div></td>';
+      tbodyXemTruoc.appendChild(tr);
+
+      var phiInput = tr.querySelector('.input-phi-cuoi');
+      var lyDoInput = tr.querySelector('.input-ly-do');
+      var phiError = tr.querySelector('.phi-error');
+      var lyDoErrorEl = tr.querySelector('.ly-do-error');
+      lyDoInput.value = line.reason || '';
+      phiError.textContent = line.phiErrText || '';
+      if (lyDoErrorEl) lyDoErrorEl.textContent = line.lyDoErrText || '';
+      if (line.lyDoErrText) lyDoInput.classList.add('error');
+      else lyDoInput.classList.remove('error');
+
+      phiInput.addEventListener('focus', function () { this.value = parseCurrency(this.value) || ''; });
+      phiInput.addEventListener('input', function () {
+        line.phiErrText = '';
+        if (!isFeeWithinLimit(phiInput.value)) phiError.textContent = 'Không hợp lệ';
+        else phiError.textContent = '';
+      });
+      phiInput.addEventListener('blur', function () {
+        var val = parseCurrency(this.value);
+        if (!isFeeWithinLimit(val)) {
+          phiError.textContent = 'Không hợp lệ';
+          line.phiErrText = 'Không hợp lệ';
+          val = 0;
+        } else {
+          phiError.textContent = '';
+          line.phiErrText = '';
+        }
+        line.finalFee = val;
+        this.value = formatCurrency(val);
+        recalculateTotal();
+        if (val === baseFee) lyDoInput.classList.remove('error');
+      });
+      lyDoInput.addEventListener('input', function () {
+        line.reason = lyDoInput.value;
+        lyDoInput.classList.remove('error');
+        line.lyDoErrText = '';
+        var lyDoError = tr.querySelector('.ly-do-error');
+        if (lyDoError) lyDoError.textContent = '';
+      });
+    });
+
+    renderPreviewPagination();
+    recalculateTotal();
+  }
+
   function openXemTruocView(payload, historyMode) {
     currentStudentsPayload = payload;
     errTongQuat.textContent = '';
@@ -176,62 +303,38 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('lbl-tong-buoi').value = String(currentTotalSessions || 0);
     document.getElementById('lbl-don-gia').value = formatCurrency(currentUnitPrice) + ' VND/buổi';
 
-    tbodyXemTruoc.innerHTML = '';
     var baseFee = (currentTotalSessions || 0) * (currentUnitPrice || 0);
-
-    (payload.students || []).forEach(function (s, idx) {
+    previewLineById = {};
+    previewOrder = [];
+    (payload.students || []).forEach(function (s) {
       var maHS = s.studentId;
+      var sid = String(maHS);
       var hoTen = (s.fullName || ((s.lastName || '') + ' ' + (s.firstName || ''))).trim();
-      var tr = document.createElement('tr');
-      tr.dataset.ten = hoTen;
-      tr.dataset.studentId = maHS;
-      tr.dataset.baseFee = String(baseFee);
-      tr.innerHTML =
-        '<td style="text-align: center; vertical-align: middle;">' + String(idx + 1).padStart(2, '0') + '</td>' +
-        '<td style="text-align: center; white-space: nowrap; vertical-align: middle;">' + maHS + '</td>' +
-        '<td style="text-align: center; vertical-align: middle;"><strong>' + hoTen + '</strong></td>' +
-        '<td style="text-align: center; vertical-align: middle;">' + formatCurrency(baseFee) + '</td>' +
-        '<td style="text-align: center; vertical-align: middle;" class="phight"><input type="text" class="input-phi-cuoi" value="' + formatCurrency(baseFee) + '"><div class="text-error phi-error" style="margin-top:4px;"></div></td>' +
-        '<td style="text-align: left;"><input type="text" class="input-ly-do" placeholder="Ghi chú"><div class="text-error ly-do-error" style="margin-top:4px;"></div></td>';
-      tbodyXemTruoc.appendChild(tr);
-
-      var phiInput = tr.querySelector('.input-phi-cuoi');
-      var lyDoInput = tr.querySelector('.input-ly-do');
-      var phiError = tr.querySelector('.phi-error');
-
-      phiInput.addEventListener('focus', function () { this.value = parseCurrency(this.value) || ''; });
-      phiInput.addEventListener('input', function () {
-        if (!isFeeWithinLimit(phiInput.value)) phiError.textContent = 'Không hợp lệ';
-        else phiError.textContent = '';
-      });
-      phiInput.addEventListener('blur', function () {
-        var val = parseCurrency(this.value);
-        if (!isFeeWithinLimit(val)) {
-          phiError.textContent = 'Không hợp lệ';
-          val = 0;
-        } else {
-          phiError.textContent = '';
-        }
-        this.value = formatCurrency(val);
-        recalculateTotal();
-        if (val === baseFee) lyDoInput.classList.remove('error');
-      });
-      lyDoInput.addEventListener('input', function () {
-        lyDoInput.classList.remove('error');
-        var lyDoError = tr.querySelector('.ly-do-error');
-        if (lyDoError) lyDoError.textContent = '';
-      });
+      previewOrder.push(sid);
+      previewLineById[sid] = {
+        studentId: maHS,
+        ten: hoTen,
+        baseFee: baseFee,
+        finalFee: baseFee,
+        reason: '',
+        phiErrText: '',
+        lyDoErrText: ''
+      };
     });
 
-    document.getElementById('lbl-tong-hoc-sinh').innerText = (payload.students || []).length;
-    recalculateTotal();
+    previewPage = 1;
+    document.getElementById('lbl-tong-hoc-sinh').innerText = String(previewOrder.length);
+    renderPreviewPage();
     switchView('view-xem-truoc');
     if (historyMode) syncUrl('preview', historyMode);
   }
 
   function recalculateTotal() {
     var sum = 0;
-    tbodyXemTruoc.querySelectorAll('.input-phi-cuoi').forEach(function (inp) { sum += parseCurrency(inp.value); });
+    previewOrder.forEach(function (sid) {
+      var line = previewLineById[sid];
+      if (line) sum += line.finalFee;
+    });
     document.getElementById('lbl-tong-tien').innerText = formatCurrency(sum);
   }
 
@@ -289,22 +392,16 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function resetPreviewGrid() {
-    Array.prototype.slice.call(tbodyXemTruoc.querySelectorAll('tr')).forEach(function (row) {
-      var baseFee = parseInt(row.dataset.baseFee, 10) || 0;
-      var feeInput = row.querySelector('.input-phi-cuoi');
-      var reasonInput = row.querySelector('.input-ly-do');
-      var feeError = row.querySelector('.phi-error');
-      var reasonError = row.querySelector('.ly-do-error');
-      if (feeInput) feeInput.value = formatCurrency(baseFee);
-      if (reasonInput) {
-        reasonInput.value = '';
-        reasonInput.classList.remove('error');
-      }
-      if (feeError) feeError.textContent = '';
-      if (reasonError) reasonError.textContent = '';
+    previewOrder.forEach(function (sid) {
+      var line = previewLineById[sid];
+      if (!line) return;
+      line.finalFee = line.baseFee;
+      line.reason = '';
+      line.phiErrText = '';
+      line.lyDoErrText = '';
     });
     errTongQuat.textContent = '';
-    recalculateTotal();
+    renderPreviewPage();
   }
 
   document.getElementById('btn-huy-xem-truoc').addEventListener('click', function () {
@@ -312,40 +409,45 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('btn-luu-hoa-don').addEventListener('click', async function () {
-    var rows = Array.prototype.slice.call(tbodyXemTruoc.querySelectorAll('tr'));
-    if (!rows.length) return;
+    if (!previewOrder.length) return;
     var ok = true;
     errTongQuat.textContent = '';
-    var lines = rows.map(function (row) {
-      var hocSinhName = row.dataset.ten;
-      var baseFee = parseInt(row.dataset.baseFee, 10) || 0;
-      var studentId = row.dataset.studentId;
-      var phiInput = row.querySelector('.input-phi-cuoi');
-      var lyDoInput = row.querySelector('.input-ly-do');
-      var lyDoError = row.querySelector('.ly-do-error');
-      var finalFee = parseCurrency(phiInput.value);
-      if (!isFeeWithinLimit(finalFee)) { ok = false; }
-      if (lyDoError) lyDoError.textContent = '';
-      if (finalFee !== baseFee && !lyDoInput.value.trim()) {
+    previewOrder.forEach(function (sid) {
+      var line = previewLineById[sid];
+      if (!line) return;
+      line.phiErrText = '';
+      line.lyDoErrText = '';
+      var finalFee = line.finalFee;
+      if (!isFeeWithinLimit(finalFee)) {
+        line.phiErrText = 'Không hợp lệ';
         ok = false;
-        lyDoInput.classList.add('error');
-        if (lyDoError) {
-          lyDoError.textContent = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + hocSinhName + '!';
-        }
-      } else if (finalFee !== baseFee && !isValidAdjustmentReason(lyDoInput.value)) {
-        ok = false;
-        lyDoInput.classList.add('error');
-        if (lyDoError) {
-          lyDoError.textContent = 'Lý do không hợp lệ!';
-        }
       }
-      return { studentId: studentId, studentName: hocSinhName, finalFee: finalFee, adjustmentReason: lyDoInput.value.trim() || null };
+      if (finalFee !== line.baseFee && !String(line.reason || '').trim()) {
+        line.lyDoErrText = 'Vui lòng nhập lý do điều chỉnh cho học sinh ' + line.ten + '!';
+        ok = false;
+      } else if (finalFee !== line.baseFee && !isValidAdjustmentReason(line.reason)) {
+        line.lyDoErrText = 'Lý do không hợp lệ!';
+        ok = false;
+      }
     });
-    if (!ok) return;
+    if (!ok) {
+      renderPreviewPage();
+      errTongQuat.textContent = 'Vui lòng kiểm tra và sửa các lỗi trên bảng.';
+      return;
+    }
+    var lines = previewOrder.map(function (sid) {
+      var line = previewLineById[sid];
+      return {
+        studentId: line.studentId,
+        studentName: line.ten,
+        finalFee: line.finalFee,
+        adjustmentReason: String(line.reason || '').trim() || null
+      };
+    });
     try {
       var created = await createInvoice({ classId: currentClass.id, billingPeriod: currentMonth, totalSessions: currentTotalSessions, lines: lines });
-      var count = created && created.createdInvoices != null ? Number(created.createdInvoices) : rows.length;
-      if (!isFinite(count) || count < 0) count = rows.length;
+      var count = created && created.createdInvoices != null ? Number(created.createdInvoices) : lines.length;
+      if (!isFinite(count) || count < 0) count = lines.length;
       showPopup('Đã tạo ' + count + ' hóa đơn thành công!');
     } catch (e) {
       showPopup((e && e.message) ? e.message : 'Không thể tạo hóa đơn');

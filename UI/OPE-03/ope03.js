@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', function () {
+import { renderPaginationBar } from '../utils/pagination.js';
+
+function initOpe03() {
     var API_BASE = (window.JIMS && window.JIMS.API_BASE) ? window.JIMS.API_BASE : 'http://127.0.0.1:8080';
     var LOGIN_URL = '../AUT-02/aut02.html';
 
@@ -107,6 +109,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var selectedToAdd = [];
     var unassignedCache = null;
 
+    var MAIN_STUDENT_PAGE_SIZE = 10;
+    var MODAL_ADD_PAGE_SIZE = 10;
+    var mainStudentPage = 1;
+    var modalAddPage = 1;
+    var modalFilteredRows = [];
+
     var headerView = document.getElementById('header-view');
     var headerEdit = document.getElementById('header-edit');
     var thCheckbox = document.getElementById('th-checkbox');
@@ -120,6 +128,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var navClassSidebar = document.getElementById('nav-class-name-sidebar');
     var tabThongTin = document.getElementById('tab-thong-tin-chung');
     var backOpe02 = document.getElementById('back-to-ope02');
+    var phanTrangMain = document.getElementById('phan-trang-ope03-main');
+    var phanTrangMainInfo = document.getElementById('phan-trang-ope03-main-info');
+    var phanTrangMainNav = document.getElementById('phan-trang-ope03-main-nav');
+    var phanTrangModal = document.getElementById('phan-trang-ope03-modal');
+    var phanTrangModalInfo = document.getElementById('phan-trang-ope03-modal-info');
+    var phanTrangModalNav = document.getElementById('phan-trang-ope03-modal-nav');
+    var modalCheckAll = document.getElementById('modal-check-all');
 
     function capNhatLinkTheoClassId() {
         var q = classIdNumeric != null ? '?classId=' + encodeURIComponent(String(classIdNumeric)) : '';
@@ -134,7 +149,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateCheckboxState() {
         var rowCheckboxes = document.querySelectorAll('.row-checkbox');
         if (rowCheckboxes.length > 0) {
-            checkAll.checked = selectedToRemove.length === rowCheckboxes.length;
+            var allOnPageSelected = Array.prototype.every.call(rowCheckboxes, function (cb) {
+                return selectedToRemove.indexOf(cb.value) !== -1;
+            });
+            checkAll.checked = allOnPageSelected;
         } else {
             checkAll.checked = false;
         }
@@ -145,11 +163,65 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function renderMainStudentPagination() {
+        if (!phanTrangMain || !phanTrangMainInfo || !phanTrangMainNav) return;
+        renderPaginationBar({
+            containerEl: phanTrangMain,
+            infoEl: phanTrangMainInfo,
+            navEl: phanTrangMainNav,
+            currentPage: mainStudentPage,
+            pageSize: MAIN_STUDENT_PAGE_SIZE,
+            totalItems: classStudents.length,
+            entityLabel: 'học sinh',
+            onPageChange: function (p) {
+                mainStudentPage = p;
+                renderTable();
+                if (isEditMode) updateCheckboxState();
+            }
+        });
+    }
+
+    function renderModalPagination() {
+        if (!phanTrangModal || !phanTrangModalInfo || !phanTrangModalNav) return;
+        renderPaginationBar({
+            containerEl: phanTrangModal,
+            infoEl: phanTrangModalInfo,
+            navEl: phanTrangModalNav,
+            currentPage: modalAddPage,
+            pageSize: MODAL_ADD_PAGE_SIZE,
+            totalItems: modalFilteredRows.length,
+            entityLabel: 'học sinh',
+            onPageChange: function (p) {
+                modalAddPage = p;
+                renderAddList(inputTimKiem.value);
+            }
+        });
+    }
+
+    function updateModalCheckAllState() {
+        if (!modalCheckAll) return;
+        var chks = listItems.querySelectorAll('.item-checkbox');
+        if (chks.length === 0) {
+            modalCheckAll.checked = false;
+            return;
+        }
+        modalCheckAll.checked = Array.prototype.every.call(chks, function (cb) {
+            return selectedToAdd.some(function (s) { return String(s.studentId) === cb.value; });
+        });
+    }
+
     function renderTable() {
         tbody.innerHTML = '';
         tongHocSinh.innerText = 'Tổng: ' + classStudents.length + ' học sinh';
 
-        classStudents.forEach(function (student, index) {
+        var total = classStudents.length;
+        var totalPages = Math.max(1, Math.ceil(total / MAIN_STUDENT_PAGE_SIZE));
+        if (mainStudentPage > totalPages) mainStudentPage = totalPages;
+        var start = (mainStudentPage - 1) * MAIN_STUDENT_PAGE_SIZE;
+        var pageSlice = classStudents.slice(start, start + MAIN_STUDENT_PAGE_SIZE);
+
+        pageSlice.forEach(function (student, index) {
+            var globalIndex = start + index;
             var sid = student.studentId != null ? String(student.studentId) : '';
             var isChecked = selectedToRemove.indexOf(sid) !== -1;
             var tr = document.createElement('tr');
@@ -161,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     + '></td>';
             }
             tr.innerHTML = checkboxCell
-                + '<td>' + (index + 1) + '</td>'
+                + '<td>' + (globalIndex + 1) + '</td>'
                 + '<td>' + (sid || '') + '</td>'
                 + '<td style="font-weight: 500;">' + (student.fullName || '') + '</td>'
                 + '<td style="color: #666;">' + formatDateDdMmYyyy(student.dob) + '</td>'
@@ -169,15 +241,17 @@ document.addEventListener('DOMContentLoaded', function () {
             tbody.appendChild(tr);
         });
 
+        renderMainStudentPagination();
+
         if (isEditMode) {
             var rowCheckboxes = document.querySelectorAll('.row-checkbox');
             rowCheckboxes.forEach(function (cb, idx) {
                 cb.addEventListener('change', function (e) {
                     var val = e.target.value;
                     if (e.shiftKey && lastCheckedIndex != null) {
-                        var start = Math.min(lastCheckedIndex, idx);
-                        var end = Math.max(lastCheckedIndex, idx);
-                        for (var i = start; i <= end; i++) {
+                        var startR = Math.min(lastCheckedIndex, idx);
+                        var endR = Math.max(lastCheckedIndex, idx);
+                        for (var i = startR; i <= endR; i++) {
                             var rowCb = rowCheckboxes[i];
                             rowCb.checked = e.target.checked;
                             var rowVal = rowCb.value;
@@ -228,7 +302,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var q = searchQuery == null ? '' : String(searchQuery).trim();
         listItems.innerHTML = '';
         var rows = unassignedCache;
+        modalFilteredRows = [];
         if (!rows || !rows.length) {
+            renderModalPagination();
+            updateModalCheckAllState();
             return;
         }
         var needle = q;
@@ -240,6 +317,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!matchAgainstFields(needle, [name, sid])) {
                 return;
             }
+            modalFilteredRows.push(student);
+        });
+
+        var totalModalPages = Math.max(1, Math.ceil(modalFilteredRows.length / MODAL_ADD_PAGE_SIZE));
+        if (modalAddPage > totalModalPages) modalAddPage = totalModalPages;
+        var start = (modalAddPage - 1) * MODAL_ADD_PAGE_SIZE;
+        var slice = modalFilteredRows.slice(start, start + MODAL_ADD_PAGE_SIZE);
+
+        slice.forEach(function (student) {
+            var sid = student.studentId != null ? String(student.studentId) : '';
+            var name = student.fullName || '';
             var isChecked = selectedToAdd.some(function (s) { return String(s.studentId) === sid; });
             var item = document.createElement('div');
             item.className = 'modal-list-item';
@@ -262,8 +350,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     selectedToAdd = selectedToAdd.filter(function (s) { return String(s.studentId) !== id; });
                 }
+                updateModalCheckAllState();
             });
         });
+        renderModalPagination();
+        updateModalCheckAllState();
     }
 
     function taiDanhSachChuaXepLop(urlSearch) {
@@ -307,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var cn = d.className != null ? String(d.className) : '';
             if (navClassSidebar) navClassSidebar.textContent = cn || '—';
             if (cn) localStorage.setItem('selectedClassId', cn);
+            mainStudentPage = 1;
             renderTable();
             if (isEditMode) updateCheckboxState();
         });
@@ -314,13 +406,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     checkAll.addEventListener('change', function (e) {
         var rowCheckboxes = document.querySelectorAll('.row-checkbox');
-        selectedToRemove = [];
+        var pageIds = Array.prototype.map.call(rowCheckboxes, function (cb) { return cb.value; });
         if (e.target.checked) {
-            rowCheckboxes.forEach(function (cb) {
-                cb.checked = true;
-                selectedToRemove.push(cb.value);
+            pageIds.forEach(function (id) {
+                if (selectedToRemove.indexOf(id) === -1) selectedToRemove.push(id);
             });
+            rowCheckboxes.forEach(function (cb) { cb.checked = true; });
         } else {
+            selectedToRemove = selectedToRemove.filter(function (id) { return pageIds.indexOf(id) === -1; });
             rowCheckboxes.forEach(function (cb) { cb.checked = false; });
         }
         updateCheckboxState();
@@ -396,6 +489,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedToAdd = [];
         inputTimKiem.value = '';
         unassignedCache = null;
+        modalAddPage = 1;
         modalThem.style.display = 'flex';
         taiDanhSachChuaXepLop('').then(function (rows) {
             unassignedCache = rows;
@@ -407,8 +501,29 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-huy-them').addEventListener('click', dongModalThem);
 
     inputTimKiem.addEventListener('input', function (e) {
+        modalAddPage = 1;
         renderAddList(e.target.value);
     });
+
+    if (modalCheckAll) {
+        modalCheckAll.addEventListener('change', function (e) {
+            var chks = listItems.querySelectorAll('.item-checkbox');
+            var want = e.target.checked;
+            chks.forEach(function (chk) {
+                chk.checked = want;
+                var id = chk.value;
+                var stu = unassignedCache && unassignedCache.find(function (s) { return String(s.studentId) === id; });
+                if (want) {
+                    if (stu && !selectedToAdd.some(function (s) { return String(s.studentId) === id; })) {
+                        selectedToAdd.push(stu);
+                    }
+                } else {
+                    selectedToAdd = selectedToAdd.filter(function (s) { return String(s.studentId) !== id; });
+                }
+            });
+            updateModalCheckAllState();
+        });
+    }
 
     document.getElementById('btn-luu-them').addEventListener('click', function () {
         var n = selectedToAdd.length;
@@ -529,4 +644,10 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         khoiChay();
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOpe03);
+} else {
+    initOpe03();
+}

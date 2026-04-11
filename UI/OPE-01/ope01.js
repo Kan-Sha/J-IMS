@@ -286,24 +286,22 @@ document.addEventListener('DOMContentLoaded', function () {
     var classNameTrim = classNameRaw.trim();
     if (!classNameTrim) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Mục này không được để trống!');
-      return false;
-    }
-    if (classNameTrim.length < 2) {
+      hopLe = false;
+    } else if (classNameTrim.length < 2) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
-      return false;
-    }
-    if (!/[a-zA-Z]/.test(classNameTrim) || !/[0-9]/.test(classNameTrim)) {
+      hopLe = false;
+    } else if (!/[a-zA-Z]/.test(classNameTrim) || !/[0-9]/.test(classNameTrim)) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
-      return false;
-    }
-    if (/[^a-zA-Z0-9\s-]/.test(classNameTrim)) {
+      hopLe = false;
+    } else if (/[^a-zA-Z0-9\s-]/.test(classNameTrim)) {
       hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học không hợp lệ!');
-      return false;
-    }
-    var className = normalizeClassName(classNameTrim);
-    if (className.length > 10) {
-      hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học cần ít hơn 10 ký tự');
-      return false;
+      hopLe = false;
+    } else {
+      var className = normalizeClassName(classNameTrim);
+      if (className.length > 10) {
+        hienLoi('loi-ten-lop', 'khung-ten-lop', 'Tên lớp học cần ít hơn 10 ký tự');
+        hopLe = false;
+      }
     }
 
     if (!selectCapDo || !selectCapDo.value) {

@@ -305,19 +305,33 @@ body {
 
 .modal-list-header {
     display: flex;
+    align-items: center;
     color: var(--mau-chu-phu);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
-    padding: 0 16px 8px 36px;
+    padding: 0 16px 8px 16px;
 }
 
-.modal-list-header div:nth-child(1) {
+.modal-list-header .modal-header-check {
+    width: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.modal-list-header .modal-header-name {
     flex: 1;
 }
 
-.modal-list-header div:nth-child(2) {
+.modal-list-header .modal-header-id {
     width: 130px;
+}
+
+.modal-phan-trang {
+    margin-top: 8px;
+    margin-bottom: 0;
 }
 
 .modal-list-items {

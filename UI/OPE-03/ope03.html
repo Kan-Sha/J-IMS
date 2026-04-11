@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="ope03.css">
+    <link rel="stylesheet" href="../css/jims-pagination.css">
     <link rel="stylesheet" href="../css/jims-shell.css">
 </head>
 
@@ -214,6 +215,10 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="phan-trang-container" id="phan-trang-ope03-main" style="display: none;">
+                            <div class="phan-trang-info" id="phan-trang-ope03-main-info"></div>
+                            <div class="phan-trang-nav" id="phan-trang-ope03-main-nav"></div>
+                        </div>
 
                     </div>
                 </div>
@@ -247,12 +252,19 @@
                 </div>
 
                 <div class="modal-list-header">
-                    <div>HỌ VÀ TÊN</div>
-                    <div>MÃ HỌC SINH</div>
+                    <div class="modal-header-check">
+                        <input type="checkbox" class="custom-checkbox" id="modal-check-all" aria-label="Chọn tất cả trên trang">
+                    </div>
+                    <div class="modal-header-name">HỌ VÀ TÊN</div>
+                    <div class="modal-header-id">MÃ HỌC SINH</div>
                 </div>
 
                 <div class="modal-list-items" id="modal-list-items">
 
+                </div>
+                <div class="phan-trang-container modal-phan-trang" id="phan-trang-ope03-modal" style="display: none;">
+                    <div class="phan-trang-info" id="phan-trang-ope03-modal-info"></div>
+                    <div class="phan-trang-nav" id="phan-trang-ope03-modal-nav"></div>
                 </div>
             </div>
 
@@ -302,7 +314,7 @@
     </div>
 
     <script src="../js/jims-shell.js"></script>
-    <script src="ope03.js"></script>
+    <script type="module" src="ope03.js"></script>
 </body>
 
 </html>

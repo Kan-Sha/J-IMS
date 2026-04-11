@@ -47,51 +47,6 @@
     color: var(--mau-xanh-dam);
 }
 
-.phan-trang-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #7d96b3;
-    padding: 12px 24px;
-    margin-top: 24px;
-    margin-bottom: 24px;
-}
-
-.phan-trang-info {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--mau-trang);
-}
-
-.phan-trang-nav {
-    display: flex;
-    gap: 6px;
-}
-
-.btn-page {
-    width: 28px;
-    height: 28px;
-    background-color: var(--mau-trang);
-    border: none;
-    border-radius: 2px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--mau-chu);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-page.active {
-    background-color: var(--mau-xanh-dam);
-    color: var(--mau-trang);
-}
-
-.btn-page:hover:not(.active) {
-    background-color: #e2e8f0;
-}
-
 #empty-state {
     text-align: center;
     padding: 40px;

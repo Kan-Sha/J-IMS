@@ -1,6 +1,7 @@
 import { fetchInvoices, fetchClasses } from '../api/invoiceService.js';
 import { generateBillingCycles, billingPeriodToLabel } from '../utils/billing.js';
-import { matchAgainstFields } from '../utils/search.js';
+import { matchesInvoiceListSearch } from '../utils/search.js';
+import { renderPaginationBar } from '../utils/pagination.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   const iptTimKiem = document.getElementById('ipt-tim-kiem');
@@ -65,33 +66,19 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function renderPagination() {
-    if (totalItems <= 0) {
-      phanTrangContainer.style.display = 'none';
-      return;
-    }
-    phanTrangContainer.style.display = 'flex';
-    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-    const start = (currentPage - 1) * pageSize + 1;
-    const end = Math.min(currentPage * pageSize, totalItems);
-    phanTrangInfo.textContent = 'Hiển thị ' + start + '-' + end + ' trên tổng số ' + totalItems + ' hóa đơn';
-    phanTrangNav.innerHTML = '';
-
-    function addBtn(label, page, disabled, active) {
-      const btn = document.createElement('button');
-      btn.className = 'btn-page' + (active ? ' active' : '');
-      btn.textContent = label;
-      btn.disabled = !!disabled;
-      btn.addEventListener('click', function () {
+    renderPaginationBar({
+      containerEl: phanTrangContainer,
+      infoEl: phanTrangInfo,
+      navEl: phanTrangNav,
+      currentPage: currentPage,
+      pageSize: pageSize,
+      totalItems: totalItems,
+      entityLabel: 'hóa đơn',
+      onPageChange: function (page) {
         currentPage = page;
         loadInvoices();
-      });
-      phanTrangNav.appendChild(btn);
-    }
-    addBtn('‹', Math.max(1, currentPage - 1), currentPage === 1, false);
-    for (let p = Math.max(1, currentPage - 1); p <= Math.min(totalPages, currentPage + 1); p++) {
-      addBtn(String(p), p, false, p === currentPage);
-    }
-    addBtn('›', Math.min(totalPages, currentPage + 1), currentPage >= totalPages, false);
+      }
+    });
   }
 
   async function loadClassFilter() {
@@ -132,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
       pageSize: serverPageSize
     });
     const allItems = (data.items || []).filter(function (item) {
-      return matchAgainstFields(keyword, [item.studentName, item.studentId, item.invoiceId]);
+      return matchesInvoiceListSearch(keyword, item);
     });
     if (keyword) {
       totalItems = allItems.length;

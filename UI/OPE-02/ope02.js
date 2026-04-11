@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', function () {
+import { renderPaginationBar } from '../utils/pagination.js';
+
+function initOpe02() {
     var API_BASE = (window.JIMS && window.JIMS.API_BASE) ? window.JIMS.API_BASE : 'http://127.0.0.1:8080';
     var LOGIN_URL = '../AUT-02/aut02.html';
 
@@ -79,8 +81,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var nutTim = document.getElementById('nut-tim-kiem');
     var nutDatLai = document.getElementById('nut-dat-lai');
     var tbody = document.getElementById('bang-than');
+    var phanTrangContainer = document.getElementById('phan-trang-ope02');
+    var phanTrangInfo = document.getElementById('phan-trang-ope02-info');
+    var phanTrangNav = document.getElementById('phan-trang-ope02-nav');
 
     var danhSachLop = [];
+    var currentOpe02Page = 1;
+    var OPE02_PAGE_SIZE = 8;
     var currentClassId = null;
     var pendingClassIdFromUrl = null;
 
@@ -153,10 +160,27 @@ document.addEventListener('DOMContentLoaded', function () {
         tbody.innerHTML = '';
         if (!data || data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--mau-chu-phu); font-style: italic; font-weight: 500;">Không tìm thấy lớp học nào phù hợp!</td></tr>';
+            if (phanTrangContainer && phanTrangInfo && phanTrangNav) {
+                renderPaginationBar({
+                    containerEl: phanTrangContainer,
+                    infoEl: phanTrangInfo,
+                    navEl: phanTrangNav,
+                    currentPage: currentOpe02Page,
+                    pageSize: OPE02_PAGE_SIZE,
+                    totalItems: 0,
+                    entityLabel: 'lớp',
+                    onPageChange: function () { }
+                });
+            }
             return;
         }
 
-        data.forEach(function (cls) {
+        var totalPages = Math.max(1, Math.ceil(data.length / OPE02_PAGE_SIZE));
+        if (currentOpe02Page > totalPages) currentOpe02Page = totalPages;
+        var start = (currentOpe02Page - 1) * OPE02_PAGE_SIZE;
+        var slice = data.slice(start, start + OPE02_PAGE_SIZE);
+
+        slice.forEach(function (cls) {
             var tr = document.createElement('tr');
             tr.innerHTML =
                 '<td>' + (cls.className || '') + '</td>' +
@@ -176,6 +200,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 showDetail(cls, { history: 'push' });
             });
         });
+
+        if (phanTrangContainer && phanTrangInfo && phanTrangNav) {
+            renderPaginationBar({
+                containerEl: phanTrangContainer,
+                infoEl: phanTrangInfo,
+                navEl: phanTrangNav,
+                currentPage: currentOpe02Page,
+                pageSize: OPE02_PAGE_SIZE,
+                totalItems: data.length,
+                entityLabel: 'lớp',
+                onPageChange: function (p) {
+                    currentOpe02Page = p;
+                    renderTable(danhSachLop);
+                }
+            });
+        }
     }
 
     function mergeScheduleText(schedules) {
@@ -229,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return Object.assign({}, c, { scheduleText: scheduleText, timeText: timeText });
             });
 
-            // sort newest first (same as backend order)
+            currentOpe02Page = 1;
             renderTable(danhSachLop);
 
             if (pendingClassIdFromUrl != null) {
@@ -387,4 +427,10 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
 
     taiDanhSachLop('');
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOpe02);
+} else {
+    initOpe02();
+}

@@ -33,3 +33,23 @@ export function matchAgainstFields(search, fields) {
     return allTokens.some(function (t) { return t === token; });
   });
 }
+
+/**
+ * Invoice list keyword filter: substring match on invoice/student id (case-insensitive, trim);
+ * name keeps token-based matching for multi-word searches.
+ */
+export function matchesInvoiceListSearch(keyword, item) {
+  const raw = String(keyword || '').trim();
+  if (!raw) return true;
+  const inv = normalize(String(item.invoiceId || ''));
+  const sid = normalize(String(item.studentId || ''));
+  const invCompact = inv.replace(/-/g, '');
+  const name = item.studentName || '';
+  const tokens = tokenize(raw);
+  return tokens.every(function (token) {
+    if (inv.includes(token) || sid.includes(token)) return true;
+    const tCompact = token.replace(/-/g, '');
+    if (tCompact && invCompact.includes(tCompact)) return true;
+    return matchName(token, name);
+  });
+}

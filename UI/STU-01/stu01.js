@@ -345,11 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
       coLoi = true;
     }
 
-    if (!email) {
-      hienLoi(khungEmail, loiEmail, 'Mục này không được để trống!');
-      anIcon(iconEmail);
-      coLoi = true;
-    } else if (!EMAIL_REGEX_GMAIL.test(email)) {
+    if (email && !EMAIL_REGEX_GMAIL.test(email)) {
       hienLoi(khungEmail, loiEmail, 'Sai định dạng email!');
       hienX(iconEmail);
       coLoi = true;
