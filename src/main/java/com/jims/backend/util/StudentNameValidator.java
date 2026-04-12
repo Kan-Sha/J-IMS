@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public final class StudentNameValidator {
     /** Phụ huynh (full name) — letters + spaces only. */
-    public static final String LETTERS_PARENT_FULL_NAME = "Họ tên chỉ được chứa chữ cái!";
+    public static final String LETTERS_PARENT_FULL_NAME = "Tên chỉ được chứa chữ cái!";
     /** Họ (family name) field — STU-01 maps API {@code lastName} to Họ. */
     public static final String LETTERS_HO = "Họ chỉ được chứa chữ cái!";
     /** Tên (given name) field — STU-01 maps API {@code firstName} to Tên. */
