@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
       date.getFullYear() !== nam ||
       date.getMonth() + 1 !== thang ||
       date.getDate() !== ngay
-    ) return 'Ngày sinh không tồn tại!';
+    ) return 'Ngày sinh không hợp lệ!';
 
     if (date > new Date()) return 'Ngày sinh không được ở tương lai!';
 
