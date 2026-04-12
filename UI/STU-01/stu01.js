@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const MSG_EMPTY = 'Mục này không được để trống!';
   const MSG_LETTERS_HO = 'Họ chỉ được chứa chữ cái!';
   const MSG_LETTERS_TEN = 'Tên chỉ được chứa chữ cái!';
-  const MSG_LETTERS_PARENT = 'Họ tên chỉ được chứa chữ cái!';
+  const MSG_LETTERS_PARENT = 'Tên chỉ được chứa chữ cái!';
   const NAME_MAX = 50;
   const PARENT_NAME_MAX = 50;
   const PARENT_NAME_MIN = 8;
