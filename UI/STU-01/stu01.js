@@ -48,22 +48,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const inputSdt      = document.getElementById('sdt');
   const inputDiaChi   = document.getElementById('dia-chi');
 
-  const khungHo       = document.getElementById('khung-ho');
-  const khungTen      = document.getElementById('khung-ten');
-  const khungNgaySinh = document.getElementById('khung-ngay-sinh');
-  const khungHoTenPH  = document.getElementById('khung-ho-ten-ph');
-  const khungEmail    = document.getElementById('khung-email');
-  const khungSdt      = document.getElementById('khung-sdt');
-  const khungDiaChi   = document.getElementById('khung-dia-chi');
-
-  const loiHo       = document.getElementById('loi-ho');
-  const loiTen      = document.getElementById('loi-ten');
-  const loiNgaySinh = document.getElementById('loi-ngay-sinh');
-  const loiHoTenPH  = document.getElementById('loi-ho-ten-ph');
-  const loiEmail    = document.getElementById('loi-email');
-  const loiSdt      = document.getElementById('loi-sdt');
-  const loiDiaChi   = document.getElementById('loi-dia-chi');
-
   const iconEmail = document.getElementById('icon-email');
   const iconSdt   = document.getElementById('icon-sdt');
 
@@ -137,15 +121,26 @@ document.addEventListener('DOMContentLoaded', function () {
   function hienX(iconEl)    { iconEl.innerHTML = SVG_X;    iconEl.classList.add('hien'); }
   function anIcon(iconEl)   { iconEl.innerHTML = '';        iconEl.classList.remove('hien'); }
 
-  function hienLoi(khung, loiEl, noiDung) {
+  /** Binds error UI to the specific input's wrapper (khung-input + loi-text in same .nhom-input). */
+  function showError(inputEl, message) {
+    if (!inputEl) return;
+    const khung = inputEl.closest('.khung-input');
+    const wrap = inputEl.closest('.nhom-input');
+    if (!khung || !wrap) return;
+    const loiEl = wrap.querySelector('.loi-text');
     khung.classList.add('loi-input');
     if (loiEl) {
-      loiEl.textContent = noiDung;
+      loiEl.textContent = message == null ? '' : String(message);
       loiEl.classList.add('hien');
     }
   }
 
-  function xoaLoi(khung, loiEl) {
+  function clearError(inputEl) {
+    if (!inputEl) return;
+    const khung = inputEl.closest('.khung-input');
+    const wrap = inputEl.closest('.nhom-input');
+    if (!khung || !wrap) return;
+    const loiEl = wrap.querySelector('.loi-text');
     khung.classList.remove('loi-input');
     if (loiEl) {
       loiEl.textContent = '';
@@ -153,27 +148,46 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function clearAllFieldErrors() {
+    [inputHo, inputTen, inputNgaySinh, inputHoTenPH, inputEmail, inputSdt, inputDiaChi].forEach(clearError);
+  }
+
+  const MSG_EMPTY = 'Mục này không được để trống!';
+  const MSG_LETTERS_HO = 'Họ chỉ được chứa chữ cái!';
+  const MSG_LETTERS_TEN = 'Tên chỉ được chứa chữ cái!';
+  const MSG_LETTERS_PARENT = 'Họ tên chỉ được chứa chữ cái!';
+  const NAME_MAX = 50;
+  const PARENT_NAME_MAX = 50;
+  const PARENT_NAME_MIN = 8;
+
   function isLettersOnlyUnicode(val) {
     const s = (val || '').trim();
     if (!s) return true;
-    // Unicode letters only, allow spaces between words.
     return /^[\p{L}]+(?:\s+[\p{L}]+)*$/u.test(s);
   }
 
-  function kiemTraHo(ho) {
-    if (!ho) return 'Mục này không được để trống!';
-    if (!isLettersOnlyUnicode(ho)) return 'Họ chỉ được chứa chữ cái';
+  /**
+   * Shared Họ / Tên rules (value must already be trimmed).
+   * @param {string} lettersMsg message when letters-only rule fails
+   */
+  function validateName(value, lettersMsg) {
+    if (value === '') return MSG_EMPTY;
+    if (value.length > NAME_MAX) return 'Mỗi trường không được vượt quá 50 ký tự!';
+    if (!isLettersOnlyUnicode(value)) return lettersMsg;
     return null;
   }
 
-  function kiemTraTen(ten) {
-    if (!ten) return 'Mục này không được để trống!';
-    if (!isLettersOnlyUnicode(ten)) return 'Tên chỉ được chứa chữ cái';
+  /** Họ tên phụ huynh: one message per field; checks run in priority order. */
+  function validateParentFullName(value) {
+    if (value === '') return MSG_EMPTY;
+    if (value.length > PARENT_NAME_MAX) return 'Họ tên không được vượt quá 50 ký tự';
+    if (value.length < PARENT_NAME_MIN) return 'Họ tên phụ huynh phải có ít nhất 8 ký tự!';
+    if (!isLettersOnlyUnicode(value)) return MSG_LETTERS_PARENT;
     return null;
   }
 
   function kiemTraNgaySinh(val) {
-    if (!val) return 'Ngày sinh không được để trống!';
+    if (!val) return MSG_EMPTY;
     const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     if (!match) return 'Định dạng ngày sinh phải là DD/MM/YYYY!';
 
@@ -201,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
   function kiemTraSdt(val) {
-    if (!val) return 'Số điện thoại không được để trống!';
+    if (!val) return MSG_EMPTY;
     const regex = /^(\+84|0)[0-9]{9,11}$/;
     if (!regex.test(val)) return 'Số điện thoại không hợp lệ!';
     return null;
@@ -222,13 +236,11 @@ document.addEventListener('DOMContentLoaded', function () {
     return `${yyyy}-${mm}-${dd}`;
   }
   inputHo.addEventListener('input', function () {
-    xoaLoi(khungHo, null);
-    if (loiHo) { loiHo.textContent = ''; loiHo.classList.remove('hien'); }
+    clearError(this);
   });
 
   inputTen.addEventListener('input', function () {
-    xoaLoi(khungTen, null);
-    if (loiTen) { loiTen.textContent = ''; loiTen.classList.remove('hien'); }
+    clearError(this);
   });
 
   inputNgaySinh.addEventListener('input', function () {
@@ -237,30 +249,30 @@ document.addEventListener('DOMContentLoaded', function () {
     if (val.length > 5) val = val.slice(0, 5) + '/' + val.slice(5);
     if (val.length > 10) val = val.slice(0, 10);
     this.value = val;
-    xoaLoi(khungNgaySinh, loiNgaySinh);
+    clearError(this);
   });
   const EMAIL_REGEX_GMAIL = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
 
   inputHoTenPH.addEventListener('input', function () {
-    xoaLoi(khungHoTenPH, loiHoTenPH);
+    clearError(this);
   });
 
   inputEmail.addEventListener('input', function () {
-    xoaLoi(khungEmail, loiEmail);
+    clearError(this);
     anIcon(iconEmail);
     const val = this.value.trim();
     if (val && EMAIL_REGEX_GMAIL.test(val)) hienTick(iconEmail);
   });
 
   inputSdt.addEventListener('input', function () {
-    xoaLoi(khungSdt, loiSdt);
+    clearError(this);
     anIcon(iconSdt);
     const val = this.value.trim();
     if (val && !kiemTraSdt(val)) hienTick(iconSdt);
   });
 
   inputDiaChi.addEventListener('input', function () {
-    xoaLoi(khungDiaChi, loiDiaChi);
+    clearError(this);
   });
 
   function hienPopup(noiDung) {
@@ -287,89 +299,85 @@ document.addEventListener('DOMContentLoaded', function () {
     inputDiaChi.value   = '';
     taiMaHocVienMoi();
 
-    xoaLoi(khungHo,       null);
-    xoaLoi(khungTen,      null);
-    xoaLoi(khungNgaySinh, loiNgaySinh);
-    xoaLoi(khungHoTenPH,  loiHoTenPH);
-    xoaLoi(khungEmail,    loiEmail);
-    xoaLoi(khungSdt,      loiSdt);
-    xoaLoi(khungDiaChi,   loiDiaChi);
-
-    if (loiHo) { loiHo.textContent = ''; loiHo.classList.remove('hien'); }
-    if (loiTen) { loiTen.textContent = ''; loiTen.classList.remove('hien'); }
+    clearAllFieldErrors();
 
     anIcon(iconEmail);
     anIcon(iconSdt);
   });
 
   nutLuu.addEventListener('click', function () {
-    const ho       = inputHo.value.trim();
-    const ten      = inputTen.value.trim();
-    const ngaySinh = inputNgaySinh.value.trim();
+    let ho       = inputHo.value.trim();
+    let ten      = inputTen.value.trim();
+    let ngaySinh = inputNgaySinh.value.trim();
     const gioiTinh = inputGioiTinh.value;
-    const hoTenPH  = inputHoTenPH.value.trim();
-    const email    = inputEmail.value.trim();
-    const sdt      = inputSdt.value.trim();
-    const diaChi   = inputDiaChi.value.trim();
-    xoaLoi(khungHo,       null);
-    xoaLoi(khungTen,      null);
-    xoaLoi(khungNgaySinh, loiNgaySinh);
-    xoaLoi(khungHoTenPH,  loiHoTenPH);
-    xoaLoi(khungEmail,    loiEmail);
-    xoaLoi(khungSdt,      loiSdt);
-    xoaLoi(khungDiaChi,   loiDiaChi);
-    if (loiHo) { loiHo.textContent = ''; loiHo.classList.remove('hien'); }
-    if (loiTen) { loiTen.textContent = ''; loiTen.classList.remove('hien'); }
+    let hoTenPH  = inputHoTenPH.value.trim();
+    let email    = inputEmail.value.trim();
+    let sdt      = inputSdt.value.trim();
+    let diaChi   = inputDiaChi.value.trim();
 
-    let coLoi = false;
+    inputHo.value = ho;
+    inputTen.value = ten;
+    inputHoTenPH.value = hoTenPH;
+    inputNgaySinh.value = ngaySinh;
+    inputEmail.value = email;
+    inputSdt.value = sdt;
+    inputDiaChi.value = diaChi;
 
-    const loiHoMsg = kiemTraHo(ho);
-    if (loiHoMsg) {
-      hienLoi(khungHo, loiHo, loiHoMsg);
-      coLoi = true;
+    clearAllFieldErrors();
+    anIcon(iconEmail);
+    anIcon(iconSdt);
+
+    let isValid = true;
+
+    const errHo = validateName(ho, MSG_LETTERS_HO);
+    if (errHo) {
+      showError(inputHo, errHo);
+      isValid = false;
     }
-    const loiTenMsg = kiemTraTen(ten);
-    if (loiTenMsg) {
-      hienLoi(khungTen, loiTen, loiTenMsg);
-      coLoi = true;
+    const errTen = validateName(ten, MSG_LETTERS_TEN);
+    if (errTen) {
+      showError(inputTen, errTen);
+      isValid = false;
     }
 
+    let dobIso = null;
     const loiNgay = kiemTraNgaySinh(ngaySinh);
     if (loiNgay) {
-      hienLoi(khungNgaySinh, loiNgaySinh, loiNgay);
-      coLoi = true;
+      showError(inputNgaySinh, loiNgay);
+      isValid = false;
+    } else {
+      dobIso = doiNgaySinhSangISO(ngaySinh);
+      if (!dobIso) {
+        showError(inputNgaySinh, 'Định dạng ngày sinh phải là DD/MM/YYYY!');
+        isValid = false;
+      }
     }
 
-    if (!hoTenPH) {
-      hienLoi(khungHoTenPH, loiHoTenPH, 'Mục này không được để trống!');
-      coLoi = true;
+    const loiPh = validateParentFullName(hoTenPH);
+    if (loiPh) {
+      showError(inputHoTenPH, loiPh);
+      isValid = false;
     }
 
     if (email && !EMAIL_REGEX_GMAIL.test(email)) {
-      hienLoi(khungEmail, loiEmail, 'Sai định dạng email!');
+      showError(inputEmail, 'Định dạng email không hợp lệ!');
       hienX(iconEmail);
-      coLoi = true;
+      isValid = false;
     }
     const loiSdtMsg = kiemTraSdt(sdt);
     if (loiSdtMsg) {
-      hienLoi(khungSdt, loiSdt, loiSdtMsg);
+      showError(inputSdt, loiSdtMsg);
       if (sdt) hienX(iconSdt); else anIcon(iconSdt);
-      coLoi = true;
+      isValid = false;
     }
 
     const loiDiaChiMsg = kiemTraDiaChi(diaChi);
     if (loiDiaChiMsg) {
-      hienLoi(khungDiaChi, loiDiaChi, loiDiaChiMsg);
-      coLoi = true;
+      showError(inputDiaChi, loiDiaChiMsg);
+      isValid = false;
     }
 
-    if (coLoi) {
-      return;
-    }
-
-    const dobIso = doiNgaySinhSangISO(ngaySinh);
-    if (!dobIso) {
-      hienLoi(khungNgaySinh, loiNgaySinh, 'Định dạng ngày sinh phải là DD/MM/YYYY!');
+    if (!isValid) {
       return;
     }
 
@@ -404,13 +412,13 @@ document.addEventListener('DOMContentLoaded', function () {
           // Inline field validation errors (no popup)
           const data = payload && payload.data && typeof payload.data === 'object' ? payload.data : null;
           if (res.status === 400 && data) {
-            if (data.firstName) hienLoi(khungHo, loiHo, String(data.firstName));
-            if (data.lastName) hienLoi(khungTen, loiTen, String(data.lastName));
-            if (data.dob) hienLoi(khungNgaySinh, loiNgaySinh, String(data.dob));
-            if (data.parentName) hienLoi(khungHoTenPH, loiHoTenPH, String(data.parentName));
-            if (data.phone) hienLoi(khungSdt, loiSdt, String(data.phone));
-            if (data.email) hienLoi(khungEmail, loiEmail, String(data.email));
-            if (data.address) hienLoi(khungDiaChi, loiDiaChi, String(data.address));
+            if (data.firstName) showError(inputTen, String(data.firstName));
+            if (data.lastName) showError(inputHo, String(data.lastName));
+            if (data.dob) showError(inputNgaySinh, String(data.dob));
+            if (data.parentName) showError(inputHoTenPH, String(data.parentName));
+            if (data.phone) showError(inputSdt, String(data.phone));
+            if (data.email) showError(inputEmail, String(data.email));
+            if (data.address) showError(inputDiaChi, String(data.address));
             return;
           }
           hienPopup(message);

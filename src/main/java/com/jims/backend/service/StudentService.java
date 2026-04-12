@@ -45,19 +45,43 @@ public class StudentService {
         try {
             Map<String, String> fieldErrors = new LinkedHashMap<String, String>();
 
-            Optional<String> parentNameErr = validateParentFullName(parentName);
-            if (parentNameErr.isPresent()) {
-                fieldErrors.put("parentName", parentNameErr.get());
+            if (isBlank(parentName)) {
+                fieldErrors.put("parentName", "Mục này không được để trống!");
+            } else {
+                String parentTrim = parentName.trim();
+                if (parentTrim.length() > 50) {
+                    fieldErrors.put("parentName", "Họ tên không được vượt quá 50 ký tự");
+                } else if (parentTrim.length() < 8) {
+                    fieldErrors.put("parentName", "Họ tên phụ huynh phải có ít nhất 8 ký tự!");
+                } else {
+                    StudentNameValidator.validateUnicodePersonName(parentTrim).ifPresent(msg -> fieldErrors.put("parentName", msg));
+                }
             }
 
+            // STU-01 JSON: firstName = Tên (given), lastName = Họ (family).
             if (isBlank(firstName)) {
                 fieldErrors.put("firstName", "Mục này không được để trống!");
+            } else {
+                String fn = firstName.trim();
+                if (fn.length() > 50) {
+                    fieldErrors.put("firstName", "Mỗi trường không được vượt quá 50 ký tự!");
+                } else {
+                    StudentNameValidator.validateStudentTenLetters(fn).ifPresent(msg -> fieldErrors.put("firstName", msg));
+                }
             }
             if (isBlank(lastName)) {
                 fieldErrors.put("lastName", "Mục này không được để trống!");
+            } else {
+                String ln = lastName.trim();
+                if (ln.length() > 50) {
+                    fieldErrors.put("lastName", "Mỗi trường không được vượt quá 50 ký tự!");
+                } else {
+                    StudentNameValidator.validateStudentHoLetters(ln).ifPresent(msg -> fieldErrors.put("lastName", msg));
+                }
             }
+
             if (isBlank(dob)) {
-                fieldErrors.put("dob", "Ngày sinh không được để trống!");
+                fieldErrors.put("dob", "Mục này không được để trống!");
             }
             if (isBlank(phone)) {
                 fieldErrors.put("phone", "Mục này không được để trống!");
@@ -66,49 +90,28 @@ public class StudentService {
                 fieldErrors.put("gender", "Mục này không được để trống!");
             }
 
-            if (!fieldErrors.isEmpty()) {
-                return new ApiResult(false, fieldErrors, "Validation failed", 400);
-            }
-
-            // Note: UI sends { firstName: Họ, lastName: Tên } for STU-01.
-            Optional<String> hoErr = StudentNameValidator.validateLastNameLettersOnly(firstName);
-            if (hoErr.isPresent()) {
-                fieldErrors.put("firstName", hoErr.get());
-            }
-            Optional<String> tenErr = StudentNameValidator.validateFirstNameLettersOnly(lastName);
-            if (tenErr.isPresent()) {
-                fieldErrors.put("lastName", tenErr.get());
-            }
-
-            String fullName = (firstName + " " + lastName).trim();
-            if (fullName.length() < 8 || fullName.length() > 100) {
-                // Not requested, but keep existing rule as a general message.
-                return new ApiResult(false, Collections.emptyMap(), "Họ tên phải từ 8 đến 100 ký tự!", 400);
-            }
-
-            if (!PHONE_PATTERN.matcher(phone.trim()).matches()) {
-                return new ApiResult(false, Collections.emptyMap(), "Số điện thoại không hợp lệ!", 400);
+            if (!isBlank(phone) && !PHONE_PATTERN.matcher(phone.trim()).matches()) {
+                fieldErrors.put("phone", "Số điện thoại không hợp lệ!");
             }
 
             if (!isBlank(email) && !EMAIL_PATTERN.matcher(email.trim()).matches()) {
-                return new ApiResult(false, Collections.emptyMap(), "Sai định dạng email!", 400);
+                fieldErrors.put("email", "Định dạng email không hợp lệ!");
             }
 
-            LocalDate dobLocalDate;
-            try {
-                dobLocalDate = LocalDate.parse(dob);
-            } catch (DateTimeParseException e) {
-                fieldErrors.put("dob", "Ngày sinh không hợp lệ!");
-                return new ApiResult(false, fieldErrors, "Ngày sinh không hợp lệ!", 400);
+            LocalDate dobLocalDate = null;
+            if (!isBlank(dob)) {
+                try {
+                    dobLocalDate = LocalDate.parse(dob.trim());
+                } catch (DateTimeParseException e) {
+                    fieldErrors.put("dob", "Ngày sinh không hợp lệ!");
+                }
             }
-
-            Optional<String> dobErr = StudentDobValidator.validateMinimumAgeFive(dobLocalDate);
-            if (dobErr.isPresent()) {
-                fieldErrors.put("dob", dobErr.get());
+            if (dobLocalDate != null) {
+                Optional<String> dobErr = StudentDobValidator.validateMinimumAgeFive(dobLocalDate);
+                dobErr.ifPresent(msg -> fieldErrors.put("dob", msg));
             }
 
             if (!fieldErrors.isEmpty()) {
-                // Let UI render inline errors for each field.
                 return new ApiResult(false, fieldErrors, "Validation failed", 400);
             }
 
@@ -193,25 +196,5 @@ public class StudentService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
-    }
-
-    /**
-     * STU-01: "Họ tên phụ huynh" — required, 8–100 chars after trim.
-     */
-    private Optional<String> validateParentFullName(String raw) {
-        if (raw == null) {
-            return Optional.of("Họ tên phụ huynh không được để trống!");
-        }
-        String t = raw.trim();
-        if (t.isEmpty()) {
-            return Optional.of("Họ tên phụ huynh không được để trống!");
-        }
-        if (t.length() < 8) {
-            return Optional.of("Họ tên phụ huynh phải có ít nhất 8 ký tự!");
-        }
-        if (t.length() > 100) {
-            return Optional.of("Họ tên phụ huynh không được vượt quá 100 ký tự!");
-        }
-        return Optional.empty();
     }
 }
