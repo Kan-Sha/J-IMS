@@ -162,16 +162,16 @@ SELECT 'Admin Demo',
        role_id
 FROM roles WHERE role_name = 'Admin' LIMIT 1;
 
--- Sample teachers (Giáo viên / Trợ giảng) — same password: 123456
+-- Sample teachers (Giáo viên) — same password: 123456
 INSERT INTO staff (full_name, email, password_hash, role_id)
 SELECT 'Giáo viên Demo', 'teacher@gmail.com',
        '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
        role_id FROM roles WHERE role_name = 'Giáo viên' LIMIT 1;
 
 INSERT INTO staff (full_name, email, password_hash, role_id)
-SELECT 'Trợ giảng Demo', 'ta@gmail.com',
+SELECT 'Giáo viên Demo 2', 'teacher2@gmail.com',
        '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
-       role_id FROM roles WHERE role_name = 'Trợ giảng' LIMIT 1;
+       role_id FROM roles WHERE role_name = 'Giáo viên' LIMIT 1;
 
 -- Seed classes (admin staff_id=1; first Giáo viên staff_id=2)
 INSERT INTO classes (class_name, level_id, teacher_id, start_date, capacity, current_size, tuition_per_session) VALUES

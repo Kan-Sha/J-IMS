@@ -136,19 +136,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function timeToMinutes(timeStr) {
     if (!timeStr) return null;
-    var parts = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?$/);
+    var parts = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})$/);
     if (!parts) return null;
     var h = parseInt(parts[1], 10);
     var m = parseInt(parts[2], 10);
     if (isNaN(h) || isNaN(m) || m < 0 || m > 59) return null;
-    var ampm = parts[3] ? String(parts[3]).toUpperCase() : '';
-    if (ampm) {
-      if (h < 1 || h > 12) return null;
-      if (ampm === 'PM' && h < 12) h += 12;
-      if (ampm === 'AM' && h === 12) h = 0;
-    } else {
-      if (h < 0 || h > 23) return null;
-    }
+    if (h < 0 || h > 23) return null;
     return h * 60 + m;
   }
 
@@ -170,10 +163,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function handleTimeInput(e) {
-    var value = e.target.value.replace(/[^0-9:amp\s]/gi, '');
-    var timeMatch = value.match(/^[0-9:]+/);
-    var timePart = timeMatch ? timeMatch[0] : '';
-    var ampmPart = timeMatch ? value.slice(timePart.length) : value;
+    var value = e.target.value.replace(/[^0-9:]/g, '');
+    var timePart = value;
 
     if (timePart) {
       var colons = timePart.split(':').length - 1;
@@ -202,19 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
         timePart = p[0].slice(0, 4);
       }
     }
-
-    if (ampmPart) {
-      ampmPart = ampmPart.replace(/[^amp\s]/gi, '').toUpperCase();
-      if (ampmPart.length > 3) ampmPart = ampmPart.slice(0, 3);
-      ampmPart = ampmPart.replace(/\s+/g, ' ').trim();
-      if (ampmPart && ampmPart !== 'AM' && ampmPart !== 'PM') {
-        if (ampmPart.indexOf('A') === 0) ampmPart = 'AM';
-        else if (ampmPart.indexOf('P') === 0) ampmPart = 'PM';
-      }
-      if (ampmPart) ampmPart = ' ' + ampmPart;
-    }
-
-    e.target.value = timePart + ampmPart;
+    e.target.value = timePart;
   }
 
   function vndText(amount) {

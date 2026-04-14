@@ -185,7 +185,7 @@ body {
 }
 
 .custom-checkbox:checked {
-    background: transparent;
+    background: #ffffff;
     border-color: #003366;
 }
 
@@ -193,7 +193,7 @@ body {
     content: "";
     width: 4px;
     height: 8px;
-    border: solid #4b5563;
+    border: solid #003366;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
     position: absolute;

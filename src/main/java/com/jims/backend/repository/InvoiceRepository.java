@@ -27,6 +27,17 @@ public class InvoiceRepository {
         }
     }
 
+    public boolean existsInvoiceForClassAndPeriod(Connection conn, int classId, String billingPeriod) throws SQLException {
+        String sql = "SELECT 1 FROM invoices WHERE class_id = ? AND billing_period = ? LIMIT 1";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classId);
+            stmt.setString(2, billingPeriod.trim());
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public void insertInvoice(Connection conn, String invoiceId, int classId, String studentId, String billingPeriod, int totalSessions, BigDecimal finalAmount, String reason) throws SQLException {
         String sql = "INSERT INTO invoices (invoice_id, class_id, student_id, billing_period, total_sessions, final_amount, adjustment_reason, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {

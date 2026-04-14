@@ -28,7 +28,7 @@ public class AuthService {
                 return new ApiResult(false, Collections.emptyMap(), "Mục này không được để trống!", 400);
             }
 
-            email = email.trim();
+            email = email.trim().toLowerCase();
             if (!EMAIL_PATTERN.matcher(email).matches()) {
                 return new ApiResult(false, Collections.emptyMap(), "Định dạng Email không hợp lệ!", 400);
             }

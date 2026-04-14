@@ -1,4 +1,4 @@
-import { fetchClasses, fetchClassStudentsForInvoice, createInvoice, fetchClassStudentCount } from '../api/invoiceService.js';
+import { fetchClasses, fetchClassStudentsForInvoice, createInvoice, fetchClassStudentCount, checkDuplicateBillingPeriod } from '../api/invoiceService.js';
 import { formatCurrency, parseCurrency, isFeeWithinLimit } from '../utils/validation.js';
 import { generateBillingCycles, billingPeriodToLabel } from '../utils/billing.js';
 import { renderPaginationBar } from '../utils/pagination.js';
@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let classListPage = 1;
   const CLASS_LIST_PAGE_SIZE = 8;
-  let previewPage = 1;
-  const PREVIEW_PAGE_SIZE = 6;
   let previewLineById = {};
   let previewOrder = [];
 
@@ -24,8 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const phanTrangDanhSachInfo = document.getElementById('phan-trang-fin01-danh-sach-info');
   const phanTrangDanhSachNav = document.getElementById('phan-trang-fin01-danh-sach-nav');
   const phanTrangXemTruoc = document.getElementById('phan-trang-fin01-xem-truoc');
-  const phanTrangXemTruocInfo = document.getElementById('phan-trang-fin01-xem-truoc-info');
-  const phanTrangXemTruocNav = document.getElementById('phan-trang-fin01-xem-truoc-nav');
   const errKy = document.getElementById('err-cau-hinh-ky');
   const errBuoi = document.getElementById('err-cau-hinh-buoi');
   const errTongQuat = document.getElementById('err-luu-tong-quat');
@@ -138,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
       classListPage = 1;
       renderClasses(allClasses);
     } catch (e) {
-      tbodyDanhSach.innerHTML = '<tr><td colspan="5">Không tải được danh sách lớp</td></tr>';
+      tbodyDanhSach.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; font-size: 16px; font-weight: 600; color: var(--mau-chu-phu);">Không tải được danh sách lớp</td></tr>';
     }
   }
 
@@ -162,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderClasses(data) {
     tbodyDanhSach.innerHTML = '';
     if (!data || data.length === 0) {
-      tbodyDanhSach.innerHTML = '<tr><td colspan="5">Không tìm thấy lớp học</td></tr>';
+      tbodyDanhSach.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; font-size: 16px; font-weight: 600; color: var(--mau-chu-phu);">Không tìm thấy lớp học</td></tr>';
       renderClassListPagination(0);
       return;
     }
@@ -206,35 +202,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (historyMode) syncUrl('config', historyMode);
   }
 
-  function renderPreviewPagination() {
-    if (!phanTrangXemTruoc || !phanTrangXemTruocInfo || !phanTrangXemTruocNav) return;
-    renderPaginationBar({
-      containerEl: phanTrangXemTruoc,
-      infoEl: phanTrangXemTruocInfo,
-      navEl: phanTrangXemTruocNav,
-      currentPage: previewPage,
-      pageSize: PREVIEW_PAGE_SIZE,
-      totalItems: previewOrder.length,
-      entityLabel: 'học sinh',
-      onPageChange: function (p) {
-        previewPage = p;
-        renderPreviewPage();
-      }
-    });
-  }
-
   function renderPreviewPage() {
     tbodyXemTruoc.innerHTML = '';
-    var total = previewOrder.length;
-    var totalPages = Math.max(1, Math.ceil(total / PREVIEW_PAGE_SIZE));
-    if (previewPage > totalPages) previewPage = totalPages;
-    var start = (previewPage - 1) * PREVIEW_PAGE_SIZE;
-    var slice = previewOrder.slice(start, start + PREVIEW_PAGE_SIZE);
+    var slice = previewOrder.slice();
 
     slice.forEach(function (sid, idx) {
       var line = previewLineById[sid];
       if (!line) return;
-      var stt = start + idx + 1;
+      var stt = idx + 1;
       var maHS = line.studentId;
       var hoTen = line.ten;
       var baseFee = line.baseFee;
@@ -291,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    renderPreviewPagination();
+    if (phanTrangXemTruoc) phanTrangXemTruoc.style.display = 'none';
     recalculateTotal();
   }
 
@@ -322,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function () {
       };
     });
 
-    previewPage = 1;
     document.getElementById('lbl-tong-hoc-sinh').innerText = String(previewOrder.length);
     renderPreviewPage();
     switchView('view-xem-truoc');
@@ -379,6 +353,11 @@ document.addEventListener('DOMContentLoaded', function () {
     currentTotalSessions = totalSessions;
     currentMonth = selKyThanhToan.value;
     try {
+      var duplicateCheck = await checkDuplicateBillingPeriod(currentClass.id, currentMonth);
+      if (duplicateCheck && duplicateCheck.exists) {
+        errKy.textContent = 'Hóa đơn kỳ ' + billingPeriodToLabel(currentMonth) + ' của lớp này đã tồn tại!';
+        return;
+      }
       var payload = await fetchClassStudentsForInvoice(currentClass.id);
       if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
         showPopup('Lớp hiện tại chưa có học sinh!');
@@ -432,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     if (!ok) {
       renderPreviewPage();
-      errTongQuat.textContent = 'Vui lòng kiểm tra và sửa các lỗi trên bảng.';
+      errTongQuat.textContent = '';
       return;
     }
     var lines = previewOrder.map(function (sid) {

@@ -47,11 +47,11 @@ public class StaffRepository {
     }
 
     /**
-     * Only Giáo viên / Trợ giảng may be assigned as class teacher (OPE-01).
+     * Only Teacher roles may be assigned as class teacher (OPE-01).
      */
     public boolean isEligibleClassTeacher(int staffId) throws SQLException {
         String sql = "SELECT 1 FROM staff s JOIN roles r ON s.role_id = r.role_id " +
-                "WHERE s.staff_id = ? AND r.role_name IN ('Giáo viên', 'Trợ giảng', 'Teacher', 'Assistant', 'TA')";
+                "WHERE s.staff_id = ? AND r.role_name IN ('Giáo viên', 'Teacher', 'Giao vien', 'TEACHER')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, staffId);
@@ -64,7 +64,7 @@ public class StaffRepository {
     public List<Map<String, Object>> listTeachers() throws SQLException {
         String sql = "SELECT s.staff_id, s.full_name, r.role_name " +
                 "FROM staff s JOIN roles r ON s.role_id = r.role_id " +
-                "WHERE r.role_name IN ('Giáo viên', 'Trợ giảng', 'Teacher', 'Assistant', 'TA') " +
+                "WHERE r.role_name IN ('Giáo viên', 'Teacher', 'Giao vien', 'TEACHER') " +
                 "ORDER BY s.full_name ASC, s.staff_id ASC";
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         try (Connection conn = DBConnection.getConnection();
@@ -83,7 +83,7 @@ public class StaffRepository {
 
     public Staff findByEmail(String email) throws SQLException {
         String sql = "SELECT s.staff_id, s.full_name, s.email, s.password_hash, s.role_id, r.role_name " +
-                "FROM staff s JOIN roles r ON s.role_id = r.role_id WHERE s.email = ?";
+                "FROM staff s JOIN roles r ON s.role_id = r.role_id WHERE LOWER(s.email) = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

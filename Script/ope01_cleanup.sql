@@ -7,7 +7,7 @@ DELETE FROM classes;
 
 -- Only delete demo accounts
 DELETE FROM staff
-WHERE email IN ('ta@gmail.com', 'giaovien@gmail.com');
+WHERE email IN ('ta@gmail.com', 'teacher2@gmail.com', 'giaovien@gmail.com');
 
 -- Schema sync (required)
 ALTER TABLE classes

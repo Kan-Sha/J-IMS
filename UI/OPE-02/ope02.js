@@ -159,7 +159,7 @@ function initOpe02() {
         if (!tbody) return;
         tbody.innerHTML = '';
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--mau-chu-phu); font-style: italic; font-weight: 500;">Không tìm thấy lớp học nào phù hợp!</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; font-size: 16px; font-weight: 600; color: var(--mau-chu-phu);">Không tìm thấy lớp học nào phù hợp!</td></tr>';
             if (phanTrangContainer && phanTrangInfo && phanTrangNav) {
                 renderPaginationBar({
                     containerEl: phanTrangContainer,
@@ -226,7 +226,7 @@ function initOpe02() {
         return days.join(', ');
     }
 
-    function formatTimeAmPm(t) {
+    function formatTime24h(t) {
         var s = t == null ? '' : String(t).trim();
         if (!s) return '';
         var m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
@@ -234,17 +234,14 @@ function initOpe02() {
         var hh = parseInt(m[1], 10);
         var mm = parseInt(m[2], 10);
         if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return s;
-        var ampm = hh >= 12 ? 'PM' : 'AM';
-        var h12 = hh % 12;
-        if (h12 === 0) h12 = 12;
-        return String(h12) + ':' + String(mm).padStart(2, '0') + ' ' + ampm;
+        return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
     }
 
     function mergeTimeText(schedules) {
         var arr = Array.isArray(schedules) ? schedules.slice() : [];
         arr = arr.filter(function (s) { return s && s.startTime && s.endTime; });
         if (arr.length === 0) return '';
-        return formatTimeAmPm(arr[0].startTime) + ' đến ' + formatTimeAmPm(arr[0].endTime);
+        return formatTime24h(arr[0].startTime) + ' đến ' + formatTime24h(arr[0].endTime);
     }
 
     async function taiDanhSachLop(search) {

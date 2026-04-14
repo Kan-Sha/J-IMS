@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let dangHienMatKhau = false;
   const API_BASE = 'http://127.0.0.1:8080';
-  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/;
+  const EMAIL_REGEX_COM = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/i;
 
 
   function hienLoiInput(khung, loiEl, noiDung) {
@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   async function xuLyDangNhap() {
-    const email   = document.getElementById('email').value.trim();
+    const emailRaw = document.getElementById('email').value.trim();
+    const email = emailRaw.toLowerCase();
     const matKhau = document.getElementById('mat-khau').value;
     xoaLoiInput(khungEmail, loiEmail);
     xoaLoiInput(khungMatKhau, loiMatKhau);

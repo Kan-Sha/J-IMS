@@ -58,6 +58,21 @@ public class InvoiceController {
 
                     if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                         String raw = exchange.getRequestURI().getRawQuery();
+                        String duplicateCheck = extractQueryParam(raw, "duplicateCheck");
+                        if ("1".equals(duplicateCheck) || "true".equalsIgnoreCase(duplicateCheck)) {
+                            String classIdStr = extractQueryParam(raw, "classId");
+                            String billingPeriod = extractQueryParam(raw, "billingPeriod");
+                            int classId;
+                            try {
+                                classId = Integer.parseInt(classIdStr == null ? "" : classIdStr.trim());
+                            } catch (NumberFormatException ignored) {
+                                ResponseUtil.sendJson(exchange, 400, false, Collections.emptyMap(), "classId không hợp lệ!");
+                                return;
+                            }
+                            ApiResult result = invoiceService.checkDuplicateBillingPeriod(classId, billingPeriod);
+                            ResponseUtil.sendJson(exchange, result.getStatusCode(), result.isSuccess(), result.getData(), result.getMessage());
+                            return;
+                        }
                         String q = extractQueryParam(raw, "q");
                         String classIdStr = extractQueryParam(raw, "classId");
                         Integer classId = null;

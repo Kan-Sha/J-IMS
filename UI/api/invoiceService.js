@@ -63,6 +63,21 @@ export async function fetchClassStudentsForInvoice(classId) {
   return payload.data;
 }
 
+export async function checkDuplicateBillingPeriod(classId, billingPeriod) {
+  const query = new URLSearchParams();
+  query.set('duplicateCheck', '1');
+  query.set('classId', String(classId));
+  query.set('billingPeriod', String(billingPeriod || ''));
+  const url = API_BASE + '/api/invoices?' + query.toString();
+  const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
+  if (!res.ok) return handleApiError(res, 'Không thể kiểm tra kỳ thanh toán', { suppressAlert: true });
+  const payload = await res.json();
+  if (!payload || !payload.success) {
+    throw new Error((payload && payload.message) || 'Không thể kiểm tra kỳ thanh toán');
+  }
+  return payload.data;
+}
+
 export async function createInvoice(options) {
   const body = {
     classId: options.classId,

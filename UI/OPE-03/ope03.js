@@ -109,8 +109,8 @@ function initOpe03() {
     var selectedToAdd = [];
     var unassignedCache = null;
 
-    var MAIN_STUDENT_PAGE_SIZE = 10;
-    var MODAL_ADD_PAGE_SIZE = 10;
+    var MAIN_STUDENT_PAGE_SIZE = 8;
+    var MODAL_ADD_PAGE_SIZE = 8;
     var mainStudentPage = 1;
     var modalAddPage = 1;
     var modalFilteredRows = [];
@@ -148,6 +148,7 @@ function initOpe03() {
 
     function updateCheckboxState() {
         var rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        checkAll.indeterminate = false;
         if (rowCheckboxes.length > 0) {
             var allOnPageSelected = Array.prototype.every.call(rowCheckboxes, function (cb) {
                 return selectedToRemove.indexOf(cb.value) !== -1;
@@ -161,24 +162,6 @@ function initOpe03() {
         } else {
             btnXoaChon.classList.remove('active');
         }
-    }
-
-    function renderMainStudentPagination() {
-        if (!phanTrangMain || !phanTrangMainInfo || !phanTrangMainNav) return;
-        renderPaginationBar({
-            containerEl: phanTrangMain,
-            infoEl: phanTrangMainInfo,
-            navEl: phanTrangMainNav,
-            currentPage: mainStudentPage,
-            pageSize: MAIN_STUDENT_PAGE_SIZE,
-            totalItems: classStudents.length,
-            entityLabel: 'học sinh',
-            onPageChange: function (p) {
-                mainStudentPage = p;
-                renderTable();
-                if (isEditMode) updateCheckboxState();
-            }
-        });
     }
 
     function renderModalPagination() {
@@ -214,14 +197,8 @@ function initOpe03() {
         tbody.innerHTML = '';
         tongHocSinh.innerText = 'Tổng: ' + classStudents.length + ' học sinh';
 
-        var total = classStudents.length;
-        var totalPages = Math.max(1, Math.ceil(total / MAIN_STUDENT_PAGE_SIZE));
-        if (mainStudentPage > totalPages) mainStudentPage = totalPages;
-        var start = (mainStudentPage - 1) * MAIN_STUDENT_PAGE_SIZE;
-        var pageSlice = classStudents.slice(start, start + MAIN_STUDENT_PAGE_SIZE);
-
-        pageSlice.forEach(function (student, index) {
-            var globalIndex = start + index;
+        classStudents.forEach(function (student, index) {
+            var globalIndex = index;
             var sid = student.studentId != null ? String(student.studentId) : '';
             var isChecked = selectedToRemove.indexOf(sid) !== -1;
             var tr = document.createElement('tr');
@@ -236,12 +213,11 @@ function initOpe03() {
                 + '<td>' + (globalIndex + 1) + '</td>'
                 + '<td>' + (sid || '') + '</td>'
                 + '<td style="font-weight: 500;">' + (student.fullName || '') + '</td>'
-                + '<td style="color: #666;">' + formatDateDdMmYyyy(student.dob) + '</td>'
-                + '<td style="color: #666;">' + docGioiTinh(student.gender) + '</td>';
+                + '<td>' + formatDateDdMmYyyy(student.dob) + '</td>'
+                + '<td>' + docGioiTinh(student.gender) + '</td>';
             tbody.appendChild(tr);
         });
-
-        renderMainStudentPagination();
+        if (phanTrangMain) phanTrangMain.style.display = 'none';
 
         if (isEditMode) {
             var rowCheckboxes = document.querySelectorAll('.row-checkbox');
@@ -279,6 +255,7 @@ function initOpe03() {
         isEditMode = state;
         selectedToRemove = [];
         checkAll.checked = false;
+        checkAll.indeterminate = false;
         xoaLoiTatCa();
 
         if (isEditMode) {
@@ -405,6 +382,7 @@ function initOpe03() {
     }
 
     checkAll.addEventListener('change', function (e) {
+        checkAll.indeterminate = false;
         var rowCheckboxes = document.querySelectorAll('.row-checkbox');
         var pageIds = Array.prototype.map.call(rowCheckboxes, function (cb) { return cb.value; });
         if (e.target.checked) {

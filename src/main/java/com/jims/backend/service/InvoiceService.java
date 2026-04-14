@@ -174,6 +174,36 @@ public class InvoiceService {
         }
     }
 
+    public ApiResult checkDuplicateBillingPeriod(int classId, String billingPeriod) {
+        if (classId <= 0) {
+            return new ApiResult(false, Collections.emptyMap(), "classId không hợp lệ!", 400);
+        }
+        if (isBlank(billingPeriod)) {
+            return new ApiResult(false, Collections.emptyMap(), "Kỳ thanh toán không được để trống!", 400);
+        }
+        int invoiceYear = Year.now().getValue();
+        String canonicalPeriod = BillingPeriodUtil.toCanonical(billingPeriod, invoiceYear);
+        if (canonicalPeriod == null) {
+            return new ApiResult(false, Collections.emptyMap(),
+                    "Kỳ thanh toán không hợp lệ! Dùng dạng \"Tháng 3-4\" hoặc YYYY-MM (ví dụ " + invoiceYear + "-03).", 400);
+        }
+        try {
+            Connection conn = studentRepository.getConnection();
+            try {
+                boolean exists = invoiceRepository.existsInvoiceForClassAndPeriod(conn, classId, canonicalPeriod);
+                Map<String, Object> data = new LinkedHashMap<String, Object>();
+                data.put("exists", Boolean.valueOf(exists));
+                data.put("billingPeriod", canonicalPeriod);
+                data.put("billingPeriodDisplay", BillingPeriodUtil.toDisplayLabel(canonicalPeriod));
+                return new ApiResult(true, data, "OK", 200);
+            } finally {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            return new ApiResult(false, Collections.emptyMap(), "Lỗi hệ thống: " + e.getMessage(), 500);
+        }
+    }
+
     private String invoicePrefix(String canonicalPeriod) {
         YearMonth ym = YearMonth.parse(canonicalPeriod);
         String mmyy = String.format("%02d%02d", ym.getMonthValue(), ym.getYear() % 100);
