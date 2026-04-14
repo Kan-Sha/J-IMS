@@ -135,6 +135,12 @@ function initOpe03() {
     var phanTrangModalInfo = document.getElementById('phan-trang-ope03-modal-info');
     var phanTrangModalNav = document.getElementById('phan-trang-ope03-modal-nav');
     var modalCheckAll = document.getElementById('modal-check-all');
+    var btnLuuThem = document.getElementById('btn-luu-them');
+
+    function updateAddSaveButtonState() {
+        if (!btnLuuThem) return;
+        btnLuuThem.disabled = selectedToAdd.length === 0;
+    }
 
     function capNhatLinkTheoClassId() {
         var q = classIdNumeric != null ? '?classId=' + encodeURIComponent(String(classIdNumeric)) : '';
@@ -328,10 +334,12 @@ function initOpe03() {
                     selectedToAdd = selectedToAdd.filter(function (s) { return String(s.studentId) !== id; });
                 }
                 updateModalCheckAllState();
+                updateAddSaveButtonState();
             });
         });
         renderModalPagination();
         updateModalCheckAllState();
+        updateAddSaveButtonState();
     }
 
     function taiDanhSachChuaXepLop(urlSearch) {
@@ -469,6 +477,7 @@ function initOpe03() {
         unassignedCache = null;
         modalAddPage = 1;
         modalThem.style.display = 'flex';
+        updateAddSaveButtonState();
         taiDanhSachChuaXepLop('').then(function (rows) {
             unassignedCache = rows;
             renderAddList('');
@@ -500,10 +509,11 @@ function initOpe03() {
                 }
             });
             updateModalCheckAllState();
+            updateAddSaveButtonState();
         });
     }
 
-    document.getElementById('btn-luu-them').addEventListener('click', function () {
+    if (btnLuuThem) btnLuuThem.addEventListener('click', function () {
         var n = selectedToAdd.length;
         var modal = modalThem;
 
@@ -512,7 +522,6 @@ function initOpe03() {
         }
 
         if (n === 0) {
-            ketThuc();
             return;
         }
 
@@ -611,6 +620,8 @@ function initOpe03() {
         hienLoi('error-capacity', null, 'Thiếu classId. Vui lòng quay lại danh sách lớp.');
         return;
     }
+
+    updateAddSaveButtonState();
 
     function khoiChay() {
         setEditMode(false);

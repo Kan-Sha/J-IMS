@@ -404,6 +404,12 @@ body {
     background: #002244;
 }
 
+.modal-footer .btn-luu:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #003366;
+}
+
 .error-message {
     color: #ef4444;
     font-size: 13px;
